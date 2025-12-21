@@ -1,79 +1,80 @@
 # CodeRabbit Configuration
-# This file configures CodeRabbit to analyze all files in the repository
+# Official schema: https://docs.coderabbit.ai/guides/configure-coderabbit
 
 reviews:
-  # Enable automatic reviews on all pull requests
-  auto_review: true
+  # Enable automatic reviews on pull requests
+  auto_review:
+    enabled: true
   
-  # Review all file types
+  # Review profile: "chill" (fewer comments) or "assertive" (more thorough)
+  profile: "assertive"
+  
+  # Path filters - include files to review, exclude with '!' prefix
   path_filters:
-    - "**/*"
+    # Include all source files
+    - "**/*.php"
+    - "**/*.js"
+    - "**/*.css"
+    - "**/*.html"
+    - "**/*.json"
+    
+    # Exclude vendor and dependencies
+    - "!vendor/**"
+    - "!node_modules/**"
+    
+    # Exclude uploads and user data
+    - "!uploads/**"
+    - "!qr_codes/**"
+    
+    # Exclude cache and temporary files
+    - "!cache/**"
+    - "!tmp/**"
+    - "!temp/**"
+    
+    # Exclude logs and backups
+    - "!logs/**"
+    - "!*.log"
+    - "!backups/**"
+    - "!database_backups/**"
+    - "!admin/backups_db/**"
+    
+    # Exclude minified files
+    - "!*.min.js"
+    - "!*.min.css"
+    
+    # Exclude backup files
+    - "!*.backup"
+    - "!*.bak"
+    - "!*.old"
+    - "!*.sql"
+    - "!*.sql.gz"
+    - "!*.sql.zip"
   
-  # Enable comprehensive analysis
+  # Enable specific analysis tools
+  tools:
+    # PHP static analysis
+    phpstan:
+      enabled: true
+      level: 5
+    
+    # JavaScript linting
+    eslint:
+      enabled: true
+    
+    # GitHub Actions workflow validation
+    actionlint:
+      enabled: true
+    
+    # YAML linting
+    yamllint:
+      enabled: true
+    
+    # Markdown linting
+    markdownlint:
+      enabled: true
+  
+  # Request changes workflow
   request_changes_workflow: true
   
-  # Language-specific settings
-  language_settings:
-    php:
-      enabled: true
-      # Check for security issues
-      security_checks: true
-      # Check for performance issues
-      performance_checks: true
-      # Check for code quality
-      quality_checks: true
-    
-    javascript:
-      enabled: true
-      security_checks: true
-      quality_checks: true
-    
-    css:
-      enabled: true
-      quality_checks: true
-    
-    html:
-      enabled: true
-      quality_checks: true
-
-  # Enable all check types
-  checks:
-    - security
-    - performance
-    - maintainability
-    - complexity
-    - duplication
-    - best_practices
-    - documentation
-
-  # Review settings
-  review_settings:
-    # Review all files, not just changed ones
-    review_full_files: true
-    # Include suggestions for improvements
-    include_suggestions: true
-    # Check for common bugs
-    bug_detection: true
-    # Check for code smells
-    code_smell_detection: true
-
-# Exclude certain files/directories
-exclude:
-  - "vendor/**"
-  - "node_modules/**"
-  - "*.min.js"
-  - "*.min.css"
-  - "uploads/**"
-  - "cache/**"
-  - "logs/**"
-  - "backups/**"
-  - "*.backup"
-  - "*.sql"
-
-# Include specific patterns
-include:
-  - "**/*.php"
-  - "**/*.js"
-  - "**/*.css"
-  - "**/*.html"
-  - "**/*.json"
+  # Enable poem generation for fun
+  poem: true
