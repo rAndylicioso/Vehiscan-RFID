@@ -98,6 +98,12 @@ document.addEventListener('DOMContentLoaded', function () {
       const items = group.querySelectorAll('.filter-toggle-item');
 
       items.forEach(item => {
+        // Skip visitor filter - it has custom handler
+        if (item.id === 'filterVisitors') {
+          __vsLog('[TOGGLE] Skipping filterVisitors - has custom handler');
+          return;
+        }
+
         item.addEventListener('click', () => {
           if (item.disabled) return;
 
