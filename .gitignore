@@ -1,28 +1,68 @@
-# Environment
+# Environment and Configuration
 .env
 .env.local
-.env.*.local
+.env.production
 
-# Uploads
+# Sensitive Files
+config.php.backup
+*.key
+*.pem
+
+# Logs
+*.log
+logs/
+error.log
+access.log
+
+# Uploads and User Data
 uploads/*
 !uploads/.gitkeep
+qr_codes/*
+!qr_codes/.gitkeep
 
-# Backups
-backups_*/
+# Cache
+cache/
+*.cache
 
-# IDE
+# IDE and Editor Files
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
+*~
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-
-# Temporary files
+# Temporary Files
 tmp/
 temp/
+*.tmp
+
+# Backup Files
+*.backup
+*.bak
+*.old
+*~
+
+# Database Dumps
+*.sql.gz
+*.sql.zip
+database_backups/
+
+# Node Modules (if any)
+node_modules/
+package-lock.json
+
+# Vendor (if using Composer)
+vendor/
+
+# System Files
+.htaccess.backup
+.htaccess.production
+*.orig
+
+# Diagnostic Files
+system_diagnostic.php
+phpinfo.php
+test*.php
+debug*.php
