@@ -1401,15 +1401,21 @@ document.addEventListener('DOMContentLoaded', function () {
           if (data.success && data.passes && data.passes.length > 0) {
             __vsLog(`[VISITOR] Loaded ${data.passes.length} visitor passes`);
             displayVisitorPasses(data.passes);
-            window.toast.show(`Loaded ${data.passes.length} active visitor passes`, 'success');
+            if (window.toast) {
+              window.toast.show(`Loaded ${data.passes.length} active visitor passes`, 'success');
+            }
           } else {
             __vsLog('[VISITOR] No active visitor passes found');
-            window.toast.show('No active visitor passes found', 'info');
+            if (window.toast) {
+              window.toast.show('No active visitor passes found', 'info');
+            }
             displayVisitorPasses([]); // Show empty state
           }
         } catch (error) {
           console.error('[VISITOR] Error fetching visitor passes:', error);
-          window.toast.show('Failed to load visitor passes: ' + error.message, 'error');
+          if (window.toast) {
+            window.toast.show('Failed to load visitor passes: ' + error.message, 'error');
+          }
           filterVisitors.classList.remove('toggle-active');
           currentFilter = null;
           loadLogs();
