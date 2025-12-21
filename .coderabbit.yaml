@@ -1,0 +1,80 @@
+# CodeRabbit Configuration
+# Official schema: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+reviews:
+  # Enable automatic reviews on pull requests
+  auto_review:
+    enabled: true
+  
+  # Review profile: "chill" (fewer comments) or "assertive" (more thorough)
+  profile: "assertive"
+  
+  # Path filters - include files to review, exclude with '!' prefix
+  path_filters:
+    # Include all source files
+    - "**/*.php"
+    - "**/*.js"
+    - "**/*.css"
+    - "**/*.html"
+    - "**/*.json"
+    
+    # Exclude vendor and dependencies
+    - "!vendor/**"
+    - "!node_modules/**"
+    
+    # Exclude uploads and user data
+    - "!uploads/**"
+    - "!qr_codes/**"
+    
+    # Exclude cache and temporary files
+    - "!cache/**"
+    - "!tmp/**"
+    - "!temp/**"
+    
+    # Exclude logs and backups
+    - "!logs/**"
+    - "!*.log"
+    - "!backups/**"
+    - "!database_backups/**"
+    - "!admin/backups_db/**"
+    
+    # Exclude minified files
+    - "!*.min.js"
+    - "!*.min.css"
+    
+    # Exclude backup files
+    - "!*.backup"
+    - "!*.bak"
+    - "!*.old"
+    - "!*.sql"
+    - "!*.sql.gz"
+    - "!*.sql.zip"
+  
+  # Enable specific analysis tools
+  tools:
+    # PHP static analysis
+    phpstan:
+      enabled: true
+      level: 5
+    
+    # JavaScript linting
+    eslint:
+      enabled: true
+    
+    # GitHub Actions workflow validation
+    actionlint:
+      enabled: true
+    
+    # YAML linting
+    yamllint:
+      enabled: true
+    
+    # Markdown linting
+    markdownlint:
+      enabled: true
+  
+  # Request changes workflow
+  request_changes_workflow: true
+  
+  # Enable poem generation for fun
+  poem: true
