@@ -1,0 +1,79 @@
+# CodeRabbit Configuration
+# This file configures CodeRabbit to analyze all files in the repository
+
+reviews:
+  # Enable automatic reviews on all pull requests
+  auto_review: true
+  
+  # Review all file types
+  path_filters:
+    - "**/*"
+  
+  # Enable comprehensive analysis
+  request_changes_workflow: true
+  
+  # Language-specific settings
+  language_settings:
+    php:
+      enabled: true
+      # Check for security issues
+      security_checks: true
+      # Check for performance issues
+      performance_checks: true
+      # Check for code quality
+      quality_checks: true
+    
+    javascript:
+      enabled: true
+      security_checks: true
+      quality_checks: true
+    
+    css:
+      enabled: true
+      quality_checks: true
+    
+    html:
+      enabled: true
+      quality_checks: true
+
+  # Enable all check types
+  checks:
+    - security
+    - performance
+    - maintainability
+    - complexity
+    - duplication
+    - best_practices
+    - documentation
+
+  # Review settings
+  review_settings:
+    # Review all files, not just changed ones
+    review_full_files: true
+    # Include suggestions for improvements
+    include_suggestions: true
+    # Check for common bugs
+    bug_detection: true
+    # Check for code smells
+    code_smell_detection: true
+
+# Exclude certain files/directories
+exclude:
+  - "vendor/**"
+  - "node_modules/**"
+  - "*.min.js"
+  - "*.min.css"
+  - "uploads/**"
+  - "cache/**"
+  - "logs/**"
+  - "backups/**"
+  - "*.backup"
+  - "*.sql"
+
+# Include specific patterns
+include:
+  - "**/*.php"
+  - "**/*.js"
+  - "**/*.css"
+  - "**/*.html"
+  - "**/*.json"
