@@ -512,6 +512,7 @@ require_once __DIR__ . '/../../db.php';
 
   <!-- Guard Application Scripts - Load in order: utils -> config -> features -> main -->
   <script src="../js/logger.js?v=<?= time() ?>"></script>
+  <script src="../../assets/js/toast.js?v=<?php echo time(); ?>"></script>
   <script src="../../assets/js/keyboard-shortcuts.js?v=<?php echo time(); ?>"></script>
   <script src="../../assets/js/mobile-gestures.js?v=<?php echo time(); ?>"></script>
   <script src="../js/guard-dark-mode.js?v=<?php echo time(); ?>"></script>
