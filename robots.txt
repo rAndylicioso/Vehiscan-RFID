@@ -1,0 +1,25 @@
+# Robots.txt for VehiScan RFID System
+# This is a private application, not for public indexing
+
+User-agent: *
+Disallow: /admin/
+Disallow: /guard/
+Disallow: /homeowners/
+Disallow: /auth/
+Disallow: /api/
+Disallow: /includes/
+Disallow: /scripts/
+Disallow: /migrations/
+Disallow: /utilities/
+Disallow: /uploads/
+Disallow: /backups/
+Disallow: /_testing/
+Disallow: /phpqrcode/
+Disallow: /visitor/
+
+# Allow access to public assets only
+Allow: /assets/
+Allow: /index.php
+
+# Sitemap (optional - can be removed if not needed)
+# Sitemap: https://yourdomain.com/sitemap.xml

@@ -1,0 +1,1221 @@
+/**
+ * Vehiscan RFID System Styles
+ * Consolidated CSS for animations, variables, and complex components
+ * Location: assets/css/system.css
+ */
+
+/* ============================================================
+   CSS VARIABLES - Salt & Pepper (Shadcn-Inspired)
+   ============================================================ */
+:root {
+  /* Base */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+
+  /* Card */
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+
+  /* Popover */
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+
+  /* Primary */
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+
+  /* Secondary */
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+
+  /* Muted */
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  /* Accent */
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+
+  /* Destructive */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  /* Border/Input/Ring */
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Legacy Variables Mapped */
+  --salt-white: hsl(var(--background));
+  --salt-light: hsl(var(--muted));
+  --salt-gray: hsl(var(--border));
+  --pepper-charcoal: hsl(var(--foreground));
+  --pepper-dark: hsl(222.2 84% 4.9%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(2, 8, 23, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================================
+   ANIMATIONS & KEYFRAMES
+   ============================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s forwards ease;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* ============================================================
+   SIDEBAR COMPONENT
+   ============================================================ */
+.sidebar-transition {
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-open {
+  width: 16rem;
+}
+
+.sidebar-closed {
+  width: 4rem;
+}
+
+.sidebar-text {
+  transition: opacity 200ms ease;
+  white-space: nowrap;
+}
+
+.sidebar-closed .sidebar-text {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.menu-item.active {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-weight: 500;
+}
+
+.dropdown-arrow {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-arrow.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* ============================================================
+   MODAL COMPONENT
+   ============================================================ */
+#editModal.hidden {
+  display: none !important;
+}
+
+#editModal:not(.hidden) {
+  display: flex !important;
+}
+
+/* [PHASE 2] Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  /* slate-300 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  /* slate-400 */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+  /* slate-600 */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+  /* slate-500 */
+}
+
+/* [PHASE 2] Skeleton Loader */
+.skeleton {
+  background: linear-gradient(90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 0.375rem;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.05) 25%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+}
+
+/* Skeleton Variants - Centralized */
+.skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.skeleton-text:last-child {
+  width: 80%;
+}
+
+.skeleton-button {
+  height: 40px;
+  width: 120px;
+  border-radius: 0.5rem;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* [PHASE 2] Rich Empty States */
+.empty-state-illustration {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1rem;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+}
+
+/* [PHASE 2] Animated Dark Mode Toggle */
+.theme-toggle-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+  border: 1px solid hsl(var(--border));
+  background-color: white;
+  color: #f59e0b;
+  /* Sun color */
+  overflow: hidden;
+}
+
+.dark .theme-toggle-btn {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+  color: #8b5cf6;
+  /* Moon color */
+}
+
+.theme-icon {
+  position: absolute;
+  transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.5s;
+}
+
+.sun-icon {
+  transform: rotate(0deg) scale(1);
+  opacity: 1;
+}
+
+.moon-icon {
+  transform: rotate(90deg) scale(0);
+  opacity: 0;
+}
+
+.dark .sun-icon {
+  transform: rotate(-90deg) scale(0);
+  opacity: 0;
+}
+
+.dark .moon-icon {
+  transform: rotate(0deg) scale(1);
+  opacity: 1;
+}
+
+/* [PHASE 2] Polished Toast (SweetAlert2 Override) */
+div:where(.swal2-container).swal2-top-end>.swal2-popup,
+div:where(.swal2-container).swal2-top-right>.swal2-popup {
+  grid-column: auto !important;
+  /* Fix Swal grid */
+  border-radius: var(--radius) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  padding: 0.75rem 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  font-family: inherit !important;
+}
+
+.dark div:where(.swal2-container) .swal2-popup {
+  background-color: hsl(var(--card)) !important;
+  /* was --popover */
+  color: hsl(var(--card-foreground)) !important;
+}
+
+/* [PHASE 2] Shadcn Inputs Global Override */
+/* Fallback if @apply is not available (since we use vanilla CSS with Tailwind classes, we might not have @apply working in raw CSS unless processed.
+   Wait, the user said "Vanilla CSS (with Tailwind)". Usually @apply requires a build step.
+   I should use standard CSS rules that MIMIC the Tailwind classes for inputs if I cannot use @apply.
+   I will write the raw CSS for Shadcn inputs to be safe.
+*/
+input.shadcn-input,
+.form-control,
+.form-select,
+input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]) {
+  display: flex;
+  height: 2.5rem;
+  /* h-10 */
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--input));
+  background-color: transparent;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: inherit;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Logo Sizing */
+.community-logo {
+  max-width: 100px;
+  height: auto;
+  margin: 0 auto 1rem;
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   Note: Detailed toast styles moved to assets/css/toast.css and guard/css/toast.css
+   This section kept for legacy compatibility only.
+   ============================================================ */
+/* Toast styles now handled by dedicated toast.css files */
+
+/* ============================================================
+   UTILITY COMPONENTS
+   ============================================================ */
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-top-color: hsl(var(--primary));
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.spinner-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 3px;
+}
+
+.spinner-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 2px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: hsl(var(--muted-foreground));
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--card)) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ============================================================
+   SWEETALERT2 CUSTOMIZATION
+   ============================================================ */
+.swal2-popup {
+  font-size: 13px !important;
+  width: clamp(280px, 28%, 340px) !important;
+  padding: 16px 20px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.swal2-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+.swal2-html-container {
+  font-size: 12.5px !important;
+  margin: 6px 0 !important;
+}
+
+.swal2-input {
+  height: 32px !important;
+  font-size: 12.5px !important;
+  padding: 5px 8px !important;
+}
+
+.swal2-confirm,
+.swal2-cancel {
+  font-size: 12.5px !important;
+  padding: 5px 14px !important;
+  border-radius: 6px !important;
+}
+
+.swal2-confirm {
+  background: var(--warn) !important;
+  color: #fff !important;
+}
+
+.swal2-cancel {
+  background: #7f8c8d !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   PREVENT LAYOUT SHIFT
+   ============================================================ */
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body.swal2-shown {
+  overflow: visible !important;
+  padding-right: 0 !important;
+  position: relative !important;
+}
+
+html.swal2-shown {
+  overflow-y: scroll !important;
+  width: 100% !important;
+}
+
+/* ============================================================
+   DARK MODE SUPPORT - Enhanced with depth and modern aesthetics
+   ============================================================ */
+body.dark {
+  --bg: #0a0e1a;
+  --bg-secondary: #131b2e;
+  --bg-elevated: #1e2a42;
+  --text: #f8fafc;
+  --text-secondary: #e1e7ef;
+  --text-muted: #8b96a8;
+  --border: #2d3d5a;
+  --border-subtle: #1f2d42;
+  --accent-blue: #60a5fa;
+  background: linear-gradient(135deg, #0a0e1a 0%, #0d1220 50%, #0a0e1a 100%);
+  color: #f8fafc;
+}
+
+/* Toast dark mode styles handled by dedicated toast.css files */
+
+body.dark table:not(.w-full) {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+body.dark table:not(.w-full) thead th {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+body.dark table:not(.w-full) tbody tr:hover {
+  background: #334155;
+}
+
+body.dark table:not(.w-full) tbody tr td {
+  border-color: #334155;
+}
+
+/* Dark mode for main UI elements */
+body.dark header {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark #content-area {
+  background: #0f172a;
+}
+
+body.dark .bg-white {
+  background: linear-gradient(145deg, #131b2e 0%, #0f1825 100%) !important;
+  color: #f8fafc !important;
+  border: 1px solid #2d3d5a !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+body.dark .text-gray-900,
+body.dark .text-gray-800,
+body.dark .text-gray-700 {
+  color: #f1f5f9 !important;
+}
+
+body.dark .text-gray-600,
+body.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+body.dark .border-gray-200,
+body.dark .border-gray-300 {
+  border-color: #334155 !important;
+}
+
+body.dark .bg-gray-50 {
+  background: #1e293b !important;
+}
+
+body.dark .bg-slate-50 {
+  background: #1e293b !important;
+}
+
+body.dark .divide-slate-200>* {
+  border-color: #334155 !important;
+}
+
+body.dark input,
+body.dark select,
+body.dark textarea {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+body.dark input::placeholder,
+body.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+body.dark .shadow-sm,
+body.dark .shadow,
+body.dark .shadow-lg {
+  box-shadow: 0 0 0 1px #334155 !important;
+}
+
+/* Sidebar dark mode - Enhanced with depth */
+body.dark #sidebar,
+body.dark aside,
+body.dark nav {
+  background: #131b2e !important;
+  border-right: 1px solid #2d3d5a !important;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark #sidebar a,
+body.dark nav a {
+  color: #e1e7ef !important;
+  transition: all 0.2s ease !important;
+}
+
+body.dark #sidebar a:hover,
+body.dark nav a:hover {
+  background: #1e2a42 !important;
+  color: #f8fafc !important;
+  border-left: 3px solid #60a5fa !important;
+  padding-left: 1rem !important;
+}
+
+body.dark #sidebar a.active,
+body.dark nav a.active {
+  background: #253251 !important;
+  color: #60a5fa !important;
+  font-weight: 600 !important;
+  border-left: 3px solid #60a5fa !important;
+  box-shadow: inset 0 0 12px rgba(96, 165, 250, 0.15) !important;
+}
+
+/* Cards and panels */
+body.dark .card,
+body.dark .panel {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Tables (comprehensive) - Enhanced zebra stripes */
+body.dark table {
+  background: #131b2e !important;
+  color: #f8fafc !important;
+  border: 1px solid #2d3d5a !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+body.dark table th {
+  background: linear-gradient(180deg, #1e2a42 0%, #131b2e 100%) !important;
+  border-color: #2d3d5a !important;
+  color: #60a5fa !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 0.8rem !important;
+}
+
+body.dark table td {
+  border-color: #1f2d42 !important;
+  color: #e1e7ef !important;
+}
+
+body.dark table tr:hover {
+  background: #1e2a42 !important;
+  box-shadow: inset 0 0 8px rgba(96, 165, 250, 0.15) !important;
+  transition: all 0.15s ease !important;
+}
+
+body.dark table tbody tr:nth-child(even) {
+  background: rgba(30, 43, 62, 0.4) !important;
+}
+
+body.dark table tbody tr:nth-child(odd) {
+  background: #131b2e !important;
+}
+
+/* Buttons - Enhanced with subtle glow and depth */
+body.dark button:not(.bg-blue-500):not(.bg-green-500):not(.bg-red-500):not(.bg-yellow-500):not([class*="from-"]) {
+  background: #1e2a42 !important;
+  color: #f8fafc !important;
+  border: 1px solid #2d3d5a !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s ease !important;
+}
+
+body.dark button:not(.bg-blue-500):not(.bg-green-500):not(.bg-red-500):not(.bg-yellow-500):not([class*="from-"]):hover {
+  background: #253251 !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Badges - keep colors visible */
+body.dark .badge {
+  filter: brightness(1.2);
+}
+
+/* Role badges - specific adjustments for dark mode */
+body.dark .bg-purple-100 {
+  background: #4c1d95 !important;
+  /* purple-900 */
+  color: #e9d5ff !important;
+  /* purple-200 */
+}
+
+body.dark .bg-blue-100 {
+  background: #1e3a8a !important;
+  /* blue-900 */
+  color: #bfdbfe !important;
+  /* blue-200 */
+}
+
+body.dark .bg-orange-100 {
+  background: #7c2d12 !important;
+  /* orange-900 */
+  color: #fed7aa !important;
+  /* orange-200 */
+}
+
+body.dark .bg-emerald-100 {
+  background: #064e3b !important;
+  /* emerald-900 */
+  color: #a7f3d0 !important;
+  /* emerald-200 */
+}
+
+body.dark .bg-gray-100 {
+  background: #1e293b !important;
+  /* slate-800 */
+  color: #cbd5e1 !important;
+  /* slate-300 */
+}
+
+/* Modals - Enhanced with backdrop blur */
+body.dark .modal-content,
+body.dark #editModal .modal-body {
+  background: linear-gradient(145deg, #131b2e 0%, #0f1b2e 100%) !important;
+  color: #f8fafc !important;
+  border: 2px solid #2d3d5a !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+  border-radius: 12px !important;
+}
+
+body.dark .modal-header {
+  border-bottom: 1px solid #2d3d5a !important;
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.08) 0%, transparent 100%) !important;
+}
+
+body.dark .modal-footer {
+  border-top: 1px solid #2d3d5a !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Forms */
+body.dark label {
+  color: #e2e8f0 !important;
+}
+
+body.dark input[type="text"],
+body.dark input[type="email"],
+body.dark input[type="password"],
+body.dark input[type="number"],
+body.dark input[type="datetime-local"],
+body.dark input[type="date"],
+body.dark input[type="time"],
+body.dark select,
+body.dark textarea {
+  background: #0a0e1a !important;
+  color: #f8fafc !important;
+  border: 1px solid #2d3d5a !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+body.dark input:focus,
+body.dark select:focus,
+body.dark textarea:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  outline: none !important;
+}
+
+/* Dropdown menus */
+body.dark .dropdown-menu,
+body.dark [role="menu"] {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark .dropdown-item,
+body.dark [role="menuitem"] {
+  color: #e2e8f0 !important;
+}
+
+body.dark .dropdown-item:hover,
+body.dark [role="menuitem"]:hover {
+  background: #334155 !important;
+}
+
+/* Stats/metrics cards */
+body.dark .stat-card,
+body.dark .metric-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Search bars */
+body.dark .search-bar,
+body.dark input[type="search"] {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+/* ============================================================
+   DARK MODE TOGGLE VISIBILITY FIX
+   ============================================================ */
+
+/* Ensure dark mode toggle is always visible with better contrast */
+#darkModeToggle,
+#guardDarkModeToggle {
+  z-index: var(--z-swal, 50) !important;
+  position: relative !important;
+  border: 2px solid #cbd5e1 !important;
+  /* slate-300 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+#darkModeToggle:hover,
+#guardDarkModeToggle:hover {
+  border-color: #94a3b8 !important;
+  /* slate-400 */
+}
+
+#darkModeThumb,
+#guardDarkModeThumb {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+@media (max-width: 640px) {
+  .toast-container {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+
+  .toast {
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* Prefers-color-scheme toast styles handled by dedicated toast.css files */
+/* ============================================================
+   PHASE 1 UI/UX IMPROVEMENTS
+   Added: 2025-12-18
+   ============================================================ */
+
+/* 1.1 Improved Focus States for Accessibility */
+*:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default focus outline for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Enhanced focus for interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid hsl(222.2 47.4% 11.2%);
+  outline-offset: 2px;
+}
+
+/* Dark mode focus states */
+.dark button:focus-visible,
+.dark a:focus-visible,
+.dark input:focus-visible {
+  outline-color: hsl(210 40% 98%);
+}
+
+/* 1.2 Optimized Touch Targets for Mobile */
+@media (hover: none) and (pointer: coarse) {
+
+  .btn,
+  .menu-item,
+  a,
+  button,
+  input[type="checkbox"],
+  input[type="radio"],
+  .filter-toggle-item {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem;
+  }
+
+  /* Ensure clickable area for small icons */
+  .icon-button {
+    padding: 12px;
+  }
+}
+
+/* 1.3 Micro-Animations for Delightful Interactions */
+
+/* Button press effect */
+.btn:active,
+button:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Card hover lift */
+.card:hover,
+.stat-card:hover,
+.visitor-pass-card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Menu item hover */
+.menu-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-item:hover {
+  transform: translateX(4px);
+}
+
+/* [PHASE 3.2] Breadcrumb Navigation */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.breadcrumb-item {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-item:hover {
+  color: #3b82f6;
+}
+
+.breadcrumb-item.active {
+  color: #1f2937;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.dark .breadcrumb-item {
+  color: #9ca3af;
+}
+
+.dark .breadcrumb-item:hover {
+  color: #60a5fa;
+}
+
+.dark .breadcrumb-item.active {
+  color: #f3f4f6;
+}
+
+.breadcrumb-separator {
+  display: inline-flex;
+  color: #d1d5db;
+}
+
+.dark .breadcrumb-separator {
+  color: #4b5563;
+}
+
+/* [PHASE 3.3] Keyboard Shortcut Styles */
+kbd {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #374151;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark kbd {
+  color: #f3f4f6;
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+/* Success checkmark animation */
+@keyframes checkmark {
+  0% {
+    transform: scale(0) rotate(45deg);
+  }
+
+  50% {
+    transform: scale(1.2) rotate(45deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+.success-checkmark {
+  animation: checkmark 0.4s ease;
+}
+
+/* Pulse animation for notifications */
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+button,
+a,
+input,
+select,
+textarea,
+.card {
+  transition: all 0.2s ease;
+}
+
+/* Ripple effect on click (optional enhancement) */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.ripple-effect:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+/* Smooth page transitions */
+.page-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading spinner enhancement */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* 1.4 Skip Link Styles */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  font-weight: 500;
+  z-index: 10000;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Dark mode skip link */
+.dark .skip-link {
+  background: hsl(210 40% 98%);
+  color: hsl(222.2 47.4% 11.2%);
+}

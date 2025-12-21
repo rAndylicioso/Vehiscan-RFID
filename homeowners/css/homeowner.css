@@ -1,0 +1,576 @@
+/* Homeowner Portal Styles */
+:root {
+    --sidebar-bg: #ffffff;
+    --sidebar-foreground: #1f2937;
+    --sidebar-border: #e5e7eb;
+    --sidebar-accent: #f3f4f6;
+    --sidebar-accent-foreground: #111827;
+}
+
+body.dark {
+    --sidebar-bg: #1f2937;
+    --sidebar-foreground: #f3f4f6;
+    --sidebar-border: #374151;
+    --sidebar-accent: #374151;
+    --sidebar-accent-foreground: #f9fafb;
+}
+
+body.dark .stat-card {
+    background: #1e293b;
+    border-color: #374151;
+}
+
+body.dark .stat-card h3 {
+    color: #9ca3af;
+}
+
+body.dark .stat-card .text-3xl {
+    color: #f3f4f6;
+}
+
+body.dark .visitor-pass-card {
+    background: #1e293b;
+    border-color: #374151;
+    color: #f3f4f6;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Sidebar Styles */
+#sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    transition: width 0.3s ease;
+}
+
+/* Sidebar Menu Items - Base styles in system.css */
+/* Portal-specific enhancements removed for cleaner appearance */
+
+/* Page Content */
+.page-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.page-content.active {
+    display: block;
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Cards */
+.stat-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    box-shadow: 0 10px 20px -5px rgb(0 0 0 / 0.1);
+    transform: translateY(-4px);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card h3 {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.stat-card .text-3xl {
+    color: #111827;
+    font-weight: 700;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.status-pending::before {
+    content: '⏳';
+}
+
+.status-approved {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+}
+
+.status-approved::before {
+    content: '✓';
+}
+
+.status-active {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #3b82f6;
+}
+
+.status-active::before {
+    content: '✓';
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #ef4444;
+}
+
+.status-rejected::before {
+    content: '✗';
+}
+
+.status-expired {
+    background: #e5e7eb;
+    color: #374151;
+    border: 1px solid #9ca3af;
+}
+
+.status-expired::before {
+    content: '⊗';
+}
+
+.status-cancelled {
+    background: #fce7f3;
+    color: #831843;
+    border: 1px solid #db2777;
+}
+
+.status-cancelled::before {
+    content: '⊘';
+}
+
+/* Visitor Pass Cards */
+.visitor-pass-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    background: white;
+    transition: all 0.2s;
+}
+
+.visitor-pass-card:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.visitor-pass-card.active {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.02);
+}
+
+.visitor-pass-card.approved {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.02);
+}
+
+/* Buttons */
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+/* Loading State */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #6b7280;
+}
+
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+    position: relative;
+    display: inline-flex;
+    height: 1.5rem;
+    width: 2.75rem;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: #d1d5db;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.dark-mode-toggle.active {
+    background-color: #3b82f6;
+}
+
+.dark-mode-thumb {
+    display: inline-block;
+    height: 1.25rem;
+    width: 1.25rem;
+    transform: translateX(0.125rem);
+    border-radius: 9999px;
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    transition: transform 0.2s;
+}
+
+.dark-mode-toggle.active .dark-mode-thumb {
+    transform: translateX(1.375rem);
+}
+
+/* Mobile Menu Toggle */
+#mobile-menu-btn {
+    display: none;
+}
+
+#mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+#mobile-overlay.active {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #mobile-menu-btn {
+        display: flex;
+    }
+
+    #sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+
+    #sidebar.mobile-open {
+        left: 0;
+    }
+
+    /* Make content full width on mobile */
+    .flex.h-screen {
+        flex-direction: column;
+    }
+
+    /* Adjust stats grid for mobile */
+    .grid.gap-6 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+
+    /* Make pass cards more compact on mobile */
+    .pass-card {
+        padding: 1rem;
+    }
+
+    /* Smaller buttons on mobile */
+    .btn-primary,
+    .btn-secondary {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    /* Adjust header for mobile */
+    header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* Stack form elements vertically on mobile */
+    .grid.grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Extra small screens */
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-card h3 {
+        font-size: 0.875rem;
+    }
+
+    .stat-card .text-3xl {
+        font-size: 1.5rem;
+    }
+
+    /* Make tables scrollable */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+
+    /* Larger tap targets for touch devices */
+    .menu-item {
+        padding-top: 0.875rem;
+        padding-bottom: 0.875rem;
+    }
+
+    button,
+    .btn-primary,
+    .btn-secondary {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Enhanced Animations */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Loading skeleton */
+
+/* Button enhancements */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Card hover lift effect */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Status indicator animation */
+@keyframes statusBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(0.9);
+    }
+}
+
+/* Header elevation on scroll */
+header {
+    transition: box-shadow 0.3s ease;
+}
+
+header.scrolled {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Sidebar Overlay */
+#sidebar.mobile-open {
+    transform: translateX(0) !important;
+}
+
+#mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#mobile-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile Sidebar - Show as overlay when mobile-open class is added */
+@media (max-width: 767px) {
+    #sidebar.mobile-open {
+        display: flex !important;
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 50;
+        width: 16rem;
+        animation: slideInFromLeft 0.3s ease-out;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+#mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#mobile-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
