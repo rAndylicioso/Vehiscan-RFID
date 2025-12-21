@@ -1,0 +1,19 @@
+========================================
+VEHISCAN LOGO PLACEMENT INSTRUCTIONS
+========================================
+
+TO ADD YOUR LOGO:
+1. Save your logo image file (the one you created)
+2. Rename it to: vehiscan-logo.png
+3. Place it in this folder: c:\xampp\htdocs\Vehiscan-RFID\assets\images\
+
+The logo should be:
+- Format: PNG (with transparent background preferred)
+- Size: Approximately 512x512 pixels or any square size
+- The system will automatically resize it to fit
+
+ALTERNATIVE IF YOU WANT THE FALLBACK:
+If you don't want to use an image, the system will show a "V" letter
+on a blue gradient background automatically.
+
+========================================

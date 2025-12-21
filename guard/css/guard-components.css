@@ -1,0 +1,144 @@
+/* ============================================================
+   GUARD TOGGLE GROUP COMPONENT
+   Filter button group with active states and variants
+   ============================================================ */
+
+.filter-toggle-group {
+  display: inline-flex;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  gap: 0;
+}
+
+.filter-toggle-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  padding: 0.5rem 1rem;
+  color: #6B7280;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  cursor: pointer;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.filter-toggle-item:first-child {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.filter-toggle-item:last-child {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.filter-toggle-item:not(:first-child) {
+  border-left-width: 0;
+}
+
+.filter-toggle-item:hover:not(:disabled):not(.toggle-active) {
+  background-color: #F9FAFB;
+  color: #374151;
+  border-color: #D1D5DB;
+}
+
+.filter-toggle-item:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+  z-index: var(--z-tooltip, 10);
+}
+
+.filter-toggle-item.toggle-active {
+  background: var(--active-from);
+  color: white;
+  border-color: var(--active-from);
+  font-weight: 600;
+  z-index: var(--z-tooltip, 5);
+}
+
+.filter-toggle-item.toggle-active:hover {
+  background: var(--active-to);
+  border-color: var(--active-to);
+}
+
+.filter-toggle-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   COLOR VARIANTS
+   ============================================================ */
+
+.filter-toggle-item[data-variant="today"] {
+  --active-from: #3b82f6;
+  --active-to: #2563eb;
+}
+
+.filter-toggle-item[data-variant="today"] {
+  --active-from: var(--guard-accent, #3b82f6);
+  --active-to: var(--guard-accent-2, #2563eb);
+}
+.filter-toggle-item[data-variant="in"] {
+  --active-from: var(--guard-success, #10b981);
+  --active-to: var(--guard-success-hover, #059669);
+}
+.filter-toggle-item[data-variant="out"] {
+  --active-from: var(--guard-warn, #ef4444);
+  --active-to: var(--guard-warn-hover, #dc2626);
+}
+.filter-toggle-item[data-variant="visitors"] {
+  --active-from: var(--guard-visitor-accent, #8b5cf6);
+  --active-to: var(--guard-visitor-accent, #7c3aed);
+}
+   DARK MODE SUPPORT
+   ============================================================ */
+
+body.dark .filter-toggle-item {
+  background: var(--bg-secondary, #1e293b);
+  border-color: var(--border, #334155);
+  color: var(--text-muted, #94a3b8);
+}
+
+body.dark .filter-toggle-item:hover:not(:disabled):not(.toggle-active) {
+  background-color: var(--bg-tertiary, #0f172a);
+  color: var(--text, #cbd5e1);
+}
+
+body.dark .filter-toggle-item.toggle-active {
+  color: white;
+}
+
+/* ============================================================
+   VISITOR PASSES GRID
+   ============================================================ */
+
+#visitorPassesContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  #visitorPassesContainer {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  #visitorPassesContainer {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+/* ============================================================
+   FLOATING CAMERA WINDOW
+   ============================================================ */
+
+#floatingCameraWindow {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
