@@ -107,14 +107,14 @@ includes/security_headers.php            ✅ Active security
    ```
 2. Or let it auto-detect from your network IP
 
-### For InfinityFree Hosting:
+### For Hosting:
 1. Create `.env` file on server:
    ```env
-   APP_URL=https://vehiscan-demo.infinityfreeapp.com
-   DB_HOST=sql100.infinityfree.com
-   DB_NAME=if0_40595877_vehiscan
-   DB_USER=if0_40595877
-   DB_PASS=Um1XBfBzTUQR
+   APP_URL=https://your-domain.example.com
+   DB_HOST=your-db-host.example.com
+   DB_NAME=your_database_name
+   DB_USER=your_database_user
+   DB_PASS=your_database_password
    ```
 2. Upload files via FTP
 3. QR codes will automatically use your hosting domain
