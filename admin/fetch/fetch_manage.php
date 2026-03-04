@@ -9,6 +9,22 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'a
 
 // admin/fetch/fetch_manage.php
 require_once __DIR__ . '/../../db.php';
+
+// Auto-sync: ensure vehicles table has entries for all approved homeowners
+try {
+    $pdo->exec("
+        INSERT IGNORE INTO vehicles (homeowner_id, plate_number, vehicle_type, color, is_primary, is_active, registered_at)
+        SELECT h.id, h.plate_number, COALESCE(h.vehicle_type, 'Unknown'), COALESCE(h.color, 'Unknown'), 1, 1, NOW()
+        FROM homeowners h
+        LEFT JOIN vehicles v ON v.homeowner_id = h.id AND v.plate_number = h.plate_number
+        WHERE h.account_status = 'approved'
+          AND h.plate_number IS NOT NULL
+          AND h.plate_number != ''
+          AND v.id IS NULL
+    ");
+} catch (Exception $e) {
+    error_log('[MANAGE] Vehicle sync error: ' . $e->getMessage());
+}
 ?>
 <!-- Page Header -->
 <div class="mb-6">
@@ -74,11 +90,14 @@ require_once __DIR__ . '/../../db.php';
 try {
   // Only show APPROVED homeowners in Manage Records
   // Pending accounts should only appear in Account Approvals
+  // LEFT JOIN vehicles to get RFID binding status
   $stmt = $pdo->query("
-        SELECT id, name, address, contact_number, plate_number, vehicle_type, account_status 
-        FROM homeowners 
-        WHERE account_status = 'approved'
-        ORDER BY id DESC
+        SELECT h.id, h.name, h.address, h.contact_number, h.plate_number, h.vehicle_type, h.account_status,
+               v.id AS vehicle_id, v.rfid_uid, v.rfid_bound_at
+        FROM homeowners h
+        LEFT JOIN vehicles v ON v.homeowner_id = h.id AND v.plate_number = h.plate_number
+        WHERE h.account_status = 'approved'
+        ORDER BY h.id DESC
     ");
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -98,6 +117,7 @@ try {
         <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
         <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
         <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Contact</th>
+        <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">RFID</th>
         <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
       </tr>
     </thead>
@@ -108,6 +128,26 @@ try {
           <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($r['plate_number'] ?? ''); ?></td>
           <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['vehicle_type'] ?? ''); ?></td>
           <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['contact_number'] ?? ''); ?></td>
+          <td class="px-4 py-3 text-center">
+            <?php if (!empty($r['rfid_uid'])): ?>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700" title="UID: <?php echo htmlspecialchars($r['rfid_uid']); ?>">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                Bound
+              </span>
+            <?php elseif (!empty($r['vehicle_id'])): ?>
+              <button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors cursor-pointer btn-bind-rfid-manage"
+                      data-vehicle-id="<?php echo $r['vehicle_id']; ?>"
+                      data-plate="<?php echo htmlspecialchars($r['plate_number'] ?? ''); ?>"
+                      data-owner="<?php echo htmlspecialchars($r['name'] ?? ''); ?>">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                Bind RFID
+              </button>
+            <?php else: ?>
+              <span class="text-xs text-gray-400">—</span>
+            <?php endif; ?>
+          </td>
           <td class="px-4 py-3">
             <div class="flex items-center justify-center gap-2">
               <button

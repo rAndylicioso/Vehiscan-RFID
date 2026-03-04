@@ -1937,6 +1937,56 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    // Bind RFID buttons (from Manage Records page)
+    document.querySelectorAll('.btn-bind-rfid-manage').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        const vehicleId = this.dataset.vehicleId;
+        const plate = this.dataset.plate;
+        const owner = this.dataset.owner;
+
+        const result = await Swal.fire({
+          title: 'Bind RFID Tag',
+          html: `<div class="text-left">
+            <p class="mb-3">Start binding an RFID tag to:</p>
+            <div class="bg-gray-50 rounded-lg p-3 mb-3">
+              <p class="font-bold text-gray-800">${plate}</p>
+              <p class="text-sm text-gray-600">${owner}</p>
+            </div>
+            <p class="text-sm text-gray-500">You'll be redirected to <strong>RFID Management</strong> to complete the binding. Scan a tag within 5 minutes.</p>
+          </div>`,
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonText: 'Start Binding',
+          confirmButtonColor: '#2563EB',
+          cancelButtonText: 'Cancel',
+          width: '420px'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const form = new FormData();
+          form.append('action', 'initiate');
+          form.append('csrf_token', csrf);
+          form.append('vehicle_id', vehicleId);
+
+          const res = await fetch('../api/rfid/bind.php', { method: 'POST', body: form });
+          const json = await res.json();
+
+          if (json.success) {
+            showGrowl('Binding session started! Redirecting to RFID Management...', 'success');
+            // Navigate to RFID Management page where binding banner + polling are active
+            setTimeout(() => loadPage('rfid'), 500);
+          } else {
+            showGrowl(json.message || 'Failed to start binding', 'error');
+          }
+        } catch (err) {
+          console.error('[MANAGE] RFID bind error:', err);
+          showGrowl('Failed to start binding session', 'error');
+        }
+      });
+    });
+
     document.querySelectorAll(".cancel-btn").forEach((btn) => {
       btn.addEventListener("click", closeModal);
     });
