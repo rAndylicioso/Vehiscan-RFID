@@ -91,30 +91,30 @@ try {
             </svg>
         </div>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">RFID Management</h1>
-            <p class="text-sm text-gray-500">Bind, manage, and monitor RFID tags for vehicles</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">RFID Management</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Bind, manage, and monitor RFID tags for vehicles</p>
         </div>
     </div>
 </div>
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                 </svg>
             </div>
             <div>
-                <p class="text-2xl font-bold text-gray-900"><?= $totalVehicles ?></p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= $totalVehicles ?></p>
                 <p class="text-xs text-gray-500">Total Vehicles</p>
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-600">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                 </svg>
@@ -125,9 +125,9 @@ try {
             </div>
         </div>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                 </svg>
@@ -181,7 +181,7 @@ try {
 <!-- Action Bar -->
 <div class="flex items-center gap-2 mb-4 flex-wrap">
     <button id="rfidRefreshBtn"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+        class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -196,7 +196,7 @@ try {
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
             <input type="text" id="rfidSearchInput"
-                class="h-10 px-4 pl-10 border border-gray-300 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
                 placeholder="Search vehicles or owners...">
         </div>
         <span id="rfidSearchCount" class="text-sm text-gray-600 font-medium whitespace-nowrap"></span>
@@ -204,28 +204,28 @@ try {
 </div>
 
 <!-- Main Table: Vehicles with RFID Status -->
-<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-6">
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
     <table id="rfidTable" class="w-full text-sm">
-        <thead class="border-b border-slate-200 bg-slate-50">
+        <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
             <tr>
-                <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Owner</th>
-                <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
-                <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
-                <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">RFID Status</th>
-                <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">RFID UID</th>
-                <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Bound Date</th>
-                <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Owner</th>
+                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
+                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
+                <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">RFID Status</th>
+                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">RFID UID</th>
+                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Bound Date</th>
+                <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-200">
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
             <?php if (empty($vehicles)): ?>
-                <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No vehicles found</td></tr>
+                <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No vehicles found</td></tr>
             <?php else: ?>
                 <?php foreach ($vehicles as $v): ?>
-                    <tr class="hover:bg-slate-100 transition-colors even:bg-slate-50" data-vehicle-id="<?= $v['vehicle_id'] ?>">
-                        <td class="px-4 py-3 text-slate-700 font-medium"><?= htmlspecialchars($v['owner_name'] ?? 'Unknown') ?></td>
-                        <td class="px-4 py-3 text-slate-700 font-mono"><?= htmlspecialchars($v['plate_number'] ?? '') ?></td>
-                        <td class="px-4 py-3 text-slate-600">
+                    <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50" data-vehicle-id="<?= $v['vehicle_id'] ?>">
+                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-medium"><?= htmlspecialchars($v['owner_name'] ?? 'Unknown') ?></td>
+                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-mono"><?= htmlspecialchars($v['plate_number'] ?? '') ?></td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">
                             <?= htmlspecialchars($v['vehicle_type'] ?? '') ?>
                             <?php if (!empty($v['color'])): ?>
                                 <span class="text-xs text-gray-400">(<?= htmlspecialchars($v['color']) ?>)</span>
@@ -244,10 +244,10 @@ try {
                                 </span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-4 py-3 text-slate-600 font-mono text-xs">
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">
                             <?= !empty($v['rfid_uid']) ? htmlspecialchars($v['rfid_uid']) : '<span class="text-gray-400">—</span>' ?>
                         </td>
-                        <td class="px-4 py-3 text-slate-600 text-xs">
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400 text-xs">
                             <?= !empty($v['rfid_bound_at']) ? date('M j, Y g:ia', strtotime($v['rfid_bound_at'])) : '<span class="text-gray-400">—</span>' ?>
                         </td>
                         <td class="px-4 py-3">
@@ -283,37 +283,37 @@ try {
 </div>
 
 <!-- Recent RFID Scan Log -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+        <svg class="h-5 w-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         Recent RFID Scans
     </h3>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
-            <thead class="border-b border-gray-200 bg-gray-50">
+            <thead class="border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700">
                 <tr>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 uppercase">Time</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 uppercase">RFID UID</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 uppercase">Vehicle</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 uppercase">Owner</th>
-                    <th class="text-center px-3 py-2 text-xs font-semibold text-gray-600 uppercase">Result</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 uppercase">Source</th>
+                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Time</th>
+                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">RFID UID</th>
+                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Vehicle</th>
+                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Owner</th>
+                    <th class="text-center px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Result</th>
+                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Source</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100" id="recentScanLog">
+            <tbody class="divide-y divide-gray-100 dark:divide-slate-700" id="recentScanLog">
                 <?php if (empty($recentScans)): ?>
-                    <tr><td colspan="6" class="px-3 py-6 text-center text-gray-400">No scan history yet</td></tr>
+                    <tr><td colspan="6" class="px-3 py-6 text-center text-gray-400 dark:text-gray-500">No scan history yet</td></tr>
                 <?php else: ?>
                     <?php foreach ($recentScans as $scan): ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-3 py-2 text-gray-600 text-xs whitespace-nowrap">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <td class="px-3 py-2 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">
                                 <?= date('M j, g:i:sa', strtotime($scan['scanned_at'])) ?>
                             </td>
-                            <td class="px-3 py-2 font-mono text-xs text-gray-700"><?= htmlspecialchars($scan['rfid_uid'] ?? '') ?></td>
-                            <td class="px-3 py-2 text-gray-700"><?= htmlspecialchars($scan['plate_number'] ?? '—') ?></td>
-                            <td class="px-3 py-2 text-gray-600"><?= htmlspecialchars($scan['owner_name'] ?? '—') ?></td>
+                            <td class="px-3 py-2 font-mono text-xs text-gray-700 dark:text-gray-300"><?= htmlspecialchars($scan['rfid_uid'] ?? '') ?></td>
+                            <td class="px-3 py-2 text-gray-700 dark:text-gray-300"><?= htmlspecialchars($scan['plate_number'] ?? '—') ?></td>
+                            <td class="px-3 py-2 text-gray-600 dark:text-gray-400"><?= htmlspecialchars($scan['owner_name'] ?? '—') ?></td>
                             <td class="px-3 py-2 text-center">
                                 <?php
                                 $resultColors = [

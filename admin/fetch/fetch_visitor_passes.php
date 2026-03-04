@@ -1,6 +1,6 @@
 <!-- Visitor Pass Management Section for Admin -->
-<div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">Pending Visitor Pass Requests</h2>
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Pending Visitor Pass Requests</h2>
 
     <div id="pendingPassesContainer">
         <div class="space-y-4 py-4 animate-pulse">
@@ -32,17 +32,17 @@
             }
 
             container.innerHTML = passes.map(pass => `
-            <div class="border rounded-lg p-4 mb-3 hover:bg-gray-50">
+            <div class="border dark:border-slate-700 rounded-lg p-4 mb-3 hover:bg-gray-50 dark:hover:bg-slate-700">
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
-                        <h3 class="font-semibold text-gray-900">${pass.visitor_name}</h3>
-                        <p class="text-sm text-gray-600 mt-1">Purpose: ${pass.purpose}</p>
-                        <p class="text-sm text-gray-600">Homeowner: ${pass.homeowner_name}</p>
-                        <p class="text-xs text-gray-500 mt-1">
+                        <h3 class="font-semibold text-gray-900 dark:text-white">${pass.visitor_name}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Purpose: ${pass.purpose}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Homeowner: ${pass.homeowner_name}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Valid: ${new Date(pass.valid_from).toLocaleString()} to ${new Date(pass.valid_until).toLocaleString()}
                         </p>
-                        ${pass.visitor_plate ? `<p class="text-xs text-gray-500">Plate: ${pass.visitor_plate}</p>` : ''}
-                        <p class="text-xs text-gray-400 mt-1">Requested: ${new Date(pass.created_at).toLocaleString()}</p>
+                        ${pass.visitor_plate ? `<p class="text-xs text-gray-500 dark:text-gray-400">Plate: ${pass.visitor_plate}</p>` : ''}
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Requested: ${new Date(pass.created_at).toLocaleString()}</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="approvePass(${pass.id})" 

@@ -44,8 +44,8 @@ $roleCount = array_count_values(array_column($employees, 'role'));
       </svg>
     </div>
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Employee Management</h1>
-      <p class="text-sm text-gray-500">View and manage all system employees</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Employee Management</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">View and manage all system employees</p>
     </div>
   </div>
 </div>
@@ -58,7 +58,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
     </svg>
     Add Employee
   </button>
-  <button id="refreshEmployeesBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+  <button id="refreshEmployeesBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
     </svg>
@@ -69,9 +69,9 @@ $roleCount = array_count_values(array_column($employees, 'role'));
       <svg class="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
-      <input type="text" id="employeeSearchInput" class="h-10 px-4 pl-10 border border-gray-300 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Search employees...">
+      <input type="text" id="employeeSearchInput" class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200" placeholder="Search employees...">
     </div>
-    <select id="employeeRoleFilter" class="h-10 px-4 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <select id="employeeRoleFilter" class="h-10 px-4 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-gray-200">
       <option value="">All Roles</option>
       <option value="admin">Admin</option>
       <option value="guard">Guard</option>
@@ -81,23 +81,23 @@ $roleCount = array_count_values(array_column($employees, 'role'));
 </div>
 
 <!-- Employee Table -->
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
   <table id="employeeTable" class="w-full">
-    <thead class="bg-gray-50 border-b border-gray-200">
+    <thead class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
       <tr>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Username</th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Created</th>
-        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Username</th>
+        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Role</th>
+        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Created</th>
+        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-200">
+    <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
       <?php if (empty($employees)): ?>
         <tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No employees found</td></tr>
       <?php else: ?>
         <?php foreach ($employees as $employee): ?>
-          <tr class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($employee['username'] ?? '') ?></td>
+          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-200"><?= htmlspecialchars($employee['username'] ?? '') ?></td>
             <td class="px-6 py-4 text-sm">
               <?php
               $badges = [
@@ -112,7 +112,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                 <?= ucfirst(str_replace('_', ' ', htmlspecialchars($employee['role'] ?? ''))) ?>
               </span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-600"><?= date('M d, Y', strtotime($employee['created_at'])) ?></td>
+            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400"><?= date('M d, Y', strtotime($employee['created_at'])) ?></td>
             <td class="px-6 py-4">
               <div class="flex items-center justify-center gap-2">
                 <button class="editEmployeeBtn inline-flex items-center px-3 py-1.5 bg-gray-700 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors gap-1" data-id="<?= $employee['id'] ?>">

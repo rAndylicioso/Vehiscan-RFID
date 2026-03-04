@@ -71,11 +71,11 @@ require_once __DIR__ . '/../../db.php';
 <body class="m-0 p-0 overflow-hidden bg-guard-bg">
 
   <!-- User Dropdown (Fixed Position) -->
-  <div id="user-dropdown" class="fixed rounded-md border border-gray-300 bg-white shadow-lg"
+  <div id="user-dropdown" class="fixed rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg"
     style="z-index: var(--z-swal); display: none;">
     <div class="p-1">
       <button id="signOutBtn"
-        class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 hover:bg-red-50 font-medium transition-colors">
+        class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 font-medium transition-colors">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -93,22 +93,22 @@ require_once __DIR__ . '/../../db.php';
     <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col" style="background-color: #F5F5F5;">
+    <main class="flex-1 flex flex-col bg-gray-100 dark:bg-slate-950 transition-colors duration-300">
       <?php include __DIR__ . '/../includes/header.php'; ?>
 
       <!-- Content Area -->
-      <div class="flex-1 overflow-auto p-6" style="background-color: #F5F5F5;">
+      <div class="flex-1 overflow-auto p-6">
         <!-- Access Logs Page -->
         <div id="page-logs" class="page-content active">
           <div class="space-y-6">
             <!-- Filters Bar -->
-            <div class="bg-white rounded-lg p-4 border border-gray-200"
+            <div class="bg-white dark:bg-slate-800 rounded-lg p-4 border border-gray-200 dark:border-slate-700"
               style="box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
               <div class="flex flex-wrap gap-3 items-center">
                 <div class="flex-1 min-w-[220px]">
                   <div class="relative">
                     <input type="text" id="logsSearch" placeholder="Search logs by name, plate, or action..."
-                      class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all">
+                      class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 transition-all">
                     <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
                       viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -142,7 +142,7 @@ require_once __DIR__ . '/../../db.php';
                 </div>
 
                 <button id="clearLogsFilter"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                     </path>
@@ -180,13 +180,13 @@ require_once __DIR__ . '/../../db.php';
         <div id="page-homeowners" class="page-content hidden">
           <div class="space-y-6">
             <!-- Search Bar -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4"
+            <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4"
               style="box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);">
               <div class="flex gap-3">
                 <input type="text" id="homeownerSearch" placeholder="Search by name, plate, or address..."
-                  class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  class="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-gray-200">
                 <button id="clearSearch"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
                   Clear
                 </button>
                 <button id="reloadHomeowners"
@@ -204,41 +204,41 @@ require_once __DIR__ . '/../../db.php';
             <!-- Homeowner Details Cards -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-guard-bg">
               <!-- Vehicle Card -->
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="px-4 py-3 font-semibold"
                   style="background: var(--card, #fff); color: var(--guard-accent-dark, #222);">
                   🚗 Vehicle Information
                 </div>
                 <div class="p-4">
-                  <div class="aspect-video bg-white rounded-lg overflow-hidden mb-4 cursor-zoom-in"
+                  <div class="aspect-video bg-white dark:bg-slate-700 rounded-lg overflow-hidden mb-4 cursor-zoom-in"
                     onclick="openImageZoom(document.getElementById('carImage').src)">
                     <img id="carImage" src="" alt="Vehicle" class="w-full h-full object-contain">
                   </div>
                   <div class="space-y-2 text-sm">
-                    <p id="vehicleType" class="font-medium text-gray-700">Vehicle Type: -</p>
-                    <p id="vehicleColor" class="font-medium text-gray-700">Color: -</p>
-                    <p id="plateNumber" class="font-medium text-gray-700">Plate Number: -</p>
+                    <p id="vehicleType" class="font-medium text-gray-700 dark:text-gray-300">Vehicle Type: -</p>
+                    <p id="vehicleColor" class="font-medium text-gray-700 dark:text-gray-300">Color: -</p>
+                    <p id="plateNumber" class="font-medium text-gray-700 dark:text-gray-300">Plate Number: -</p>
                   </div>
                 </div>
               </div>
               <!-- Owner Card -->
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="px-4 py-3 fonts-semibold"
                   style="background: var(--card, #fff); color: var(--guard-accent-dark, #222);">
                   👤 Owner Information
                 </div>
                 <div class="p-4">
-                  <div class="aspect-video bg-white rounded-lg overflow-hidden mb-4 cursor-zoom-in"
+                  <div class="aspect-video bg-white dark:bg-slate-700 rounded-lg overflow-hidden mb-4 cursor-zoom-in"
                     onclick="openImageZoom(document.getElementById('ownerImage').src)">
                     <img id="ownerImage" src="" alt="Owner" class="w-full h-full object-contain">
                   </div>
                   <div class="space-y-2 text-sm">
-                    <p id="ownerName" class="font-medium text-gray-700">Name: -</p>
-                    <p id="ownerAddress" class="font-medium text-gray-700">Address: -</p>
-                    <p id="ownerContact" class="font-medium text-gray-700">Contact: -</p>
+                    <p id="ownerName" class="font-medium text-gray-700 dark:text-gray-300">Name: -</p>
+                    <p id="ownerAddress" class="font-medium text-gray-700 dark:text-gray-300">Address: -</p>
+                    <p id="ownerContact" class="font-medium text-gray-700 dark:text-gray-300">Contact: -</p>
                   </div>
                 </div>
-                <div class="bg-white px-4 py-3 border-t border-gray-200 flex justify-between items-center">
+                <div class="bg-white dark:bg-slate-800 px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center">
                   <button id="prevOwner"
                     class="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
                     ◄ Prev
@@ -257,7 +257,7 @@ require_once __DIR__ . '/../../db.php';
         <!-- Camera Page -->
         <div id="page-camera" class="page-content hidden">
           <div class="space-y-6 bg-guard-bg">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
               <div
                 class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-2 font-semibold">
@@ -282,7 +282,7 @@ require_once __DIR__ . '/../../db.php';
                   </div>
                 </div>
               </div>
-              <div class="p-6 bg-white">
+              <div class="p-6 bg-white dark:bg-slate-800">
                 <div class="max-w-4xl mx-auto">
                   <div class="aspect-video bg-black rounded-xl overflow-hidden relative shadow-lg">
                     <video id="liveCamera" autoplay playsinline muted class="w-full h-full object-cover"></video>
@@ -357,8 +357,8 @@ require_once __DIR__ . '/../../db.php';
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-800">Visitor Passes</h2>
-                  <p class="text-sm text-gray-600">View active visitor passes</p>
+                  <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Visitor Passes</h2>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">View active visitor passes</p>
                 </div>
               </div>
               <button id="refreshVisitorPasses"
@@ -368,9 +368,9 @@ require_once __DIR__ . '/../../db.php';
             </div>
 
             <!-- Search Bar -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
               <input type="text" id="visitorSearchInput" placeholder="🔍 Search by visitor name, plate number..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 dark:text-gray-200">
             </div>
 
             <!-- Visitor Passes Cards Grid -->
@@ -463,7 +463,7 @@ require_once __DIR__ . '/../../db.php';
     </div>
 
     <!-- Controls -->
-    <div class="p-3 bg-white rounded-b-lg flex items-center justify-between gap-2">
+    <div class="p-3 bg-white dark:bg-slate-800 rounded-b-lg flex items-center justify-between gap-2">
       <button id="floatingToggleCamera"
         class="flex-1 px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

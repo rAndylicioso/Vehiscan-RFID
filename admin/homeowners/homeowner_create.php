@@ -78,94 +78,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <form id="createHomeownerForm" class="modern-form compact-form" action="homeowners/homeowner_create.php" method="post" enctype="multipart/form-data">
   <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
 
-  <h3 class="text-xl font-bold text-gray-900 mb-2 text-center form-title">Add New Homeowner</h3>
-  <p class="text-xs text-gray-500 mb-5 text-center">Create a new homeowner record and link it to a vehicle.</p>
+  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center form-title">Add New Homeowner</h3>
+  <p class="text-xs text-gray-500 dark:text-gray-400 mb-5 text-center">Create a new homeowner record and link it to a vehicle.</p>
 
   <div class="grid grid-cols-2 gap-4 compact-grid">
     <!-- Row 1 -->
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Name <span class="text-red-500">*</span></span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Name <span class="text-red-500">*</span></span>
       <input
         type="text"
         name="name"
         required
         placeholder="Full name"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Plate Number <span class="text-red-500">*</span></span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Plate Number <span class="text-red-500">*</span></span>
       <input
         type="text"
         name="plate_number"
         required
         placeholder="e.g., ABC123"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <!-- Row 2 -->
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Vehicle Type</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Vehicle Type</span>
       <input
         type="text"
         name="vehicle_type"
         placeholder="e.g., Sedan, SUV"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Color</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Color</span>
       <input
         type="text"
         name="color"
         placeholder="e.g., Blue, Red"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <!-- Row 3 -->
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Contact</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Contact</span>
       <input
         type="text"
         name="contact"
         placeholder="Phone number"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Address</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Address</span>
       <textarea
         name="address"
         rows="2"
         placeholder="Full address"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
       ></textarea>
     </label>
 
     <!-- Row 4: Images -->
     <div class="block col-span-2 sm:col-span-1">
-      <label class="text-sm font-medium text-gray-700 mb-1.5 block">Owner Image</label>
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Owner Image</label>
       <input
         type="file"
         name="owner_img"
         accept="image/*"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
       <small class="text-gray-500 text-xs mt-1 block">Optional. JPG, PNG, WEBP.</small>
     </div>
 
     <div class="block col-span-2 sm:col-span-1">
-      <label class="text-sm font-medium text-gray-700 mb-1.5 block">Car Image</label>
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Car Image</label>
       <input
         type="file"
         name="car_img"
         accept="image/*"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
       <small class="text-gray-500 text-xs mt-1 block">Optional. JPG, PNG, WEBP.</small>
     </div>

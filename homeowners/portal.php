@@ -59,11 +59,11 @@ if (empty($_SESSION['csrf_token'])) {
 <body class="m-0 p-0 overflow-hidden bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
 
     <!-- User Dropdown (Fixed Position) -->
-    <div id="user-dropdown" class="hidden fixed w-56 rounded-md border border-gray-300 bg-white shadow-lg"
+    <div id="user-dropdown" class="hidden fixed w-56 rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg"
         style="z-index: 9999;">
         <div class="p-1">
             <button id="signOutBtn"
-                class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 hover:bg-red-50 font-medium transition-colors">
+                class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 font-medium transition-colors">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
@@ -143,13 +143,13 @@ if (empty($_SESSION['csrf_token'])) {
 
                         <!-- Statistics Cards -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="stat-card group">
+                            <div class="stat-card group dark:bg-slate-800 dark:border-slate-700">
                                 <div class="flex items-center justify-between">
                                     <div class="flex-1">
-                                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                                        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">
                                             Total Passes</h3>
-                                        <p class="text-4xl font-extrabold text-gray-900"><?= $stats['total'] ?? 0 ?></p>
-                                        <p class="text-xs text-gray-500 mt-2">All time requests</p>
+                                        <p class="text-4xl font-extrabold text-gray-900 dark:text-white"><?= $stats['total'] ?? 0 ?></p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">All time requests</p>
                                     </div>
                                     <div
                                         class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl group-hover:from-blue-100 group-hover:to-blue-200 transition-all duration-300">
@@ -163,14 +163,14 @@ if (empty($_SESSION['csrf_token'])) {
                                 </div>
                             </div>
 
-                            <div class="stat-card group">
+                            <div class="stat-card group dark:bg-slate-800 dark:border-slate-700">
                                 <div class="flex items-center justify-between">
                                     <div class="flex-1">
-                                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                                        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">
                                             Active Passes</h3>
                                         <p class="text-4xl font-extrabold text-green-600"><?= $stats['active'] ?? 0 ?>
                                         </p>
-                                        <p class="text-xs text-gray-500 mt-2">Currently valid</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Currently valid</p>
                                     </div>
                                     <div
                                         class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl group-hover:from-green-100 group-hover:to-green-200 transition-all duration-300">
@@ -183,14 +183,14 @@ if (empty($_SESSION['csrf_token'])) {
                                 </div>
                             </div>
 
-                            <div class="stat-card group">
+                            <div class="stat-card group dark:bg-slate-800 dark:border-slate-700">
                                 <div class="flex items-center justify-between">
                                     <div class="flex-1">
-                                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                                        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">
                                             Pending Approval</h3>
                                         <p class="text-4xl font-extrabold text-amber-600"><?= $stats['pending'] ?? 0 ?>
                                         </p>
-                                        <p class="text-xs text-gray-500 mt-2">Awaiting review</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Awaiting review</p>
                                     </div>
                                     <div
                                         class="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl group-hover:from-amber-100 group-hover:to-amber-200 transition-all duration-300">
@@ -264,8 +264,8 @@ if (empty($_SESSION['csrf_token'])) {
                     <div class="space-y-6">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
-                                <h2 class="text-2xl font-bold text-gray-900">My Visitor Passes</h2>
-                                <p class="text-sm text-gray-600 mt-1">Request and manage visitor passes for your guests
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">My Visitor Passes</h2>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Request and manage visitor passes for your guests
                                 </p>
                             </div>
                             <button onclick="showAddVisitorPassModal()"
@@ -290,8 +290,8 @@ if (empty($_SESSION['csrf_token'])) {
                     <div class="space-y-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h2 class="text-xl font-bold text-gray-900">My Vehicles</h2>
-                                <p class="text-sm text-gray-600 mt-1">Manage your registered vehicles</p>
+                                <h2 class="text-xl font-bold text-gray-900 dark:text-white">My Vehicles</h2>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your registered vehicles</p>
                             </div>
                             <button id="addVehicleBtn"
                                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
@@ -313,12 +313,12 @@ if (empty($_SESSION['csrf_token'])) {
                 <div id="page-activity" class="page-content">
                     <div class="space-y-6">
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">Vehicle Activity</h2>
-                            <p class="text-sm text-gray-600 mt-1">Track your vehicle entry and exit history</p>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Vehicle Activity</h2>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Track your vehicle entry and exit history</p>
                         </div>
 
                         <!-- Time Period Selector -->
-                        <div class="gap-2 bg-white p-1 rounded-lg border border-gray-200 inline-flex">
+                        <div class="gap-2 bg-white dark:bg-slate-800 p-1 rounded-lg border border-gray-200 dark:border-slate-700 inline-flex">
                             <button class="period-btn active px-4 py-2 rounded-md text-sm font-medium"
                                 data-period="day">Today</button>
                             <button class="period-btn px-4 py-2 rounded-md text-sm font-medium" data-period="week">This
@@ -329,9 +329,9 @@ if (empty($_SESSION['csrf_token'])) {
 
                         <!-- Summary Cards -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-white rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700 transition-colors duration-300">
                                 <div class="flex items-center gap-3">
-                                    <div class="p-3 bg-green-100 rounded-lg">
+                                    <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
                                         <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -339,15 +339,15 @@ if (empty($_SESSION['csrf_token'])) {
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">Total Entries</p>
-                                        <p class="text-2xl font-bold text-gray-900" id="totalEntries">0</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Entries</p>
+                                        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="totalEntries">0</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700 transition-colors duration-300">
                                 <div class="flex items-center gap-3">
-                                    <div class="p-3 bg-red-100 rounded-lg">
+                                    <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
                                         <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -355,15 +355,15 @@ if (empty($_SESSION['csrf_token'])) {
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">Total Exits</p>
-                                        <p class="text-2xl font-bold text-gray-900" id="totalExits">0</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Exits</p>
+                                        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="totalExits">0</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700 transition-colors duration-300">
                                 <div class="flex items-center gap-3">
-                                    <div class="p-3 bg-blue-100 rounded-lg">
+                                    <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                         <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -372,16 +372,16 @@ if (empty($_SESSION['csrf_token'])) {
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">Total Activity</p>
-                                        <p class="text-2xl font-bold text-gray-900" id="totalActivity">0</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Activity</p>
+                                        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="totalActivity">0</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Activity Chart -->
-                        <div class="bg-white rounded-lg p-6 border border-gray-200">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">Activity Timeline</h3>
+                        <div class="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700 transition-colors duration-300">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Activity Timeline</h3>
                             <canvas id="activityChart" height="80"></canvas>
                         </div>
                     </div>
@@ -391,12 +391,12 @@ if (empty($_SESSION['csrf_token'])) {
                 <div id="page-profile" class="page-content">
                     <div class="space-y-6">
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">My Profile</h2>
-                            <p class="text-sm text-gray-600 mt-1">Your personal and vehicle information</p>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white">My Profile</h2>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Your personal and vehicle information</p>
                         </div>
 
                         <!-- Images Section -->
-                        <div class="bg-white rounded-lg p-6 border border-gray-200">
+                        <div class="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700 transition-colors duration-300">
                             <div class="flex items-center gap-2 mb-5">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -404,12 +404,12 @@ if (empty($_SESSION['csrf_token'])) {
                                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                <h3 class="text-lg font-bold text-gray-900">Registered Images</h3>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Registered Images</h3>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Owner Image -->
                                 <div class="space-y-3">
-                                    <span class="block text-sm font-semibold text-gray-700">Owner Photo</span>
+                                    <span class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Owner Photo</span>
                                     <div class="relative group">
                                         <?php if (!empty($homeowner['owner_img'])): ?>
                                             <?php
@@ -471,7 +471,7 @@ if (empty($_SESSION['csrf_token'])) {
 
                                 <!-- Vehicle Image -->
                                 <div class="space-y-3">
-                                    <span class="block text-sm font-semibold text-gray-700">Vehicle Photo</span>
+                                    <span class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Vehicle Photo</span>
                                     <div class="relative group">
                                         <?php if (!empty($homeowner['car_img'])): ?>
                                             <?php
@@ -534,47 +534,47 @@ if (empty($_SESSION['csrf_token'])) {
                         </div>
 
                         <!-- Personal Information -->
-                        <div class="bg-white rounded-lg p-6 border border-gray-200">
+                        <div class="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700 transition-colors duration-300">
                             <div class="flex items-center gap-2 mb-5">
                                 <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                                <h3 class="text-lg font-bold text-gray-900">Personal Information</h3>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Personal Information</h3>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500 mb-1">Full Name</span>
-                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['name'] ?? '') ?></p>
+                                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Full Name</span>
+                                    <p class="text-base text-gray-900 dark:text-gray-100"><?= htmlspecialchars($homeowner['name'] ?? '') ?></p>
                                 </div>
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500 mb-1">Address</span>
-                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['address'] ?? '') ?>
+                                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Address</span>
+                                    <p class="text-base text-gray-900 dark:text-gray-100"><?= htmlspecialchars($homeowner['address'] ?? '') ?>
                                     </p>
                                 </div>
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500 mb-1">Contact Number</span>
-                                    <p class="text-base text-gray-900">
+                                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Contact Number</span>
+                                    <p class="text-base text-gray-900 dark:text-gray-100">
                                         <?= htmlspecialchars($homeowner['contact_number'] ?? 'N/A') ?>
                                     </p>
                                 </div>
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500 mb-1">Plate Number</span>
+                                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Plate Number</span>
                                     <p
-                                        class="text-base text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded inline-block">
+                                        class="text-base text-gray-900 dark:text-gray-100 font-mono bg-gray-50 dark:bg-slate-700 px-3 py-2 rounded inline-block">
                                         <?= htmlspecialchars($homeowner['plate_number'] ?? '') ?>
                                     </p>
                                 </div>
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500 mb-1">Vehicle Type</span>
-                                    <p class="text-base text-gray-900">
+                                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Vehicle Type</span>
+                                    <p class="text-base text-gray-900 dark:text-gray-100">
                                         <?= htmlspecialchars($homeowner['vehicle_type'] ?? '') ?>
                                     </p>
                                 </div>
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500 mb-1">Vehicle Color</span>
-                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['color'] ?? '') ?></p>
+                                    <span class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Vehicle Color</span>
+                                    <p class="text-base text-gray-900 dark:text-gray-100"><?= htmlspecialchars($homeowner['color'] ?? '') ?></p>
                                 </div>
                             </div>
                         </div>
@@ -584,7 +584,7 @@ if (empty($_SESSION['csrf_token'])) {
         </main>
     </div>
 
-    <script src="../assets/js/homeowner/homeowner_portal.js?v=<?php echo time(); ?>"></script>
+    <script src="js/homeowner.js?v=<?php echo time(); ?>"></script>
     <script src="../assets/js/keyboard-shortcuts.js?v=<?php echo time(); ?>"></script>
     <script src="../assets/js/mobile-gestures.js?v=<?php echo time(); ?>"></script>
     <script src="js/homeowner-dark-mode.js?v=<?php echo time(); ?>"></script>

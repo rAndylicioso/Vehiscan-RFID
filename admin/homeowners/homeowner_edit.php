@@ -82,85 +82,85 @@ if (!empty($_GET['ajax'])):
   <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
   <input type="hidden" name="id" value="<?php echo intval($id); ?>">
 
-  <h3 class="text-xl font-bold text-gray-900 mb-2 text-center form-title">Edit Homeowner</h3>
-  <p class="text-xs text-gray-500 mb-5 text-center">Update homeowner information and attached vehicle details.</p>
+  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center form-title">Edit Homeowner</h3>
+  <p class="text-xs text-gray-500 dark:text-gray-400 mb-5 text-center">Update homeowner information and attached vehicle details.</p>
 
   <div class="grid grid-cols-2 gap-4 compact-grid">
     <!-- Row 1 -->
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Name</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Name</span>
       <input
         type="text"
         name="name"
         required
         value="<?php echo htmlspecialchars($homeowner['name'] ?? ''); ?>"
         placeholder="Full name"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Contact</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Contact</span>
       <input
         type="text"
         name="contact"
         required
         value="<?php echo htmlspecialchars($homeowner['contact_number'] ?? ''); ?>"
         placeholder="Phone number"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <!-- Row 2 -->
     <label class="block col-span-2">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Address</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Address</span>
       <textarea
         name="address"
         rows="2"
         required
         placeholder="Full address"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
       ><?php echo htmlspecialchars($homeowner['address'] ?? ''); ?></textarea>
     </label>
 
     <!-- Row 3 -->
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Vehicle Type</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Vehicle Type</span>
       <input
         type="text"
         name="vehicle_type"
         value="<?php echo htmlspecialchars($homeowner['vehicle_type'] ?? ''); ?>"
         placeholder="e.g., Sedan, SUV"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Color</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Color</span>
       <input
         type="text"
         name="color"
         value="<?php echo htmlspecialchars($homeowner['color'] ?? ''); ?>"
         placeholder="e.g., Blue, Red"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <!-- Row 4 -->
     <label class="block col-span-2 sm:col-span-1">
-      <span class="text-sm font-medium text-gray-700 mb-1.5 block">Plate Number</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Plate Number</span>
       <input
         type="text"
         name="plate_number"
         value="<?php echo htmlspecialchars($homeowner['plate_number'] ?? ''); ?>"
         placeholder="e.g., ABC123"
-        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
     </label>
 
     <!-- Images -->
     <div class="block col-span-2 sm:col-span-1">
-      <label class="text-sm font-medium text-gray-700 mb-1.5 block">Owner Image</label>
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Owner Image</label>
       <?php if (!empty($homeowner['owner_img'])): ?>
         <?php
           $ownerImgPath = $homeowner['owner_img'];
@@ -174,13 +174,13 @@ if (!empty($_GET['ajax'])):
         type="file"
         name="owner_img"
         accept="image/*"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
       <small class="text-gray-500 text-xs mt-1 block">Leave empty to keep current image.</small>
     </div>
 
     <div class="block col-span-2 sm:col-span-1">
-      <label class="text-sm font-medium text-gray-700 mb-1.5 block">Car Image</label>
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">Car Image</label>
       <?php if (!empty($homeowner['car_img'])): ?>
         <?php
           $carImgPath = $homeowner['car_img'];
@@ -194,7 +194,7 @@ if (!empty($_GET['ajax'])):
         type="file"
         name="car_img"
         accept="image/*"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
       <small class="text-gray-500 text-xs mt-1 block">Leave empty to keep current image.</small>
     </div>

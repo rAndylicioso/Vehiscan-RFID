@@ -128,8 +128,8 @@ function getStatusBadge($status) {
             </svg>
         </div>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Profile Update Requests</h1>
-            <p class="text-sm text-gray-500">Review and manage homeowner profile change requests</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Profile Update Requests</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Review and manage homeowner profile change requests</p>
         </div>
     </div>
 </div>
@@ -158,22 +158,22 @@ function getStatusBadge($status) {
 
     <!-- Stat Cards Row -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === '' ? 'ring-2 ring-blue-500' : ''; ?>"
+        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === '' ? 'ring-2 ring-blue-500' : ''; ?>"
             data-status="">
-            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Total</p>
-            <p class="text-2xl font-bold text-gray-900"><?php echo $pendingCount + $acknowledgedCount + $completedCount + $rejectedCount; ?></p>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo $pendingCount + $acknowledgedCount + $completedCount + $rejectedCount; ?></p>
         </button>
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''; ?>"
+        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''; ?>"
             data-status="pending">
             <p class="text-xs font-medium text-yellow-600 uppercase tracking-wider mb-1">Pending</p>
             <p class="text-2xl font-bold text-yellow-700"><?php echo $pendingCount; ?></p>
         </button>
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'acknowledged' ? 'ring-2 ring-blue-500' : ''; ?>"
+        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'acknowledged' ? 'ring-2 ring-blue-500' : ''; ?>"
             data-status="acknowledged">
             <p class="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">Acknowledged</p>
             <p class="text-2xl font-bold text-blue-700"><?php echo $acknowledgedCount; ?></p>
         </button>
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'completed' ? 'ring-2 ring-green-500' : ''; ?>"
+        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'completed' ? 'ring-2 ring-green-500' : ''; ?>"
             data-status="completed">
             <p class="text-xs font-medium text-green-600 uppercase tracking-wider mb-1">Completed</p>
             <p class="text-2xl font-bold text-green-700"><?php echo $completedCount; ?></p>
@@ -183,7 +183,7 @@ function getStatusBadge($status) {
     <!-- Action Bar -->
     <div class="flex items-center gap-2 mb-4 flex-wrap">
         <button id="refreshProfileReqs"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -197,25 +197,25 @@ function getStatusBadge($status) {
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 <input type="text" id="profileReqSearch"
-                    class="h-10 px-4 pl-10 border border-gray-300 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
                     placeholder="Search requests..." value="<?php echo htmlspecialchars($search); ?>">
             </div>
         </div>
     </div>
 
     <!-- Requests Table -->
-    <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden overflow-x-auto">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden overflow-x-auto">
         <table class="w-full text-sm">
-            <thead class="border-b border-slate-200 bg-slate-50">
+            <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
                 <tr>
-                    <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Homeowner</th>
-                    <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Request</th>
-                    <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Status</th>
-                    <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Date</th>
-                    <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+                    <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Homeowner</th>
+                    <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Request</th>
+                    <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Status</th>
+                    <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Date</th>
+                    <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200">
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
                 <?php if (empty($requests)): ?>
                     <tr>
                         <td colspan="5" class="px-4 py-12 text-center">
@@ -237,7 +237,7 @@ function getStatusBadge($status) {
                         $displayName = htmlspecialchars($r['homeowner_name'] ?? ($r['first_name'] . ' ' . $r['last_name']) ?? 'Unknown');
                         $initials = getInitials($displayName);
                     ?>
-                        <tr class="hover:bg-slate-100 transition-colors">
+                        <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                             <!-- Homeowner -->
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
@@ -250,7 +250,7 @@ function getStatusBadge($status) {
                                         </div>
                                     <?php endif; ?>
                                     <div class="min-w-0">
-                                        <p class="text-sm font-medium text-slate-900 truncate"><?php echo $displayName; ?></p>
+                                        <p class="text-sm font-medium text-slate-900 dark:text-slate-200 truncate"><?php echo $displayName; ?></p>
                                         <?php if (!empty($r['plate_number'])): ?>
                                             <p class="text-xs text-slate-500"><?php echo htmlspecialchars($r['plate_number']); ?></p>
                                         <?php endif; ?>
@@ -259,7 +259,7 @@ function getStatusBadge($status) {
                             </td>
                             <!-- Request Text -->
                             <td class="px-4 py-3">
-                                <p class="text-slate-700 max-w-xs truncate" title="<?php echo htmlspecialchars($r['request_text']); ?>">
+                                <p class="text-slate-700 dark:text-slate-300 max-w-xs truncate" title="<?php echo htmlspecialchars($r['request_text']); ?>">
                                     <?php echo htmlspecialchars($r['request_text']); ?>
                                 </p>
                                 <?php if (!empty($r['admin_notes'])): ?>
@@ -276,7 +276,7 @@ function getStatusBadge($status) {
                                 </span>
                             </td>
                             <!-- Date -->
-                            <td class="px-4 py-3 text-slate-600 text-xs whitespace-nowrap">
+                            <td class="px-4 py-3 text-slate-600 dark:text-slate-400 text-xs whitespace-nowrap">
                                 <?php echo date('M j, Y g:i A', strtotime($r['created_at'])); ?>
                             </td>
                             <!-- Actions -->
@@ -328,7 +328,7 @@ function getStatusBadge($status) {
             </p>
             <div class="flex items-center gap-1">
                 <?php if ($page > 1): ?>
-                    <button class="page-btn px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors" data-page="<?php echo $page - 1; ?>">
+                    <button class="page-btn px-3 py-1.5 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors" data-page="<?php echo $page - 1; ?>">
                         Previous
                     </button>
                 <?php endif; ?>
@@ -339,14 +339,14 @@ function getStatusBadge($status) {
                 for ($i = $startPage; $i <= $endPage; $i++):
                 ?>
                     <button class="page-btn px-3 py-1.5 rounded-md border transition-colors
-                        <?php echo $i === $page ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-300 text-gray-700 hover:bg-gray-50'; ?>"
+                        <?php echo $i === $page ? 'bg-gray-900 dark:bg-slate-600 text-white border-gray-900 dark:border-slate-600' : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700'; ?>"
                         data-page="<?php echo $i; ?>">
                         <?php echo $i; ?>
                     </button>
                 <?php endfor; ?>
 
                 <?php if ($page < $totalPages): ?>
-                    <button class="page-btn px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors" data-page="<?php echo $page + 1; ?>">
+                    <button class="page-btn px-3 py-1.5 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors" data-page="<?php echo $page + 1; ?>">
                         Next
                     </button>
                 <?php endif; ?>
@@ -358,17 +358,17 @@ function getStatusBadge($status) {
 
 <!-- Action Modal -->
 <div id="profileReqModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-        <h3 id="modalTitle" class="text-lg font-semibold text-gray-900 mb-4">Process Request</h3>
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
+        <h3 id="modalTitle" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Process Request</h3>
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Admin Notes (optional)</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Admin Notes (optional)</label>
             <textarea id="modalNotes" rows="3"
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-gray-200"
                 placeholder="Add any notes about this action..."></textarea>
         </div>
         <div class="flex items-center justify-end gap-2">
             <button id="modalCancel"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
                 Cancel
             </button>
             <button id="modalConfirm"

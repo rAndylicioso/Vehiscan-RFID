@@ -38,8 +38,8 @@ try {
       </svg>
     </div>
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Manage Records</h1>
-      <p class="text-sm text-gray-500">View, add, edit, and manage homeowners</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Manage Records</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">View, add, edit, and manage homeowners</p>
     </div>
   </div>
 </div>
@@ -47,7 +47,7 @@ try {
 <!-- Action Bar -->
 <div class="flex items-center gap-2 mb-4 flex-wrap">
   <button id="refreshBtn"
-    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+    class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -79,7 +79,7 @@ try {
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
       <input type="text" id="searchInput"
-        class="h-10 px-4 pl-10 border border-gray-300 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+        class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
         placeholder="Search records...">
     </div>
     <span id="searchCount" class="text-sm text-gray-600 font-medium whitespace-nowrap"></span>
@@ -109,25 +109,25 @@ try {
 }
 ?>
 
-<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
   <table id="homeownersTable" class="w-full text-sm">
-    <thead class="border-b border-slate-200 bg-slate-50">
+    <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
       <tr>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Name</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Contact</th>
-        <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">RFID</th>
-        <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Name</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Contact</th>
+        <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">RFID</th>
+        <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-slate-200">
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
       <?php foreach ($rows as $r): ?>
-        <tr class="hover:bg-slate-100 transition-colors even:bg-slate-50">
-          <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($r['name'] ?? ''); ?></td>
-          <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($r['plate_number'] ?? ''); ?></td>
-          <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['vehicle_type'] ?? ''); ?></td>
-          <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['contact_number'] ?? ''); ?></td>
+        <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50">
+          <td class="px-4 py-3 text-slate-700 dark:text-slate-300"><?php echo htmlspecialchars($r['name'] ?? ''); ?></td>
+          <td class="px-4 py-3 text-slate-700 dark:text-slate-300"><?php echo htmlspecialchars($r['plate_number'] ?? ''); ?></td>
+          <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo htmlspecialchars($r['vehicle_type'] ?? ''); ?></td>
+          <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo htmlspecialchars($r['contact_number'] ?? ''); ?></td>
           <td class="px-4 py-3 text-center">
             <?php if (!empty($r['rfid_uid'])): ?>
               <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700" title="UID: <?php echo htmlspecialchars($r['rfid_uid']); ?>">

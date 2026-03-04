@@ -541,8 +541,8 @@ document.addEventListener('DOMContentLoaded', function () {
       logsWrapper.innerHTML = `
         <div class="logs-table-container">
           <div class="text-center py-12">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-gray-600"></div>
-            <p class="mt-2 text-gray-500">Loading logs...</p>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 dark:border-slate-600 border-t-gray-600 dark:border-t-gray-400"></div>
+            <p class="mt-2 text-gray-500 dark:text-gray-400">Loading logs...</p>
           </div>
         </div>
       `;
@@ -2097,7 +2097,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const data = await res.json();
 
       if (!data.success || !data.passes || data.passes.length === 0) {
-        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">🎫</div><p class="text-gray-600">No visitor passes found</p></div>';
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">🎫</div><p class="text-gray-600 dark:text-gray-400">No visitor passes found</p></div>';
         return;
       }
 
@@ -2127,13 +2127,13 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const qrCodeHtml = pass.qr_code ? `
-          <div class="flex items-center justify-center bg-white p-2 rounded border border-gray-200">
+          <div class="flex items-center justify-center bg-white dark:bg-slate-800 p-2 rounded border border-gray-200 dark:border-slate-700">
             <img src="${pass.qr_code}" alt="QR Code" class="w-24 h-24 qr-clickable" style="image-rendering: pixelated;" title="Click to zoom">
           </div>
         ` : '';
 
         return `
-          <div class="bg-white rounded-lg shadow-sm border-l-4 ${statusColor} overflow-hidden hover:shadow-md transition-shadow" style="min-height: 200px; max-height: 320px;">
+          <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border-l-4 ${statusColor} overflow-hidden hover:shadow-md transition-shadow" style="min-height: 200px; max-height: 320px;">
             <div class="p-3">
               <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -2141,8 +2141,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${pass.visitor_name.charAt(0).toUpperCase()}
                   </div>
                   <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-gray-900 text-base truncate">${pass.visitor_name}</h3>
-                    <p class="text-sm text-gray-600 font-mono font-semibold">${pass.visitor_plate}</p>
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base truncate">${pass.visitor_name}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 font-mono font-semibold">${pass.visitor_plate}</p>
                   </div>
                 </div>
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase ${statusColor} whitespace-nowrap ml-2">
@@ -2151,7 +2151,7 @@ document.addEventListener('DOMContentLoaded', function () {
               </div>
               
               <div class="space-y-2 text-sm mb-3">
-                <div class="flex items-center gap-2 text-gray-700">
+                <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                   <svg class="w-4 h-4" style="color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                   </svg>
@@ -2161,19 +2161,19 @@ document.addEventListener('DOMContentLoaded', function () {
               
               ${qrCodeHtml}
               
-              <div class="space-y-1.5 text-xs bg-gray-50 rounded-lg p-2.5 mt-2">
+              <div class="space-y-1.5 text-xs bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2.5 mt-2">
                 <div class="flex items-start gap-2">
-                  <span class="text-gray-500 font-semibold whitespace-nowrap">Valid From:</span>
-                  <span class="font-medium text-gray-900 text-right flex-1">${formatDate(pass.valid_from)}</span>
+                  <span class="text-gray-500 dark:text-gray-400 font-semibold whitespace-nowrap">Valid From:</span>
+                  <span class="font-medium text-gray-900 dark:text-white text-right flex-1">${formatDate(pass.valid_from)}</span>
                 </div>
                 <div class="flex items-start gap-2">
-                  <span class="text-gray-500 font-semibold whitespace-nowrap">Valid Until:</span>
-                  <span class="font-medium text-gray-900 text-right flex-1">${formatDate(pass.valid_until)}</span>
+                  <span class="text-gray-500 dark:text-gray-400 font-semibold whitespace-nowrap">Valid Until:</span>
+                  <span class="font-medium text-gray-900 dark:text-white text-right flex-1">${formatDate(pass.valid_until)}</span>
                 </div>
               </div>
               
-              <div class="mt-2 pt-2 border-t border-gray-200">
-                <div class="flex items-center justify-center gap-1.5 text-xs text-gray-500">
+              <div class="mt-2 pt-2 border-t border-gray-200 dark:border-slate-700">
+                <div class="flex items-center justify-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                   </svg>

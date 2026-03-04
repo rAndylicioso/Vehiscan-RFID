@@ -65,14 +65,14 @@ $page = 'dashboard';
   </style>
 </head>
 
-<body class="m-0 p-0 overflow-hidden" style="background-color: #F5F5F5;">
+<body class="m-0 p-0 overflow-hidden bg-gray-100 dark:bg-slate-950 transition-colors duration-300">
 
   <!-- User Dropdown (Fixed Position) -->
-  <div id="user-dropdown" class="hidden fixed w-56 rounded-md border border-gray-300 bg-white shadow-lg"
+  <div id="user-dropdown" class="hidden fixed w-56 rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg"
     style="z-index: 9999;">
     <div class="p-1">
       <button id="signOutBtn"
-        class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 hover:bg-red-50 font-medium transition-colors">
+        class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 font-medium transition-colors">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -96,7 +96,7 @@ $page = 'dashboard';
         <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center">
           <img src="../assets/images/vehiscan-logo.png" alt="VehiScan Logo" class="h-full w-full object-contain"
             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <span style="display:none;" class="text-2xl text-gray-700 font-bold">V</span>
+          <span style="display:none;" class="text-2xl text-gray-700 dark:text-gray-300 font-bold">V</span>
         </div>
         <span id="brand-name" class="sidebar-text ml-3 text-left font-bold text-lg">VehiScan</span>
       </div>
@@ -275,7 +275,7 @@ $page = 'dashboard';
         class="flex h-14 items-center gap-4 border-b border-gray-300 dark:border-slate-700 px-6 bg-white dark:bg-slate-900">
         <!-- Mobile Menu Button -->
         <button id="mobile-menu-btn"
-          class="flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-100 transition-colors md:hidden"
+          class="flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors md:hidden"
           aria-label="Toggle mobile menu">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -283,7 +283,7 @@ $page = 'dashboard';
         </button>
 
         <button id="sidebar-toggle"
-          class="hidden md:flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-100 transition-colors"
+          class="hidden md:flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
           aria-label="Toggle sidebar">
           <svg id="hamburger-icon" class="h-5 w-5 transition-transform duration-300" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
@@ -304,7 +304,7 @@ $page = 'dashboard';
                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
             </svg>
           </button>
-          <span id="liveTime" class="text-gray-600 text-sm font-medium"></span>
+          <span id="liveTime" class="text-gray-600 dark:text-gray-300 text-sm font-medium"></span>
         </div>
       </header>
 
@@ -328,7 +328,7 @@ $page = 'dashboard';
       <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
         role="document">
         <button type="button"
-          class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center text-2xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full cursor-pointer transition-all z-10"
+          class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center text-2xl text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full cursor-pointer transition-all z-10"
           onclick="closeModal()" aria-label="Close modal">&times;</button>
         <div class="overflow-y-auto max-h-[90vh] p-8" id="modal-body"></div>
       </div>

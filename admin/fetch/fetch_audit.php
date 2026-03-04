@@ -41,8 +41,8 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
       </svg>
     </div>
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Audit Logs</h1>
-      <p class="text-sm text-gray-500">Track system actions and changes</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Audit Logs</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Track system actions and changes</p>
     </div>
   </div>
 </div>
@@ -50,7 +50,7 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
 <!-- Action Bar -->
 <div class="flex items-center gap-3 mb-6 flex-wrap">
   <select id="actionFilter"
-    class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent filter-select">
+    class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent filter-select dark:bg-slate-700 dark:text-gray-200">
     <option value="">All Actions</option>
     <?php foreach ($actions as $action): ?>
       <option value="<?php echo htmlspecialchars($action ?? ''); ?>" <?php echo $action === $filter_action ? 'selected' : ''; ?>>
@@ -60,7 +60,7 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
   </select>
 
   <input type="text" id="userFilter"
-    class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px]"
+    class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px] dark:bg-slate-700 dark:text-gray-200"
     placeholder="Filter by user..." value="<?php echo htmlspecialchars($filter_user); ?>">
 
   <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
@@ -69,34 +69,34 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
 
   <div class="flex items-center gap-2 ml-auto">
     <input type="text" id="auditSearchInput"
-      class="px-4 py-2 border border-gray-300 rounded-lg min-w-[250px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent search-bar"
+    class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[250px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent search-bar dark:bg-slate-700 dark:text-gray-200"
       placeholder="🔍 Search logs...">
     <span id="auditSearchCount" class="text-gray-600 text-sm font-medium"></span>
   </div>
 </div>
 
-<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
   <table id="auditTable" class="w-full text-sm">
-    <thead class="border-b border-slate-200 bg-slate-50">
+    <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
       <tr>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Time</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">User</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Action</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Table</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Time</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">User</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Action</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Table</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-slate-200">
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
       <?php if (empty($logs)): ?>
         <tr>
-          <td colspan="4" class="px-4 py-8 text-center text-slate-500">No audit logs found</td>
+          <td colspan="4" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No audit logs found</td>
         </tr>
       <?php else: ?>
         <?php foreach ($logs as $log): ?>
-          <tr class="hover:bg-slate-100 transition-colors even:bg-slate-50">
-            <td class="px-4 py-3 text-slate-700"><?php echo date('M d, H:i:s', strtotime($log['created_at'])); ?></td>
-            <td class="px-4 py-3 font-medium text-slate-900"><?php echo htmlspecialchars($log['username'] ?? ''); ?></td>
+          <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50">
+            <td class="px-4 py-3 text-slate-700 dark:text-slate-300"><?php echo date('M d, H:i:s', strtotime($log['created_at'])); ?></td>
+            <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-200"><?php echo htmlspecialchars($log['username'] ?? ''); ?></td>
             <td class="px-4 py-3"><span class="action-badge"><?php echo htmlspecialchars($log['action'] ?? ''); ?></span></td>
-            <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($log['table_name'] ?? '-'); ?></td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo htmlspecialchars($log['table_name'] ?? '-'); ?></td>
           </tr>
         <?php endforeach; ?>
       <?php endif; ?>

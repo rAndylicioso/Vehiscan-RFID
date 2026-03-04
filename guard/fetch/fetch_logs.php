@@ -73,7 +73,7 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
       No logs to display
     <?php endif; ?>
   </div>
-  <div class="text-xs text-gray-500">
+  <div class="text-xs text-gray-500 dark:text-gray-400">
     Page <?php echo $page; ?> of <?php echo $total_pages; ?>
   </div>
 </div>
@@ -84,8 +84,8 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
     <div class="text-center py-12">
       <div class="empty-state">
         <div class="empty-state-icon text-6xl mb-4">📋</div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">No access logs found</h3>
-        <p class="text-gray-500">Access logs will appear here when vehicles scan in/out.</p>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No access logs found</h3>
+        <p class="text-gray-500 dark:text-gray-400">Access logs will appear here when vehicles scan in/out.</p>
       </div>
     </div>
   <?php else: ?>
@@ -158,7 +158,7 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
                 <?php endif; ?>
               </div>
               <?php if (!empty($log['visitor_name'])): ?>
-                <div class="text-xs text-gray-500">Visitor: <?php echo htmlspecialchars($log['visitor_name'] ?? ''); ?></div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Visitor: <?php echo htmlspecialchars($log['visitor_name'] ?? ''); ?></div>
               <?php endif; ?>
             </div>
           </div>

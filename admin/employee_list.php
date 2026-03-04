@@ -81,7 +81,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
     <link rel="stylesheet" href="../assets/css/admin/admin.css?v=<?php echo time(); ?>">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="m-0 p-0 overflow-hidden bg-white">
+<body class="m-0 p-0 overflow-hidden bg-gray-100 dark:bg-slate-950">
   <div class="flex h-screen w-full">
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar-transition sidebar-open relative flex flex-col border-r bg-sidebar text-sidebar-foreground overflow-x-hidden">
@@ -120,22 +120,22 @@ $roleCount = array_count_values(array_column($employees, 'role'));
         </aside>
 
         <main class="flex-1 flex flex-col overflow-hidden">
-            <header class="border-b bg-white px-6 py-4 flex items-center gap-4">
-                <h1 class="text-lg font-semibold text-gray-900">Employee Management</h1>
-                <p class="text-sm text-gray-600">View and manage all system employees</p>
+            <header class="border-b bg-white dark:bg-slate-900 dark:border-slate-700 px-6 py-4 flex items-center gap-4">
+                <h1 class="text-lg font-semibold text-gray-900 dark:text-white">Employee Management</h1>
+                <p class="text-sm text-gray-600 dark:text-gray-400">View and manage all system employees</p>
             </header>
 
             <div class="flex-1 overflow-y-auto p-6">
                 <div class="max-w-7xl mx-auto space-y-6">
                     <!-- Search & Filter -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
                         <form method="GET" class="flex gap-3 items-center flex-wrap">
                             <div class="flex-1 min-w-[250px]">
                                 <input type="text" name="search" value="<?= htmlspecialchars($search ?? '') ?>" 
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                       class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                        placeholder="Search by username...">
                             </div>
-                            <select name="role" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select name="role" class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">All Roles</option>
                                 <option value="admin" <?= $role_filter === 'admin' ? 'selected' : '' ?>>Admin</option>
                                 <option value="guard" <?= $role_filter === 'guard' ? 'selected' : '' ?>>Guard</option>
@@ -157,9 +157,9 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                     </div>
 
                     <!-- Employee Table -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
                         <table class="w-full">
-                            <thead class="bg-gray-50 border-b border-gray-200">
+                            <thead class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-700">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Username</th>
@@ -168,7 +168,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                                     <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
                                 <?php if (empty($employees)): ?>
                                     <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No employees found</td></tr>
                                 <?php else: ?>
@@ -176,9 +176,9 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                                     $row_num = 1;
                                     foreach ($employees as $employee): 
                                     ?>
-                                        <tr class="hover:bg-gray-50 transition-colors">
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                                             <td class="px-6 py-4 text-sm text-gray-500 font-medium"><?= $row_num++ ?></td>
-                                            <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($employee['username'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white"><?= htmlspecialchars($employee['username'] ?? '') ?></td>
                                             <td class="px-6 py-4 text-sm">
                                                 <?php
                                                 $badges = [
@@ -216,16 +216,16 @@ $roleCount = array_count_values(array_column($employees, 'role'));
 
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-6">
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div class="text-sm font-semibold text-gray-600 mb-2">Total Employees</div>
-                            <div class="text-3xl font-bold text-gray-900"><?= $totalEmployees ?></div>
+                        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+                            <div class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Total Employees</div>
+                            <div class="text-3xl font-bold text-gray-900 dark:text-white"><?= $totalEmployees ?></div>
                         </div>
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div class="text-sm font-semibold text-gray-600 mb-2">Admins</div>
+                        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+                            <div class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Admins</div>
                             <div class="text-3xl font-bold text-purple-600"><?= $roleCount['admin'] ?? 0 ?></div>
                         </div>
-                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div class="text-sm font-semibold text-gray-600 mb-2">Guards</div>
+                        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+                            <div class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Guards</div>
                             <div class="text-3xl font-bold text-blue-600"><?= $roleCount['guard'] ?? 0 ?></div>
                         </div>
                     </div>

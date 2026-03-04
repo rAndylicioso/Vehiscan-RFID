@@ -31,10 +31,10 @@ function renderVehicles(vehicles) {
     if (vehicles.length === 0) {
         grid.innerHTML = `
             <div class="col-span-full text-center py-12">
-                <svg class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-16 w-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                 </svg>
-                <p class="text-gray-600 mb-4">No vehicles registered yet</p>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">No vehicles registered yet</p>
                 <button onclick="showAddVehicleModal()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                     Add Your First Vehicle
                 </button>
@@ -44,25 +44,25 @@ function renderVehicles(vehicles) {
     }
     
     grid.innerHTML = vehicles.map(vehicle => `
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+        <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-shadow">
             ${vehicle.vehicle_img ? `
                 <img src="../uploads/${vehicle.vehicle_img}" alt="${vehicle.vehicle_type}" class="w-full h-48 object-cover">
             ` : `
-                <div class="w-full h-48 bg-gray-100 flex items-center justify-center">
-                    <svg class="h-20 w-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-full h-48 bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                    <svg class="h-20 w-20 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                     </svg>
                 </div>
             `}
             <div class="p-4">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-bold text-gray-900">${vehicle.vehicle_type}</h3>
-                    ${vehicle.is_primary ? '<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded">Primary</span>' : ''}
+                    <h3 class="font-bold text-gray-900 dark:text-white">${vehicle.vehicle_type}</h3>
+                    ${vehicle.is_primary ? '<span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold rounded">Primary</span>' : ''}
                 </div>
-                <p class="text-sm text-gray-600 mb-1">Color: ${vehicle.color}</p>
-                <p class="text-sm font-mono bg-gray-50 px-2 py-1 rounded inline-block">${vehicle.plate_number}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Color: ${vehicle.color}</p>
+                <p class="text-sm font-mono bg-gray-50 dark:bg-slate-700 dark:text-gray-200 px-2 py-1 rounded inline-block">${vehicle.plate_number}</p>
                 <div class="mt-4 flex gap-2">
-                    <button onclick="deleteVehicle(${vehicle.id})" class="px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 text-sm font-medium flex items-center gap-1">
+                    <button onclick="deleteVehicle(${vehicle.id})" class="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded hover:bg-red-100 dark:hover:bg-red-900/40 text-sm font-medium flex items-center gap-1">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>

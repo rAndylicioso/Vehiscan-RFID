@@ -63,8 +63,8 @@ if (!$stats) {
       </svg>
     </div>
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-      <p class="text-sm text-gray-500">Real-time system statistics and activity</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Real-time system statistics and activity</p>
     </div>
   </div>
 </div>
@@ -72,10 +72,10 @@ if (!$stats) {
 <!-- Main Dashboard Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
   <div
-    class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-all">
+    class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm hover:shadow-md transition-all">
     <div class="flex items-start justify-between mb-4">
-      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 border border-gray-100">
-        <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-700 border border-gray-100 dark:border-slate-600">
+        <svg class="h-6 w-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
           </path>
@@ -85,18 +85,18 @@ if (!$stats) {
     <div>
       <p class="text-sm font-medium text-gray-500 mb-1">Total Homeowners</p>
       <div class="flex items-baseline gap-2">
-        <p class="text-3xl font-bold text-gray-900"><?php echo htmlspecialchars($totalHomeowners ?? ''); ?></p>
-        <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+2.5%</span>
+        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($totalHomeowners ?? ''); ?></p>
+        <span class="text-xs font-medium text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">+2.5%</span>
       </div>
       <p class="text-xs text-gray-500 mt-2">Registered residents</p>
     </div>
   </div>
 
   <div
-    class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-all">
+    class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm hover:shadow-md transition-all">
     <div class="flex items-start justify-between mb-4">
-      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 border border-gray-100">
-        <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-700 border border-gray-100 dark:border-slate-600">
+        <svg class="h-6 w-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
           </path>
@@ -106,7 +106,7 @@ if (!$stats) {
     <div>
       <p class="text-sm font-medium text-gray-500 mb-1">24h Access Logs</p>
       <div class="flex items-baseline gap-2">
-        <p class="text-3xl font-bold text-gray-900"><?php echo htmlspecialchars($recentLogsCount ?? ''); ?></p>
+        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($recentLogsCount ?? ''); ?></p>
         <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Coming soon</span>
       </div>
       <p class="text-xs text-gray-500 mt-2">Activity in last 24h</p>
@@ -124,71 +124,71 @@ if (!$stats) {
         </path>
       </svg>
     </div>
-    <h2 class="text-xl font-bold text-gray-900">Today's Analytics</h2>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Today's Analytics</h2>
   </div>
   <p class="text-sm text-gray-500">Real-time access control statistics</p>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
   <div
-    class="relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
     <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
-        <svg class="h-5 w-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 dark:bg-slate-700">
+        <svg class="h-5 w-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
           </path>
         </svg>
       </div>
     </div>
-    <p class="text-sm font-medium text-gray-600 mb-1">Total Homeowners</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($totalHomeowners) ? number_format($totalHomeowners) : $totalHomeowners; ?></p>
+    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Homeowners</p>
+    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($totalHomeowners) ? number_format($totalHomeowners) : $totalHomeowners; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-400"></div>
   </div>
 
   <div
-    class="relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
     <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-green-50">
+      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-green-50 dark:bg-green-900/30">
         <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
       </div>
     </div>
-    <p class="text-sm font-medium text-gray-600 mb-1">Entries Today</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($allowedToday) ? number_format($allowedToday) : $allowedToday; ?></p>
+    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Entries Today</p>
+    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($allowedToday) ? number_format($allowedToday) : $allowedToday; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-green-500 to-green-400"></div>
   </div>
 
   <div
-    class="relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
     <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-red-50">
+      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-red-50 dark:bg-red-900/30">
         <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
       </div>
     </div>
-    <p class="text-sm font-medium text-gray-600 mb-1">Exits Today</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($deniedToday) ? number_format($deniedToday) : $deniedToday; ?></p>
+    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Exits Today</p>
+    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($deniedToday) ? number_format($deniedToday) : $deniedToday; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-red-500 to-red-400"></div>
   </div>
 
   <div
-    class="relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
     <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
-        <svg class="h-5 w-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 dark:bg-slate-700">
+        <svg class="h-5 w-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
           </path>
         </svg>
       </div>
     </div>
-    <p class="text-sm font-medium text-gray-600 mb-1">Total Logs Today</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($logsToday) ? number_format($logsToday) : $logsToday; ?></p>
+    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Logs Today</p>
+    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($logsToday) ? number_format($logsToday) : $logsToday; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-purple-500 to-purple-400"></div>
   </div>
 </div>
@@ -196,9 +196,9 @@ if (!$stats) {
 <!-- Analytics Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
   <!-- Status Distribution Pie Chart -->
-  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
     <div class="flex items-center gap-2 mb-4">
-      <div class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100">
+      <div class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900/30">
         <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
@@ -206,7 +206,7 @@ if (!$stats) {
             d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
         </svg>
       </div>
-      <h3 class="text-lg font-semibold text-gray-900">Today's Access Status</h3>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Today's Access Status</h3>
     </div>
     <div class="relative" style="height: 256px; width: 100%;">
       <canvas id="statusPieChart" style="max-height: 256px; display: block;"></canvas>
@@ -214,15 +214,15 @@ if (!$stats) {
   </div>
 
   <!-- Weekly Activity Line Chart -->
-  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
     <div class="flex items-center gap-2 mb-4">
-      <div class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-100">
+      <div class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/30">
         <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
         </svg>
       </div>
-      <h3 class="text-lg font-semibold text-gray-900">7-Day Activity Trend</h3>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">7-Day Activity Trend</h3>
     </div>
     <div class="relative" style="height: 256px; width: 100%;">
       <canvas id="weeklyLineChart" style="max-height: 256px; display: block;"></canvas>
@@ -605,15 +605,15 @@ try {
         </path>
       </svg>
     </div>
-    <h2 class="text-xl font-bold text-gray-900">6-Month Trends</h2>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white">6-Month Trends</h2>
   </div>
-  <p class="text-sm text-gray-500 mb-6">Visual analytics for system activity</p>
+  <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Visual analytics for system activity</p>
 
   <!-- Homeowner Registrations Chart -->
-  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
-    <div class="border-b border-gray-200 pb-4 mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">Homeowner Registrations</h3>
-      <p class="text-sm text-gray-500 mt-1">Last 6 months - Approved vs Pending</p>
+  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm mb-6">
+    <div class="border-b border-gray-200 dark:border-slate-700 pb-4 mb-4">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Homeowner Registrations</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 6 months - Approved vs Pending</p>
     </div>
     <div class="flex gap-6 mb-4 justify-center flex-wrap">
       <div class="flex items-center gap-2">
@@ -634,10 +634,10 @@ try {
   </div>
 
   <!-- Access Logs Chart -->
-  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
-    <div class="border-b border-gray-200 pb-4 mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">Access Activity</h3>
-      <p class="text-sm text-gray-500 mt-1">Last 6 months - Entries vs Exits</p>
+  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm mb-6">
+    <div class="border-b border-gray-200 dark:border-slate-700 pb-4 mb-4">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Access Activity</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 6 months - Entries vs Exits</p>
     </div>
     <div class="flex gap-6 mb-4 justify-center flex-wrap">
       <div class="flex items-center gap-2">
@@ -667,10 +667,10 @@ try {
   </div>
 
   <!-- Vehicle Registrations Chart -->
-  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
-    <div class="border-b border-gray-200 pb-4 mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">Vehicle Registrations</h3>
-      <p class="text-sm text-gray-500 mt-1">Last 6 months</p>
+  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm mb-6">
+    <div class="border-b border-gray-200 dark:border-slate-700 pb-4 mb-4">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Vehicle Registrations</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 6 months</p>
     </div>
     <div style="position: relative; height: 300px;">
       <svg id="vehicleChart" width="100%" height="100%"></svg>

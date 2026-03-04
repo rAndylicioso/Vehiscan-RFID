@@ -5,19 +5,19 @@ require_once __DIR__ . '/../../db.php';
 
 <div class="p-6">
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">Account Approvals</h2>
-        <p class="text-sm text-gray-600 mt-1">Review and approve pending account registrations</p>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Account Approvals</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Review and approve pending account registrations</p>
     </div>
 
     <!-- Pending Accounts Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Pending Registrations</h3>
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pending Registrations</h3>
         </div>
         
         <div class="overflow-x-auto">
-            <table id="approvalsTable" class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table id="approvalsTable" class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                <thead class="bg-gray-50 dark:bg-slate-700">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
@@ -27,7 +27,7 @@ require_once __DIR__ . '/../../db.php';
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="approvalsBody" class="bg-white divide-y divide-gray-200">
+                <tbody id="approvalsBody" class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                     <!-- Loaded via JavaScript -->
                 </tbody>
             </table>
@@ -47,22 +47,22 @@ require_once __DIR__ . '/../../db.php';
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         
         <!-- Modal panel -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" style="position: relative; z-index: 10000;">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" style="position: relative; z-index: 10000;">
+            <div class="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                     <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                        <h3 id="modalTitle" class="text-lg leading-6 font-medium text-gray-900 mb-4"></h3>
+                        <h3 id="modalTitle" class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4"></h3>
                         <input type="hidden" id="actionUserId">
                         <input type="hidden" id="actionType">
                         
                         <div class="mt-4">
-                            <label for="actionReason" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="actionReason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Reason/Notes (optional)
                             </label>
                             <textarea 
                                 id="actionReason" 
                                 rows="4" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Enter any notes or reason for this action..."
                             ></textarea>
                         </div>
@@ -70,7 +70,7 @@ require_once __DIR__ . '/../../db.php';
                 </div>
             </div>
             
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+            <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                 <button 
                     id="confirmActionBtn" 
                     onclick="window.confirmAction()" 
@@ -78,7 +78,7 @@ require_once __DIR__ . '/../../db.php';
                 ></button>
                 <button 
                     onclick="window.closeActionModal()" 
-                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto sm:text-sm"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-slate-600 shadow-sm px-4 py-2 bg-white dark:bg-slate-600 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto sm:text-sm"
                 >
                     Cancel
                 </button>
@@ -204,9 +204,9 @@ function loadPendingAccounts() {
                 
                 return `
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${fullName}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${username}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${acc.email || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${fullName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">${username}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">${acc.email || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 py-1 text-xs font-semibold rounded-full ${
                                 role === 'admin' ? 'bg-purple-100 text-purple-800' :
@@ -214,16 +214,16 @@ function loadPendingAccounts() {
                                 'bg-green-100 text-green-800'
                             }">${role}</span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${date}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="relative inline-block text-left">
-                                <button type="button" class="inline-flex justify-center items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors" id="action-menu-${acc.id}" onclick="toggleActionDropdown(${acc.id})">
+                                <button type="button" class="inline-flex justify-center items-center gap-x-1.5 rounded-md bg-white dark:bg-slate-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors" id="action-menu-${acc.id}" onclick="toggleActionDropdown(${acc.id})">
                                     Actions
                                     <svg class="-mr-1 h-5 w-5 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor" style="transform: rotate(0deg);">
                                         <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
-                                <div id="dropdown-${acc.id}" class="absolute right-0 z-10 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-200" style="display: none;">
+                                <div id="dropdown-${acc.id}" class="absolute right-0 z-10 w-48 origin-top-right rounded-md bg-white dark:bg-slate-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-200" style="display: none;">
                                     <div class="py-1">
                                         <button onclick="window.openActionModal(${acc.id}, 'approve', '${fullName.replace(/'/g, "\\'")}'); toggleActionDropdown(${acc.id})" class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 hover:text-green-900 flex items-center gap-2 transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

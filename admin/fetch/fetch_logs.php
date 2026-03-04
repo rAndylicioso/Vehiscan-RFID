@@ -61,8 +61,8 @@ try {
       </svg>
     </div>
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Access Logs</h1>
-      <p class="text-sm text-gray-500">Monitor vehicle entry and exit logs</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Access Logs</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Monitor vehicle entry and exit logs</p>
     </div>
   </div>
 </div>
@@ -70,7 +70,7 @@ try {
 <!-- Action Bar -->
 <div class="flex items-center gap-2 mb-4 flex-wrap">
   <button id="refreshLogsBtn"
-    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+    class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -96,26 +96,26 @@ try {
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
       <input type="text" id="logsSearchInput"
-        class="h-10 px-4 pl-10 border border-gray-300 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+        class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
         placeholder="Search logs...">
     </div>
     <span id="logsSearchCount" class="text-sm text-gray-600 font-medium whitespace-nowrap"></span>
   </div>
 </div>
 
-<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
   <table id="logsTable" class="w-full text-sm">
-    <thead class="border-b border-slate-200 bg-slate-50">
+    <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
       <tr>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Date/Time</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Status</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Owner</th>
-        <th class="text-left font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
-        <th class="text-center font-semibold text-slate-900 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Date/Time</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Status</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Owner</th>
+        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
+        <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-slate-200">
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
       <?php if (empty($logs)): ?>
         <tr>
           <td colspan="6" class="px-4 py-8 text-center text-slate-500">
@@ -133,16 +133,16 @@ try {
         </tr>
       <?php else: ?>
         <?php foreach ($logs as $log): ?>
-          <tr class="hover:bg-slate-100 transition-colors even:bg-slate-50">
-            <td class="px-4 py-3 text-slate-700"><?php echo date('M d, Y H:i:s', strtotime($log['created_at'])); ?></td>
-            <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($log['plate_number'] ?? ''); ?></td>
+          <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50">
+            <td class="px-4 py-3 text-slate-700 dark:text-slate-300"><?php echo date('M d, Y H:i:s', strtotime($log['created_at'])); ?></td>
+            <td class="px-4 py-3 text-slate-700 dark:text-slate-300"><?php echo htmlspecialchars($log['plate_number'] ?? ''); ?></td>
             <td class="px-4 py-3">
               <span class="status-badge status-<?php echo strtolower($log['status']); ?>">
                 <?php echo htmlspecialchars($log['status'] ?? ''); ?>
               </span>
             </td>
-            <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($log['name'] ?? 'Unknown'); ?></td>
-            <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($log['vehicle_type'] ?? '-'); ?></td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo htmlspecialchars($log['name'] ?? 'Unknown'); ?></td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo htmlspecialchars($log['vehicle_type'] ?? '-'); ?></td>
             <td class="px-4 py-3 text-center">
               <button class="btn btn-sm btn-danger deleteLogBtn" data-id="<?php echo $log['log_id']; ?>"
                 title="Delete log entry">
