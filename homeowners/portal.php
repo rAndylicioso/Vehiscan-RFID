@@ -414,7 +414,7 @@ if (empty($_SESSION['csrf_token'])) {
                                         <?php if (!empty($homeowner['owner_img'])): ?>
                                             <?php
                                             $ownerImgPath = '../uploads/' . $homeowner['owner_img'];
-                                            if (file_exists($ownerImgPath)):
+                                            if (file_exists(__DIR__ . '/../uploads/' . $homeowner['owner_img'])):
                                                 ?>
                                                 <div
                                                     class="aspect-square rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 shadow-md hover:shadow-xl transition-shadow duration-300">
@@ -476,7 +476,7 @@ if (empty($_SESSION['csrf_token'])) {
                                         <?php if (!empty($homeowner['car_img'])): ?>
                                             <?php
                                             $carImgPath = '../uploads/' . $homeowner['car_img'];
-                                            if (file_exists($carImgPath)):
+                                            if (file_exists(__DIR__ . '/../uploads/' . $homeowner['car_img'])):
                                                 ?>
                                                 <div
                                                     class="aspect-square rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 shadow-md hover:shadow-xl transition-shadow duration-300">
