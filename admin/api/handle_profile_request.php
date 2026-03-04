@@ -59,16 +59,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $updateStmt->execute([$action, $adminNotes ?: null, $requestId]);
 
-        // Log the action to audit trail
+        // Log the action to audit logs
         $logStmt = $pdo->prepare("
-            INSERT INTO audit_trail (user_id, action, details, ip_address, created_at)
-            VALUES (?, ?, ?, ?, NOW())
+            INSERT INTO audit_logs (username, action, table_name, record_id, details, ip_address)
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
         $logStmt->execute([
-            $_SESSION['user_id'] ?? 0,
+            $_SESSION['username'] ?? 'unknown',
             'profile_request_' . $action,
+            'profile_update_requests',
+            $requestId,
             json_encode([
-                'request_id' => $requestId,
                 'homeowner_id' => $request['homeowner_id'],
                 'previous_status' => $request['status'],
                 'new_status' => $action,
