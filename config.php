@@ -141,15 +141,23 @@ function getQrCodeUrl()
 
         if (!$wifiIp) {
             // Auto-detect: prioritize actual IP over localhost
+            $loopbackHosts = ['localhost', '127.0.0.1', '::1'];
+
             if (preg_match('/^\d+\.\d+\.\d+\.\d+/', $httpHost) && !preg_match('/^127\./', $httpHost)) {
-                // HTTP_HOST is a valid IP (not 127.x.x.x)
+                // HTTP_HOST is a valid LAN IP (not 127.x.x.x)
                 $wifiIp = explode(':', $httpHost)[0]; // Remove port if present
-            } elseif ($serverAddr && !preg_match('/^127\./', $serverAddr)) {
-                // SERVER_ADDR is available and not localhost
+            } elseif ($serverAddr && !preg_match('/^127\./', $serverAddr) && !in_array($serverAddr, $loopbackHosts, true)) {
+                // SERVER_ADDR is available and not loopback
                 $wifiIp = $serverAddr;
             } else {
-                // Fallback: default to common WiFi IP
-                $wifiIp = $_SERVER['SERVER_ADDR'] ?? $_SERVER['LOCAL_ADDR'] ?? 'localhost';
+                // Resolve actual LAN IP via hostname (same as registration QR)
+                $lanIp = @gethostbyname(gethostname());
+                if ($lanIp && !in_array($lanIp, $loopbackHosts, true) && filter_var($lanIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                    $wifiIp = $lanIp;
+                } else {
+                    // Last resort fallback
+                    $wifiIp = $_SERVER['SERVER_ADDR'] ?? $_SERVER['LOCAL_ADDR'] ?? 'localhost';
+                }
             }
         }
 
