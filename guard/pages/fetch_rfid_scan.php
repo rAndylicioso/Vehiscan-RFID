@@ -17,12 +17,21 @@ try {
     
     if ($mode === 'multiple') {
         // Return last 5 scans for carousel
+        // Join with both homeowners (legacy) and vehicles (RFID-aware)
         $stmt = $pdo->query("
-            SELECT DISTINCT r.plate_number, r.status, r.log_time,
-                   h.name, h.address, h.contact_number AS contact, h.owner_img,
-                   h.vehicle_type, h.color, h.car_img
+            SELECT DISTINCT r.plate_number, r.rfid_uid, r.status, r.log_time,
+                   COALESCE(h.name, h2.name) AS name,
+                   COALESCE(h.address, h2.address) AS address,
+                   COALESCE(h.contact_number, h2.contact_number) AS contact,
+                   COALESCE(h.owner_img, h2.owner_img) AS owner_img,
+                   COALESCE(v.vehicle_type, h.vehicle_type) AS vehicle_type,
+                   COALESCE(v.color, h.color) AS color,
+                   COALESCE(h.car_img, h2.car_img) AS car_img,
+                   v.rfid_uid AS bound_rfid
             FROM recent_logs r
             LEFT JOIN homeowners h ON r.plate_number = h.plate_number
+            LEFT JOIN vehicles v ON r.plate_number = v.plate_number AND v.is_active = 1
+            LEFT JOIN homeowners h2 ON v.homeowner_id = h2.id
             WHERE r.log_time >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
             ORDER BY r.created_at DESC
             LIMIT 5
@@ -40,12 +49,21 @@ try {
     }
     
     // Default: Single most recent scan
+    // Join with both homeowners (legacy) and vehicles (RFID-aware)
     $stmt = $pdo->query("
-        SELECT r.plate_number, r.status, r.log_time,
-               h.name, h.address, h.contact_number AS contact, h.owner_img,
-               h.vehicle_type, h.color, h.car_img
+        SELECT r.plate_number, r.rfid_uid, r.status, r.log_time,
+               COALESCE(h.name, h2.name) AS name,
+               COALESCE(h.address, h2.address) AS address,
+               COALESCE(h.contact_number, h2.contact_number) AS contact,
+               COALESCE(h.owner_img, h2.owner_img) AS owner_img,
+               COALESCE(v.vehicle_type, h.vehicle_type) AS vehicle_type,
+               COALESCE(v.color, h.color) AS color,
+               COALESCE(h.car_img, h2.car_img) AS car_img,
+               v.rfid_uid AS bound_rfid
         FROM recent_logs r
         LEFT JOIN homeowners h ON r.plate_number = h.plate_number
+        LEFT JOIN vehicles v ON r.plate_number = v.plate_number AND v.is_active = 1
+        LEFT JOIN homeowners h2 ON v.homeowner_id = h2.id
         ORDER BY r.created_at DESC
         LIMIT 1
     ");
@@ -68,6 +86,7 @@ try {
             'message' => 'Unknown plate number: ' . $scan['plate_number'],
             'data' => [
                 'plate_number' => $scan['plate_number'],
+                'rfid_uid' => $scan['rfid_uid'],
                 'status' => $scan['status'],
                 'name' => 'UNKNOWN',
                 'address' => 'Not registered',
@@ -81,7 +100,7 @@ try {
         exit;
     }
 
-    // Return full homeowner data
+    // Return full homeowner data with RFID info
     echo json_encode([
         'success' => true,
         'message' => 'Scan retrieved',
@@ -92,6 +111,8 @@ try {
             'vehicle_type' => $scan['vehicle_type'],
             'color' => $scan['color'],
             'plate_number' => $scan['plate_number'],
+            'rfid_uid' => $scan['rfid_uid'],
+            'bound_rfid' => $scan['bound_rfid'],
             'owner_img' => $scan['owner_img'],
             'car_img' => $scan['car_img'],
             'status' => $scan['status'],

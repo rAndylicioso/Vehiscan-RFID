@@ -36,18 +36,42 @@ try {
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
   <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 simulator-panel">
     <h3 class="text-xl font-bold text-gray-800 mb-2">Scan Vehicle</h3>
-    <p class="text-gray-600 mb-4 helper-text">Select a registered vehicle to simulate RFID scan</p>
     
-    <select id="vehicleSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 sim-select">
-      <option value="">-- Select Vehicle to Scan --</option>
-      <?php foreach ($homeowners as $h): ?>
-        <option value="<?php echo htmlspecialchars($h['plate_number'] ?? ''); ?>" 
-                data-name="<?php echo htmlspecialchars($h['name'] ?? ''); ?>"
-                data-type="<?php echo htmlspecialchars($h['vehicle_type'] ?? ''); ?>">
-          <?php echo htmlspecialchars($h['plate_number'] ?? ''); ?> - <?php echo htmlspecialchars($h['name'] ?? ''); ?> (<?php echo htmlspecialchars($h['vehicle_type'] ?? ''); ?>)
-        </option>
-      <?php endforeach; ?>
-    </select>
+    <!-- Scan Mode Toggle -->
+    <div class="flex bg-gray-100 rounded-lg p-1 mb-4">
+      <button id="modePlate" class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all bg-white text-gray-900 shadow-sm" onclick="setScanMode('plate')">
+        By Plate Number
+      </button>
+      <button id="modeRfid" class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all text-gray-500" onclick="setScanMode('rfid')">
+        By RFID UID
+      </button>
+    </div>
+    
+    <!-- Plate Number Mode -->
+    <div id="plateModePanel">
+      <p class="text-gray-600 mb-4 helper-text">Select a registered vehicle to simulate RFID scan</p>
+      <select id="vehicleSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 sim-select">
+        <option value="">-- Select Vehicle to Scan --</option>
+        <?php foreach ($homeowners as $h): ?>
+          <option value="<?php echo htmlspecialchars($h['plate_number'] ?? ''); ?>" 
+                  data-name="<?php echo htmlspecialchars($h['name'] ?? ''); ?>"
+                  data-type="<?php echo htmlspecialchars($h['vehicle_type'] ?? ''); ?>">
+            <?php echo htmlspecialchars($h['plate_number'] ?? ''); ?> - <?php echo htmlspecialchars($h['name'] ?? ''); ?> (<?php echo htmlspecialchars($h['vehicle_type'] ?? ''); ?>)
+          </option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+    
+    <!-- RFID UID Mode -->
+    <div id="rfidModePanel" class="hidden">
+      <p class="text-gray-600 mb-4 helper-text">Enter an RFID UID to simulate a tag scan (hex characters, e.g. A1B2C3D4)</p>
+      <input type="text" id="rfidUidInput" 
+             class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+             placeholder="Enter RFID UID (e.g. A1B2C3D4E5F6)"
+             maxlength="32"
+             pattern="[A-Fa-f0-9]*">
+      <p class="text-xs text-gray-400 -mt-2 mb-4">This mode also completes active binding sessions</p>
+    </div>
     
     <button id="scanBtn" class="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 btn-scan" disabled>
       <span class="scan-icon text-2xl">📡</span> <span>Simulate Scan</span>
@@ -308,3 +332,53 @@ try {
   }
 }
 </style>
+
+<script>
+// Scan mode toggle for simulator
+window._simScanMode = 'plate';
+
+function setScanMode(mode) {
+    window._simScanMode = mode;
+    const platePanel = document.getElementById('plateModePanel');
+    const rfidPanel = document.getElementById('rfidModePanel');
+    const modePlate = document.getElementById('modePlate');
+    const modeRfid = document.getElementById('modeRfid');
+    const scanBtn = document.getElementById('scanBtn');
+
+    if (mode === 'rfid') {
+        platePanel?.classList.add('hidden');
+        rfidPanel?.classList.remove('hidden');
+        modePlate?.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        modePlate?.classList.add('text-gray-500');
+        modeRfid?.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+        modeRfid?.classList.remove('text-gray-500');
+        // Enable scan button based on RFID input
+        const rfidInput = document.getElementById('rfidUidInput');
+        if (scanBtn) scanBtn.disabled = !rfidInput?.value?.trim();
+    } else {
+        platePanel?.classList.remove('hidden');
+        rfidPanel?.classList.add('hidden');
+        modePlate?.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+        modePlate?.classList.remove('text-gray-500');
+        modeRfid?.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        modeRfid?.classList.add('text-gray-500');
+        // Enable scan button based on vehicle selection
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        if (scanBtn) scanBtn.disabled = !vehicleSelect?.value;
+    }
+}
+
+// RFID UID input - enable/disable scan button and filter to hex
+document.addEventListener('DOMContentLoaded', function() {
+    const rfidInput = document.getElementById('rfidUidInput');
+    if (rfidInput) {
+        rfidInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^A-Fa-f0-9]/g, '').toUpperCase();
+            const scanBtn = document.getElementById('scanBtn');
+            if (scanBtn && window._simScanMode === 'rfid') {
+                scanBtn.disabled = !this.value.trim();
+            }
+        });
+    }
+});
+</script>

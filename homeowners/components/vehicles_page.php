@@ -44,11 +44,28 @@ $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <?php foreach ($vehicles as $vehicle): ?>
                 <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow">
-                    <?php if ($vehicle['is_primary']): ?>
-                        <div class="mb-2">
+                    <div class="flex items-center justify-between mb-2">
+                        <?php if ($vehicle['is_primary']): ?>
                             <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">PRIMARY</span>
-                        </div>
-                    <?php endif; ?>
+                        <?php else: ?>
+                            <span></span>
+                        <?php endif; ?>
+                        <?php if (!empty($vehicle['rfid_uid'])): ?>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full" title="RFID Tag: <?php echo htmlspecialchars($vehicle['rfid_uid']); ?>">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                                </svg>
+                                RFID Active
+                            </span>
+                        <?php else: ?>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-500 rounded-full">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                </svg>
+                                No RFID
+                            </span>
+                        <?php endif; ?>
+                    </div>
                     
                     <div class="mb-3">
                         <h3 class="text-lg font-bold text-gray-900"><?php echo htmlspecialchars($vehicle['plate_number'] ?? ''); ?></h3>

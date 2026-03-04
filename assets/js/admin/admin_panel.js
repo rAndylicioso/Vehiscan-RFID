@@ -377,6 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
         'manage': 'Manage Records',
         'logs': 'Access Logs',
         'audit': 'Audit Logs',
+        'rfid': 'RFID Management',
         'simulator': 'RFID Simulator',
         'visitors': 'Visitor Passes',
         'employees': 'Employee Management',
@@ -535,6 +536,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (page === "manage") attachManageControls();
       if (page === "logs") attachLogsControls();
       if (page === "dashboard") attachDashboardControls();
+      if (page === "rfid") attachRFIDControls();
       if (page === "simulator") attachRFIDSimulatorControls();
       if (page === "visitors") attachVisitorsControls();
       if (page === "audit") attachAuditControls();
@@ -547,6 +549,245 @@ document.addEventListener("DOMContentLoaded", () => {
       contentArea.innerHTML = "<p style='color:red'>Failed to load page</p>";
       showGrowl("Failed to load page", "error");
     }
+  }
+
+  /* ---------- RFID Management Controls ---------- */
+  let rfidBindingPollTimer = null;
+  let rfidBindingSessionId = null;
+  let rfidBindingExpiry = null;
+
+  function attachRFIDControls() {
+    console.log('[RFID_MGMT] Attaching controls...');
+
+    // Search functionality
+    const searchInput = document.getElementById('rfidSearchInput');
+    const searchCount = document.getElementById('rfidSearchCount');
+    const table = document.getElementById('rfidTable');
+
+    if (searchInput && table) {
+      const totalRows = table.querySelectorAll('tbody tr[data-vehicle-id]').length;
+      searchInput.addEventListener('input', function () {
+        const term = this.value.toLowerCase().trim();
+        const rows = table.querySelectorAll('tbody tr[data-vehicle-id]');
+        let visible = 0;
+        rows.forEach(row => {
+          const text = Array.from(row.querySelectorAll('td')).map(c => c.textContent).join(' ').toLowerCase();
+          const show = !term || text.includes(term);
+          row.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+        if (searchCount) {
+          searchCount.textContent = term ? `${visible} of ${totalRows}` : '';
+          searchCount.style.color = visible > 0 ? '#16a34a' : '#dc2626';
+        }
+      });
+    }
+
+    // Refresh button
+    document.getElementById('rfidRefreshBtn')?.addEventListener('click', () => loadPage('rfid'));
+
+    // Bind RFID buttons
+    document.querySelectorAll('.btn-bind-rfid').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        const vehicleId = this.dataset.vehicleId;
+        const plate = this.dataset.plate;
+        const owner = this.dataset.owner;
+
+        const result = await Swal.fire({
+          title: 'Bind RFID Tag',
+          html: `<div class="text-left">
+            <p class="mb-3">Start a binding session for:</p>
+            <div class="bg-gray-50 rounded-lg p-3 mb-3">
+              <p class="font-bold text-gray-800">${plate}</p>
+              <p class="text-sm text-gray-600">${owner}</p>
+            </div>
+            <p class="text-sm text-gray-500">After clicking <strong>Start</strong>, scan an RFID tag within 5 minutes. The tag will be automatically bound to this vehicle.</p>
+          </div>`,
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonText: 'Start Binding',
+          confirmButtonColor: '#2563EB',
+          cancelButtonText: 'Cancel',
+          width: '420px'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const form = new FormData();
+          form.append('action', 'initiate');
+          form.append('csrf_token', csrf);
+          form.append('vehicle_id', vehicleId);
+
+          const res = await fetch('../api/rfid/bind.php', { method: 'POST', body: form });
+          const json = await res.json();
+
+          if (json.success) {
+            showGrowl(json.message, 'success');
+            rfidBindingSessionId = json.data.session_id;
+            rfidBindingExpiry = new Date(json.data.expires_at).getTime();
+
+            // Show binding banner
+            const banner = document.getElementById('bindingBanner');
+            if (banner) {
+              banner.classList.remove('hidden');
+              const target = document.getElementById('bindingTarget');
+              if (target) target.textContent = `Binding to: ${plate} (${owner})`;
+              const cancelBtn = document.getElementById('cancelBindingBtn');
+              if (cancelBtn) cancelBtn.dataset.sessionId = rfidBindingSessionId;
+            }
+
+            // Start polling for binding completion
+            startBindingPoll();
+          } else {
+            showGrowl(json.message || 'Failed to start binding', 'error');
+          }
+        } catch (err) {
+          console.error('[RFID_MGMT] Bind error:', err);
+          showGrowl('Failed to start binding session', 'error');
+        }
+      });
+    });
+
+    // Unbind RFID buttons
+    document.querySelectorAll('.btn-unbind-rfid').forEach(btn => {
+      btn.addEventListener('click', async function () {
+        const vehicleId = this.dataset.vehicleId;
+        const plate = this.dataset.plate;
+        const uid = this.dataset.uid;
+
+        const result = await Swal.fire({
+          title: 'Unbind RFID Tag',
+          html: `<div class="text-left">
+            <p class="mb-3">Remove RFID binding from:</p>
+            <div class="bg-gray-50 rounded-lg p-3 mb-3">
+              <p class="font-bold text-gray-800">${plate}</p>
+              <p class="text-sm text-gray-600 font-mono">UID: ${uid}</p>
+            </div>
+            <p class="text-sm text-red-500 font-medium">This vehicle will lose RFID access until a new tag is bound.</p>
+          </div>`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Unbind',
+          confirmButtonColor: '#EF4444',
+          cancelButtonText: 'Keep',
+          width: '420px'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const form = new FormData();
+          form.append('action', 'unbind');
+          form.append('csrf_token', csrf);
+          form.append('vehicle_id', vehicleId);
+
+          const res = await fetch('../api/rfid/bind.php', { method: 'POST', body: form });
+          const json = await res.json();
+
+          if (json.success) {
+            showGrowl(json.message, 'success');
+            loadPage('rfid');
+          } else {
+            showGrowl(json.message || 'Unbind failed', 'error');
+          }
+        } catch (err) {
+          console.error('[RFID_MGMT] Unbind error:', err);
+          showGrowl('Failed to unbind RFID tag', 'error');
+        }
+      });
+    });
+
+    // Cancel binding button
+    document.getElementById('cancelBindingBtn')?.addEventListener('click', async function () {
+      const sessionId = this.dataset.sessionId;
+      if (!sessionId) return;
+
+      try {
+        const form = new FormData();
+        form.append('action', 'cancel');
+        form.append('csrf_token', csrf);
+        form.append('session_id', sessionId);
+
+        const res = await fetch('../api/rfid/bind.php', { method: 'POST', body: form });
+        const json = await res.json();
+
+        stopBindingPoll();
+        if (json.success) {
+          showGrowl('Binding session cancelled', 'info');
+          loadPage('rfid');
+        } else {
+          showGrowl(json.message || 'Cancel failed', 'error');
+        }
+      } catch (err) {
+        console.error('[RFID_MGMT] Cancel error:', err);
+        showGrowl('Failed to cancel binding', 'error');
+      }
+    });
+
+    // Check if there's already an active session on page load
+    const banner = document.getElementById('bindingBanner');
+    const cancelBtn = document.getElementById('cancelBindingBtn');
+    if (banner && !banner.classList.contains('hidden') && cancelBtn?.dataset.sessionId) {
+      rfidBindingSessionId = parseInt(cancelBtn.dataset.sessionId);
+      startBindingPoll();
+    }
+  }
+
+  function startBindingPoll() {
+    stopBindingPoll();
+    console.log('[RFID_MGMT] Starting binding poll for session:', rfidBindingSessionId);
+
+    rfidBindingPollTimer = setInterval(async () => {
+      try {
+        const res = await fetch(`../api/rfid/bind.php?action=status&session_id=${rfidBindingSessionId}`);
+        const json = await res.json();
+
+        if (!json.success) {
+          stopBindingPoll();
+          return;
+        }
+
+        // Update timer display
+        const timerEl = document.getElementById('bindingTimer');
+        if (timerEl && json.data.remaining_seconds !== undefined) {
+          const mins = Math.floor(json.data.remaining_seconds / 60);
+          const secs = json.data.remaining_seconds % 60;
+          timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Check if session completed/timed out/cancelled
+        if (!json.active || json.data.status !== 'pending') {
+          stopBindingPoll();
+
+          if (json.data.status === 'completed') {
+            await Swal.fire({
+              title: 'RFID Bound!',
+              html: `<p>RFID tag <strong class="font-mono">${json.data.scanned_uid}</strong> has been bound to <strong>${json.data.plate_number}</strong></p>`,
+              icon: 'success',
+              confirmButtonColor: '#2563EB'
+            });
+          } else if (json.data.status === 'timeout') {
+            showGrowl('Binding session timed out', 'warning');
+          } else if (json.data.status === 'cancelled') {
+            showGrowl('Binding session was cancelled', 'info');
+          }
+
+          loadPage('rfid');
+        }
+      } catch (err) {
+        console.error('[RFID_MGMT] Poll error:', err);
+      }
+    }, 2000); // Poll every 2 seconds
+  }
+
+  function stopBindingPoll() {
+    if (rfidBindingPollTimer) {
+      clearInterval(rfidBindingPollTimer);
+      rfidBindingPollTimer = null;
+      console.log('[RFID_MGMT] Stopped binding poll');
+    }
+    rfidBindingSessionId = null;
   }
 
   /* ---------- RFID Simulator Controls ---------- */
@@ -598,10 +839,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       scanBtn.addEventListener('click', async function () {
-        const plate = vehicleSelect.value;
-        if (!plate) {
-          showGrowl('Please select a vehicle first', 'error');
-          return;
+        const scanMode = window._simScanMode || 'plate';
+        let plate = '';
+        let rfidUid = '';
+        let bodyStr = '';
+
+        if (scanMode === 'rfid') {
+          rfidUid = (document.getElementById('rfidUidInput')?.value || '').trim().toUpperCase();
+          if (!rfidUid || rfidUid.length < 4) {
+            showGrowl('Enter a valid RFID UID (at least 4 hex characters)', 'error');
+            return;
+          }
+          bodyStr = 'scan_mode=rfid&rfid_uid=' + encodeURIComponent(rfidUid) + '&csrf=' + encodeURIComponent(csrf);
+        } else {
+          plate = vehicleSelect.value;
+          if (!plate) {
+            showGrowl('Please select a vehicle first', 'error');
+            return;
+          }
+          bodyStr = 'scan_mode=plate&plate_number=' + encodeURIComponent(plate) + '&csrf=' + encodeURIComponent(csrf);
         }
 
         scanBtn.disabled = true;
@@ -616,7 +872,7 @@ document.addEventListener("DOMContentLoaded", () => {
               'Content-Type': 'application/x-www-form-urlencoded',
               'X-Requested-With': 'XMLHttpRequest'
             },
-            body: 'plate_number=' + encodeURIComponent(plate) + '&csrf=' + encodeURIComponent(csrf),
+            body: bodyStr,
             credentials: 'same-origin'
           });
 
@@ -661,18 +917,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 <strong style="color: ${statusColor}">${statusText}</strong><br>
                 Plate: ${json.plate || 'N/A'}<br>
                 Owner: ${json.name || 'N/A'}<br>
+                ${json.rfid_uid ? 'RFID: ' + json.rfid_uid + '<br>' : ''}
                 Status: ${json.status || 'N/A'}
               `;
             }
             showGrowl('Scan successful!', 'success');
             setTimeout(() => refreshRecentScans(), 500);
           } else {
-            if (scanResult) {
-              scanResult.className = 'scan-result error';
-              scanResult.querySelector('.result-icon').textContent = '❌';
-              scanResult.querySelector('.result-text').innerHTML = `<strong>Scan Failed</strong><br>${json.message || json.error || 'Unknown error'}`;
+            // Check for special scan results (binding, unknown UID)
+            const scanResult2 = json.scan_result || '';
+            let icon = '❌';
+            let resultClass = 'scan-result error';
+            if (scanResult2 === 'uid_bound') {
+              icon = '🔗';
+              resultClass = 'scan-result success';
+              showGrowl(json.message || 'RFID tag bound!', 'success');
+              setTimeout(() => refreshRecentScans(), 500);
+            } else if (scanResult2 === 'unknown_uid') {
+              icon = '❓';
             }
-            showGrowl('Scan failed: ' + (json.message || json.error || 'Unknown'), 'error');
+            if (scanResult) {
+              scanResult.className = resultClass;
+              scanResult.querySelector('.result-icon').textContent = icon;
+              scanResult.querySelector('.result-text').innerHTML = `<strong>${scanResult2 === 'uid_bound' ? 'Binding Complete' : 'Scan Failed'}</strong><br>${json.message || json.error || 'Unknown error'}`;
+            }
+            if (scanResult2 !== 'uid_bound') {
+              showGrowl('Scan failed: ' + (json.message || json.error || 'Unknown'), 'error');
+            }
           }
         } catch (err) {
           console.error('[RFID] Error during scan:', err);
