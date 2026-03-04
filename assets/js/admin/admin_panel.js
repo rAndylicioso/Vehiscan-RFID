@@ -1027,7 +1027,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const response = await fetch('api/approve_visitor_pass.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pass_id: passId })
+            body: JSON.stringify({ pass_id: passId, csrf_token: csrf })
           });
 
           const data = await response.json();
@@ -1092,7 +1092,8 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               pass_id: passId,
-              reason: reason.trim()
+              reason: reason.trim(),
+              csrf_token: csrf
             })
           });
 

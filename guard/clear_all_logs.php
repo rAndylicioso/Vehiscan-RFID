@@ -66,13 +66,13 @@ try {
     http_response_code(500);
     exit(json_encode([
         'success' => false,
-        'message' => 'Database error: ' . $e->getMessage()
+        'message' => 'Database error. Please try again later.'
     ]));
 } catch (Exception $e) {
     error_log("[GUARD] Error clearing logs: " . $e->getMessage());
     http_response_code(500);
     exit(json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => 'An error occurred. Please try again later.'
     ]));
 }

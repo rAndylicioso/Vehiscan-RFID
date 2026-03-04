@@ -28,6 +28,7 @@ try {
     
     echo json_encode($stmt->fetchAll());
 } catch (PDOException $e) {
+    error_log('Get homeowner stats error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['error' => 'Failed to fetch stats']);
 }

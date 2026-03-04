@@ -183,7 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
     } catch (Exception $e) {
         $pdo->rollBack();
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        error_log('Approve user account error: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again later.']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);

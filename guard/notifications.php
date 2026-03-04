@@ -2,15 +2,18 @@
 require_once __DIR__ . '/../includes/session_guard.php';
 require_once __DIR__ . '/../db.php';
 
-// OPTIONAL: Restrict access (e.g., only guards or admins)
-if (!isset($_SESSION['role'])) {
+// Restrict access to guards only
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guard') {
     header("Location: ../auth/login.php");
     exit();
 }
 
-// Handle mark-all-as-read
+$guardId = $_SESSION['guard_id'] ?? $_SESSION['user_id'] ?? 0;
+
+// Handle mark-all-as-read (POST with user scope)
 if (isset($_POST['mark_all_read'])) {
-    $pdo->query("UPDATE notifications SET is_read = 1");
+    $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? OR user_id IS NULL");
+    $stmt->execute([$guardId]);
     header("Location: notifications.php");
     exit();
 }

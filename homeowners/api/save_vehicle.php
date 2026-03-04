@@ -1,15 +1,9 @@
 <?php
+require_once __DIR__ . '/../../includes/session_homeowner.php';
 require_once __DIR__ . '/../../db.php';
 header('Content-Type: application/json');
 
-session_name('vehiscan_homeowner');
-session_start();
-$homeownerId = $_SESSION['homeowner_id'] ?? null;
-
-if (!$homeownerId) {
-    echo json_encode(['success' => false, 'message' => 'Not authenticated']);
-    exit();
-}
+$homeownerId = $_SESSION['homeowner_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $plateNumber = trim($_POST['plate_number'] ?? '');
@@ -52,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         echo json_encode(['success' => true, 'message' => $message]);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Database error. Please try again later.']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);

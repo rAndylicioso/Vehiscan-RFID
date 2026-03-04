@@ -31,7 +31,7 @@ try {
     // Verify ownership and check if it's the only vehicle
     $stmt = $pdo->prepare("
         SELECT COUNT(*) as total
-        FROM homeowner_vehicles
+        FROM vehicles
         WHERE homeowner_id = ? AND is_active = TRUE
     ");
     $stmt->execute([$_SESSION['homeowner_id']]);
@@ -44,7 +44,7 @@ try {
     
     // Soft delete (deactivate) vehicle
     $stmt = $pdo->prepare("
-        UPDATE homeowner_vehicles 
+        UPDATE vehicles 
         SET is_active = FALSE 
         WHERE id = ? AND homeowner_id = ?
     ");
@@ -66,6 +66,6 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to delete vehicle: ' . $e->getMessage()
+        'error' => 'Failed to delete vehicle. Please try again later.'
     ]);
 }

@@ -29,6 +29,7 @@ require_once __DIR__ . '/../../db.php';
   <!-- CSS Files - Load in Order -->
   <link rel="stylesheet" href="../../assets/css/tailwind.css">
   <link rel="stylesheet" href="../../assets/css/system.css?v=<?php echo time(); ?>">
+  <link rel="stylesheet" href="../../assets/css/tailadmin-components.css?v=<?php echo time(); ?>">
   <link rel="stylesheet" href="../css/guard_side.css?v=<?php echo time(); ?>">
   <link rel="stylesheet" href="../css/guard-dark-mode.css?v=<?php echo time(); ?>">
   <link rel="stylesheet" href="../css/guard-components.css?v=<?php echo time(); ?>">

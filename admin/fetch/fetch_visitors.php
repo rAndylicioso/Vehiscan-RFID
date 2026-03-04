@@ -86,8 +86,8 @@ $passes = $pdo->query("
             <td class="px-4 py-3 text-slate-600"><?php echo date('M d, Y H:i', strtotime($p['valid_from'])); ?></td>
             <td class="px-4 py-3 text-slate-600"><?php echo date('M d, Y H:i', strtotime($p['valid_until'])); ?></td>
             <td class="px-4 py-3">
-              <span class="status-badge status-<?php echo $p['status']; ?>">
-                <?php echo ucfirst($p['status']); ?>
+              <span class="status-badge status-<?php echo htmlspecialchars($p['status']); ?>">
+                <?php echo htmlspecialchars(ucfirst($p['status'])); ?>
               </span>
             </td>
             <td class="px-4 py-3 text-center">

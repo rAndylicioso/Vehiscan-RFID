@@ -59,6 +59,10 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
     <?php endforeach; ?>
   </select>
 
+  <input type="text" id="userFilter"
+    class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px]"
+    placeholder="Filter by user..." value="<?php echo htmlspecialchars($filter_user); ?>">
+
   <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
   <button id="clearFilters" class="btn btn-secondary">Clear</button>
   <button id="exportAuditBtn" class="btn btn-add">📥 Export CSV</button>

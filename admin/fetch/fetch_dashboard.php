@@ -259,9 +259,11 @@ if (!$stats) {
     // Status Pie Chart
     const statusCtx = document.getElementById('statusPieChart');
     if (statusCtx) {
-      console.log('[Dashboard] Creating pie chart with data:', [<?php echo $allowedToday; ?>, <?php echo $deniedToday; ?>]);
+      const _allowed = <?php echo is_numeric($allowedToday) ? (int)$allowedToday : 0; ?>;
+      const _denied = <?php echo is_numeric($deniedToday) ? (int)$deniedToday : 0; ?>;
+      console.log('[Dashboard] Creating pie chart with data:', [_allowed, _denied]);
 
-      const total = <?php echo $allowedToday + $deniedToday; ?>;
+      const total = _allowed + _denied;
       if (total === 0) {
         statusCtx.parentElement.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-gray-400"><svg class="w-16 h-16 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg><p class="text-sm font-medium">No activity data today</p><p class="text-xs">Chart will display once logs are recorded</p></div>';
       } else {
@@ -270,7 +272,7 @@ if (!$stats) {
           data: {
             labels: ['Entries', 'Exits'],
             datasets: [{
-              data: [<?php echo $allowedToday; ?>, <?php echo $deniedToday; ?>],
+              data: [_allowed, _denied],
               backgroundColor: [
                 'rgba(16, 185, 129, 0.8)',  // Green for IN
                 'rgba(59, 130, 246, 0.8)'   // Blue for OUT

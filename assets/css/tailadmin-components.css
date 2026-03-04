@@ -1,0 +1,623 @@
+/**
+ * TailAdmin-Inspired Component System for VehiScan
+ * Provides consistent UI patterns across all admin pages
+ * Built on top of Tailwind CSS utility classes via CSS custom properties
+ */
+
+/* ================================================================
+   CSS Custom Properties (Design Tokens)
+   ================================================================ */
+:root {
+  /* Card tokens */
+  --ta-card-bg: #ffffff;
+  --ta-card-border: #e2e8f0;
+  --ta-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --ta-card-radius: 0.75rem;
+  
+  /* Surface tokens */
+  --ta-surface-bg: #f8fafc;
+  --ta-surface-hover: #f1f5f9;
+  
+  /* Text tokens */
+  --ta-text-primary: #0f172a;
+  --ta-text-secondary: #475569;
+  --ta-text-muted: #94a3b8;
+  
+  /* Input tokens */
+  --ta-input-bg: #ffffff;
+  --ta-input-border: #cbd5e1;
+  --ta-input-focus-ring: rgba(59, 130, 246, 0.5);
+  
+  /* Table tokens */
+  --ta-table-header-bg: #f8fafc;
+  --ta-table-row-hover: #f1f5f9;
+  --ta-table-border: #e2e8f0;
+}
+
+body.dark,
+body.dark-mode {
+  --ta-card-bg: #1e293b;
+  --ta-card-border: #334155;
+  --ta-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  
+  --ta-surface-bg: #0f172a;
+  --ta-surface-hover: #1e293b;
+  
+  --ta-text-primary: #f1f5f9;
+  --ta-text-secondary: #cbd5e1;
+  --ta-text-muted: #64748b;
+  
+  --ta-input-bg: #1e293b;
+  --ta-input-border: #475569;
+  --ta-input-focus-ring: rgba(59, 130, 246, 0.4);
+  
+  --ta-table-header-bg: #1e293b;
+  --ta-table-row-hover: #334155;
+  --ta-table-border: #334155;
+}
+
+/* ================================================================
+   Layout: Content Area Dark Mode
+   ================================================================ */
+body.dark #content-area,
+body.dark-mode #content-area {
+  background-color: var(--ta-surface-bg);
+  color: var(--ta-text-primary);
+}
+
+body.dark .main-header,
+body.dark-mode .main-header {
+  background-color: var(--ta-card-bg) !important;
+  border-color: var(--ta-card-border) !important;
+}
+
+/* ================================================================
+   Component: Card
+   ================================================================ */
+.ta-card {
+  background: var(--ta-card-bg);
+  border: 1px solid var(--ta-card-border);
+  border-radius: var(--ta-card-radius);
+  box-shadow: var(--ta-card-shadow);
+  transition: box-shadow 0.2s ease;
+}
+
+.ta-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+.ta-card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--ta-card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ta-card-header h3,
+.ta-card-header .ta-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ta-text-primary);
+  margin: 0;
+}
+
+.ta-card-body {
+  padding: 1.5rem;
+}
+
+.ta-card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--ta-card-border);
+}
+
+/* ================================================================
+   Component: Stat Card (TailAdmin-style metric cards)
+   ================================================================ */
+.ta-stat-card {
+  background: var(--ta-card-bg);
+  border: 1px solid var(--ta-card-border);
+  border-radius: var(--ta-card-radius);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: var(--ta-card-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ta-stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+.ta-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.ta-stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.ta-stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.ta-stat-icon.amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.ta-stat-icon.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.ta-stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.ta-stat-icon.indigo { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+
+.ta-stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ta-stat-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ta-text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.ta-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ta-text-primary);
+  line-height: 1.2;
+}
+
+.ta-stat-trend {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ta-stat-trend.up { color: #10b981; }
+.ta-stat-trend.down { color: #ef4444; }
+.ta-stat-trend.neutral { color: #94a3b8; }
+
+/* ================================================================
+   Component: Table
+   ================================================================ */
+.ta-table-wrapper {
+  background: var(--ta-card-bg);
+  border: 1px solid var(--ta-card-border);
+  border-radius: var(--ta-card-radius);
+  box-shadow: var(--ta-card-shadow);
+  overflow: hidden;
+}
+
+.ta-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.ta-table thead {
+  background-color: var(--ta-table-header-bg);
+  border-bottom: 1px solid var(--ta-table-border);
+}
+
+.ta-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ta-text-secondary);
+  white-space: nowrap;
+}
+
+.ta-table tbody tr {
+  border-bottom: 1px solid var(--ta-table-border);
+  transition: background-color 0.15s ease;
+}
+
+.ta-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.ta-table tbody tr:hover {
+  background-color: var(--ta-table-row-hover);
+}
+
+.ta-table tbody td {
+  padding: 0.75rem 1rem;
+  color: var(--ta-text-primary);
+  vertical-align: middle;
+}
+
+.ta-table tbody td.muted {
+  color: var(--ta-text-secondary);
+}
+
+/* ================================================================
+   Component: Toolbar (search + filters + actions)
+   ================================================================ */
+.ta-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.ta-toolbar-start {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ta-toolbar-end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ================================================================
+   Component: Form Inputs
+   ================================================================ */
+.ta-input {
+  display: block;
+  width: 100%;
+  background: var(--ta-input-bg);
+  border: 1px solid var(--ta-input-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ta-text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.ta-input::placeholder {
+  color: var(--ta-text-muted);
+}
+
+.ta-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px var(--ta-input-focus-ring);
+}
+
+.ta-select {
+  display: block;
+  background: var(--ta-input-bg);
+  border: 1px solid var(--ta-input-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ta-text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem;
+}
+
+.ta-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px var(--ta-input-focus-ring);
+}
+
+.ta-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ta-text-secondary);
+  margin-bottom: 0.375rem;
+}
+
+/* ================================================================
+   Component: Badges
+   ================================================================ */
+.ta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.ta-badge.success { background: rgba(16, 185, 129, 0.1); color: #059669; }
+.ta-badge.warning { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+.ta-badge.danger  { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+.ta-badge.info    { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+.ta-badge.neutral { background: rgba(100, 116, 139, 0.1); color: #475569; }
+.ta-badge.purple  { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+
+body.dark .ta-badge.success,
+body.dark-mode .ta-badge.success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+body.dark .ta-badge.warning,
+body.dark-mode .ta-badge.warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+body.dark .ta-badge.danger,
+body.dark-mode .ta-badge.danger  { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+body.dark .ta-badge.info,
+body.dark-mode .ta-badge.info    { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+body.dark .ta-badge.neutral,
+body.dark-mode .ta-badge.neutral { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
+body.dark .ta-badge.purple,
+body.dark-mode .ta-badge.purple  { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+
+/* ================================================================
+   Component: Page Header
+   ================================================================ */
+.ta-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.ta-page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ta-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ta-page-header p {
+  font-size: 0.875rem;
+  color: var(--ta-text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* ================================================================
+   Component: Empty State
+   ================================================================ */
+.ta-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--ta-text-muted);
+}
+
+.ta-empty-state svg {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+.ta-empty-state p {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ================================================================
+   Dark Mode: Content background & general fixes
+   ================================================================ */
+body.dark,
+body.dark-mode {
+  background-color: #0f172a !important;
+}
+
+body.dark #content-area h1,
+body.dark #content-area h2,
+body.dark #content-area h3,
+body.dark-mode #content-area h1,
+body.dark-mode #content-area h2,
+body.dark-mode #content-area h3 {
+  color: var(--ta-text-primary);
+}
+
+body.dark #content-area p,
+body.dark-mode #content-area p {
+  color: var(--ta-text-secondary);
+}
+
+/* Dark mode for standard bg-white / bg-slate-50 elements inside fetch fragments */
+body.dark #content-area .bg-white,
+body.dark-mode #content-area .bg-white {
+  background-color: var(--ta-card-bg) !important;
+  color: var(--ta-text-primary);
+}
+
+body.dark #content-area .bg-slate-50,
+body.dark #content-area .bg-gray-50,
+body.dark-mode #content-area .bg-slate-50,
+body.dark-mode #content-area .bg-gray-50 {
+  background-color: var(--ta-table-header-bg) !important;
+}
+
+body.dark #content-area .text-gray-900,
+body.dark #content-area .text-slate-900,
+body.dark-mode #content-area .text-gray-900,
+body.dark-mode #content-area .text-slate-900 {
+  color: var(--ta-text-primary) !important;
+}
+
+body.dark #content-area .text-gray-800,
+body.dark #content-area .text-slate-800,
+body.dark-mode #content-area .text-gray-800,
+body.dark-mode #content-area .text-slate-800 {
+  color: var(--ta-text-primary) !important;
+}
+
+body.dark #content-area .text-gray-700,
+body.dark #content-area .text-slate-700,
+body.dark-mode #content-area .text-gray-700,
+body.dark-mode #content-area .text-slate-700 {
+  color: var(--ta-text-secondary) !important;
+}
+
+body.dark #content-area .text-gray-600,
+body.dark #content-area .text-slate-600,
+body.dark-mode #content-area .text-gray-600,
+body.dark-mode #content-area .text-slate-600 {
+  color: var(--ta-text-secondary) !important;
+}
+
+body.dark #content-area .text-gray-500,
+body.dark #content-area .text-slate-500,
+body.dark-mode #content-area .text-gray-500,
+body.dark-mode #content-area .text-slate-500 {
+  color: var(--ta-text-muted) !important;
+}
+
+body.dark #content-area .border-slate-200,
+body.dark #content-area .border-gray-200,
+body.dark-mode #content-area .border-slate-200,
+body.dark-mode #content-area .border-gray-200 {
+  border-color: var(--ta-card-border) !important;
+}
+
+body.dark #content-area .divide-slate-200 > :not(:last-child),
+body.dark #content-area .divide-gray-200 > :not(:last-child),
+body.dark-mode #content-area .divide-slate-200 > :not(:last-child),
+body.dark-mode #content-area .divide-gray-200 > :not(:last-child) {
+  border-color: var(--ta-card-border) !important;
+}
+
+body.dark #content-area .hover\:bg-slate-50:hover,
+body.dark #content-area .hover\:bg-gray-50:hover,
+body.dark-mode #content-area .hover\:bg-slate-50:hover,
+body.dark-mode #content-area .hover\:bg-gray-50:hover {
+  background-color: var(--ta-table-row-hover) !important;
+}
+
+/* Dark mode for form inputs inside content area */
+body.dark #content-area input[type="text"],
+body.dark #content-area input[type="search"],
+body.dark #content-area input[type="date"],
+body.dark #content-area input[type="email"],
+body.dark #content-area select,
+body.dark #content-area textarea,
+body.dark-mode #content-area input[type="text"],
+body.dark-mode #content-area input[type="search"],
+body.dark-mode #content-area input[type="date"],
+body.dark-mode #content-area input[type="email"],
+body.dark-mode #content-area select,
+body.dark-mode #content-area textarea {
+  background-color: var(--ta-input-bg) !important;
+  border-color: var(--ta-input-border) !important;
+  color: var(--ta-text-primary) !important;
+}
+
+body.dark #content-area input::placeholder,
+body.dark-mode #content-area input::placeholder {
+  color: var(--ta-text-muted) !important;
+}
+
+/* Dark mode for shadows */
+body.dark #content-area .shadow-sm,
+body.dark #content-area .shadow,
+body.dark-mode #content-area .shadow-sm,
+body.dark-mode #content-area .shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Dark mode for modal */
+body.dark .swal2-popup,
+body.dark-mode .swal2-popup {
+  background-color: var(--ta-card-bg);
+  color: var(--ta-text-primary);
+}
+
+body.dark .swal2-title,
+body.dark-mode .swal2-title {
+  color: var(--ta-text-primary);
+}
+
+body.dark .swal2-html-container,
+body.dark-mode .swal2-html-container {
+  color: var(--ta-text-secondary);
+}
+
+/* Dark mode for dropdown */
+body.dark #user-dropdown,
+body.dark-mode #user-dropdown {
+  background-color: var(--ta-card-bg);
+  border-color: var(--ta-card-border);
+}
+
+/* ================================================================
+   Component: Chart Wrapper
+   ================================================================ */
+.ta-chart-card {
+  background: var(--ta-card-bg);
+  border: 1px solid var(--ta-card-border);
+  border-radius: var(--ta-card-radius);
+  box-shadow: var(--ta-card-shadow);
+  overflow: hidden;
+}
+
+.ta-chart-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--ta-card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ta-chart-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ta-text-primary);
+  margin: 0;
+}
+
+.ta-chart-body {
+  padding: 1.25rem;
+}
+
+/* ================================================================
+   Utility: Smooth page transition for SPA fragments
+   ================================================================ */
+#content-area > * {
+  animation: taFadeIn 0.15s ease-out;
+}
+
+@keyframes taFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================================
+   DataTables Dark Mode Override
+   ================================================================ */
+body.dark .dataTables_wrapper,
+body.dark-mode .dataTables_wrapper {
+  color: var(--ta-text-primary);
+}
+
+body.dark .dataTables_wrapper .dataTables_length select,
+body.dark .dataTables_wrapper .dataTables_filter input,
+body.dark-mode .dataTables_wrapper .dataTables_length select,
+body.dark-mode .dataTables_wrapper .dataTables_filter input {
+  background-color: var(--ta-input-bg);
+  border-color: var(--ta-input-border);
+  color: var(--ta-text-primary);
+}
+
+body.dark .dataTables_wrapper .dataTables_paginate .paginate_button,
+body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button {
+  color: var(--ta-text-secondary) !important;
+}
+
+body.dark .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: #3b82f6 !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+}
+
+body.dark .dataTables_wrapper .dataTables_info,
+body.dark-mode .dataTables_wrapper .dataTables_info {
+  color: var(--ta-text-muted);
+}

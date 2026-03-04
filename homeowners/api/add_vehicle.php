@@ -32,7 +32,7 @@ try {
     }
     
     // Check for duplicate plate number
-    $stmt = $pdo->prepare("SELECT id FROM homeowner_vehicles WHERE plate_number = ?");
+    $stmt = $pdo->prepare("SELECT id FROM vehicles WHERE plate_number = ?");
     $stmt->execute([$plateNumber]);
     if ($stmt->fetch()) {
         echo json_encode(['success' => false, 'error' => 'This plate number is already registered']);
@@ -58,14 +58,14 @@ try {
     
     // If setting as primary, unset other primary vehicles
     if ($isPrimary) {
-        $pdo->prepare("UPDATE homeowner_vehicles SET is_primary = FALSE WHERE homeowner_id = ?")
+        $pdo->prepare("UPDATE vehicles SET is_primary = FALSE WHERE homeowner_id = ?")
             ->execute([$_SESSION['homeowner_id']]);
     }
     
     // Insert new vehicle
     $stmt = $pdo->prepare("
-        INSERT INTO homeowner_vehicles (homeowner_id, vehicle_type, color, plate_number, vehicle_img, is_primary)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO vehicles (homeowner_id, vehicle_type, color, plate_number, is_primary, is_active, registered_at)
+        VALUES (?, ?, ?, ?, ?, TRUE, NOW())
     ");
     
     $stmt->execute([
@@ -73,7 +73,6 @@ try {
         $vehicleType,
         $color,
         $plateNumber,
-        $vehicleImg,
         $isPrimary
     ]);
     
@@ -88,6 +87,6 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to add vehicle: ' . $e->getMessage()
+        'error' => 'Failed to add vehicle. Please try again later.'
     ]);
 }

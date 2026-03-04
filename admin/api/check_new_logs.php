@@ -44,9 +44,10 @@ try {
     ]);
     
 } catch (Exception $e) {
+    error_log('Check new logs error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to check logs: ' . $e->getMessage()
+        'error' => 'Failed to check logs'
     ]);
 }

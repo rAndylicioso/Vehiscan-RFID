@@ -43,9 +43,10 @@ try {
     ]);
 
 } catch (Exception $e) {
+    error_log('Weekly stats error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Database error: ' . $e->getMessage()
+        'error' => 'Failed to fetch weekly stats'
     ]);
 }

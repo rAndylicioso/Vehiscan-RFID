@@ -56,6 +56,7 @@ try {
     echo json_encode(['success' => true, 'message' => 'Employee deleted successfully']);
     
 } catch (Exception $e) {
+    error_log('Employee delete error: ' . $e->getMessage());
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again later.']);
 }

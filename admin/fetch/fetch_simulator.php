@@ -369,7 +369,7 @@ function setScanMode(mode) {
 }
 
 // RFID UID input - enable/disable scan button and filter to hex
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     const rfidInput = document.getElementById('rfidUidInput');
     if (rfidInput) {
         rfidInput.addEventListener('input', function() {
@@ -380,5 +380,5 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+})();
 </script>

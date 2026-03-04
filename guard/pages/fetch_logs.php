@@ -75,5 +75,5 @@ try {
 } catch (PDOException $e) {
     error_log('[FETCH_LOGS ERROR] Database error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode(['error' => 'Failed to fetch logs']);
 }

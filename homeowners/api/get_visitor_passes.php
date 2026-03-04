@@ -1,23 +1,8 @@
 <?php
 require_once __DIR__ . '/../../includes/security_headers.php';
-
-// Configure session for local network testing
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.cookie_secure', 0);
-
-// Use the same session name as login
-session_name('vehiscan_homeowner');
-session_start();
+require_once __DIR__ . '/../../includes/session_homeowner.php';
 
 header('Content-Type: application/json');
-
-// Check if homeowner is logged in
-if (!isset($_SESSION['homeowner_id']) || $_SESSION['role'] !== 'homeowner') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit();
-}
 
 require_once __DIR__ . '/../../db.php';
 

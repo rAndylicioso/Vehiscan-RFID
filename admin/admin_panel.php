@@ -33,6 +33,7 @@ $page = 'dashboard';
   <!-- Skeleton loaders are now centralized in system.css -->
 
   <link rel="stylesheet" href="../assets/css/admin/admin.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/admin/admin.css'); ?>">
+  <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailadmin-components.css'); ?>">
   <link rel="stylesheet" href="../assets/css/button-system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/button-system.css'); ?>">
   <link rel="stylesheet" href="css/visitor-passes.css?v=<?php echo @filemtime(__DIR__ . '/css/visitor-passes.css') ?: time(); ?>">
 
@@ -141,7 +142,7 @@ $page = 'dashboard';
             </a>
 
             <a href="#"
-              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
               data-page="audit">
               <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -152,7 +153,7 @@ $page = 'dashboard';
             </a>
 
             <a href="#"
-              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
               data-page="visitors">
               <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -163,7 +164,7 @@ $page = 'dashboard';
             </a>
 
             <a href="#"
-              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
               data-page="employees">
               <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -174,7 +175,7 @@ $page = 'dashboard';
             </a>
 
             <a href="#"
-              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
               data-page="profile_requests">
               <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -185,7 +186,7 @@ $page = 'dashboard';
 
             <?php if ($isSuperAdmin): ?>
               <a href="#"
-                class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+                class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                 data-page="approvals">
                 <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -196,7 +197,7 @@ $page = 'dashboard';
             <?php endif; ?>
 
             <a href="#"
-              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
               data-page="rfid">
               <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -207,7 +208,7 @@ $page = 'dashboard';
             </a>
 
             <a href="#"
-              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
               data-page="simulator">
               <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -223,12 +224,12 @@ $page = 'dashboard';
 
         <!-- System Section -->
         <div class="px-3">
-          <div id="system-label" class="sidebar-text mb-2 px-2 text-xs font-semibold text-gray-500 opacity-70">
+          <div id="system-label" class="sidebar-text mb-2 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 opacity-70">
             SYSTEM
           </div>
           <div class="space-y-1">
             <button id="backupBtn"
-              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100">
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
               <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
@@ -241,22 +242,22 @@ $page = 'dashboard';
       </div>
 
       <!-- User Section -->
-      <div class="mt-auto border-t border-gray-100 p-4">
+      <div class="mt-auto border-t border-gray-100 dark:border-slate-700 p-4">
         <div class="relative">
           <button id="user-trigger"
-            class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-gray-100 transition-colors">
+            class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
             <div
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 flex-shrink-0 border border-gray-200">
-              <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700 flex-shrink-0 border border-gray-200 dark:border-slate-600">
+              <svg class="h-4 w-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
             </div>
             <div class="sidebar-text flex flex-col items-start flex-1">
               <span
-                class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin User'); ?></span>
+                class="text-sm font-medium text-gray-900 dark:text-white"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin User'); ?></span>
               <span
-                class="text-xs text-gray-500 opacity-70"><?php echo htmlspecialchars($_SESSION['role'] ?? 'admin'); ?></span>
+                class="text-xs text-gray-500 dark:text-gray-400 opacity-70"><?php echo htmlspecialchars($_SESSION['role'] ?? 'admin'); ?></span>
             </div>
             <svg id="user-chevron" class="sidebar-text ml-auto h-4 w-4 text-gray-500 transition-transform rotate-180"
               fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,7 +325,7 @@ $page = 'dashboard';
 
     <!-- Modal Content -->
     <div class="relative h-full w-full flex items-center justify-center p-6">
-      <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+      <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
         role="document">
         <button type="button"
           class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center text-2xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full cursor-pointer transition-all z-10"
@@ -347,3 +348,4 @@ $page = 'dashboard';
   <script src="../assets/js/mobile-gestures.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/mobile-gestures.js'); ?>"></script>
   <script src="js/admin-dark-mode.js?v=<?php echo @filemtime(__DIR__ . '/js/admin-dark-mode.js') ?: time(); ?>"></script>
 </body>
+</html>

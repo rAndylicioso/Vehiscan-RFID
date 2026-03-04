@@ -61,6 +61,6 @@ try {
     header('Content-Type: application/json');
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to fetch visitor passes: ' . $e->getMessage()
+        'error' => 'Failed to fetch visitor passes'
     ]);
 }

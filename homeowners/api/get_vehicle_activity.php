@@ -40,7 +40,7 @@ try {
     // Get plate numbers for this homeowner
     $stmt = $pdo->prepare("
         SELECT plate_number 
-        FROM homeowner_vehicles 
+        FROM vehicles 
         WHERE homeowner_id = ? AND is_active = TRUE
     ");
     $stmt->execute([$_SESSION['homeowner_id']]);
@@ -107,6 +107,6 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to fetch activity: ' . $e->getMessage()
+        'error' => 'Failed to fetch activity data'
     ]);
 }

@@ -1,15 +1,9 @@
 <?php
+require_once __DIR__ . '/../../includes/session_homeowner.php';
 require_once __DIR__ . '/../../db.php';
 header('Content-Type: application/json');
 
-session_name('vehiscan_homeowner');
-session_start();
-$homeownerId = $_SESSION['homeowner_id'] ?? null;
-
-if (!$homeownerId) {
-    echo json_encode(['success' => false, 'message' => 'Not authenticated']);
-    exit();
-}
+$homeownerId = $_SESSION['homeowner_id'];
 
 $data = json_decode(file_get_contents('php://input'), true);
 $vehicleId = $data['vehicle_id'] ?? null;

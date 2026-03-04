@@ -37,5 +37,5 @@ try {
 } catch (PDOException $e) {
     error_log('Error loading pending accounts: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['error' => 'Failed to load pending accounts']);
 }

@@ -48,6 +48,7 @@ if (empty($_SESSION['csrf_token'])) {
     <title>Homeowner Portal — VehiScan</title>
     <link rel="stylesheet" href="../assets/css/tailwind.css">
     <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="css/homeowner.css?v=<?php echo time(); ?>">
     <script src="../assets/js/libs/sweetalert2.all.min.js"></script>
     <script src="../assets/js/libs/chart.umd.min.js"></script>
@@ -555,7 +556,7 @@ if (empty($_SESSION['csrf_token'])) {
                                 <div>
                                     <span class="block text-sm font-medium text-gray-500 mb-1">Contact Number</span>
                                     <p class="text-base text-gray-900">
-                                        <?= htmlspecialchars($homeowner['contact'] ?? 'N/A') ?>
+                                        <?= htmlspecialchars($homeowner['contact_number'] ?? 'N/A') ?>
                                     </p>
                                 </div>
                                 <div>

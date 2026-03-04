@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success'=>true,'message'=>'Visitor pass created successfully with QR code']);
     } catch (Exception $e) {
         error_log("Visitor pass creation error: " . $e->getMessage());
-        echo json_encode(['success'=>false,'message'=>'DB error: '.$e->getMessage()]);
+        echo json_encode(['success'=>false,'message'=>'Failed to create visitor pass. Please try again later.']);
     }
     exit;
 }

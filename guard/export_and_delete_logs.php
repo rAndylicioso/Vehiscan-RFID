@@ -145,6 +145,6 @@ try {
     http_response_code(500);
     exit(json_encode([
         'success' => false,
-        'message' => 'Failed to export and delete logs: ' . $e->getMessage()
+        'message' => 'Failed to export and delete logs. Please try again later.'
     ]));
 }

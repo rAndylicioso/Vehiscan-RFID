@@ -8,6 +8,15 @@ require_once __DIR__ . '/qr_helper.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
+
+// CSRF validation
+$csrf = $data['csrf_token'] ?? '';
+if (empty($csrf) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit();
+}
+
 $pass_id = isset($data['pass_id']) ? InputSanitizer::sanitizeInt($data['pass_id']) : 0;
 
 if (!$pass_id) {
@@ -57,8 +66,8 @@ try {
 
 } catch (PDOException $e) {
     error_log("Approve pass error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Database error. Please try again later.']);
 } catch (Exception $e) {
     error_log("Approve pass error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again later.']);
 }

@@ -4,19 +4,12 @@
  * Returns access logs for vehicles registered to this homeowner
  */
 require_once __DIR__ . '/../../includes/security_headers.php';
-
-session_name('vehiscan_homeowner');
-session_start();
-
-if (!isset($_SESSION['homeowner_id']) || $_SESSION['role'] !== 'homeowner') {
-    http_response_code(403);
-    exit(json_encode(['success' => false, 'error' => 'Unauthorized']));
-}
+require_once __DIR__ . '/../../includes/session_homeowner.php';
 
 require_once __DIR__ . '/../../db.php';
 
 $homeownerId = $_SESSION['homeowner_id'];
-$days = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+$days = isset($_GET['days']) ? min(365, max(1, (int)$_GET['days'])) : 30;
 
 try {
     // Check if vehicles table exists
@@ -145,9 +138,10 @@ try {
     ]);
     
 } catch (Exception $e) {
+    error_log('Get my activity error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to fetch activity: ' . $e->getMessage()
+        'error' => 'Failed to fetch activity'
     ]);
 }

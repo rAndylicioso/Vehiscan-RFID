@@ -63,3 +63,8 @@ if (!isset($_SESSION['last_regeneration'])) {
 }
 
 $_SESSION['last_activity'] = time();
+
+// Auto-generate CSRF token if not present
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}

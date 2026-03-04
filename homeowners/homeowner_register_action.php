@@ -66,7 +66,7 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare("INSERT INTO homeowners (name, contact, plate_number, vehicle_type, color, address, owner_img, car_img, created_at)
+    $stmt = $pdo->prepare("INSERT INTO homeowners (name, contact_number, plate_number, vehicle_type, color, address, owner_img, car_img, created_at)
                            VALUES (?,?,?,?,?,?,?, ?, NOW())");
     $stmt->execute([$name, $contact, $plate_normalized, $vehicle_type, $color, $address, $owner_img, $car_img]);
 

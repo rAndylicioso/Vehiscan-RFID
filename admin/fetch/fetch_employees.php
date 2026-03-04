@@ -101,14 +101,14 @@ $roleCount = array_count_values(array_column($employees, 'role'));
             <td class="px-6 py-4 text-sm">
               <?php
               $badges = [
-                'admin' => 'bg-gray-200 text-gray-800',
-                'guard' => 'bg-gray-200 text-gray-800',
-                'super_admin' => 'bg-gray-300 text-gray-900',
-                'owner' => 'bg-emerald-100 text-emerald-800'
+                'admin' => 'info',
+                'guard' => 'success',
+                'super_admin' => 'purple',
+                'owner' => 'success'
               ];
-              $badge = $badges[$employee['role']] ?? 'bg-gray-100 text-gray-800';
+              $badge = $badges[$employee['role']] ?? 'neutral';
               ?>
-              <span class="px-3 py-1 rounded-full text-xs font-semibold <?= $badge ?>">
+              <span class="ta-badge <?= $badge ?>">
                 <?= ucfirst(str_replace('_', ' ', htmlspecialchars($employee['role'] ?? ''))) ?>
               </span>
             </td>
@@ -132,47 +132,41 @@ $roleCount = array_count_values(array_column($employees, 'role'));
   </table>
 </div>
 
-<!-- Stats Cards -->
+<!-- Stats Cards (TailAdmin Pattern) -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-600">Total Employees</p>
-        <p class="text-3xl font-bold text-gray-900 mt-1"><?= $totalEmployees ?></p>
-      </div>
-      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
-        <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon purple">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+      </svg>
+    </div>
+    <div class="ta-stat-content">
+      <div class="ta-stat-label">Total Employees</div>
+      <div class="ta-stat-value"><?= $totalEmployees ?></div>
     </div>
   </div>
   
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-600">Admins</p>
-        <p class="text-3xl font-bold text-gray-900 mt-1"><?= $roleCount['admin'] ?? 0 ?></p>
-      </div>
-      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
-        <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon indigo">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+      </svg>
+    </div>
+    <div class="ta-stat-content">
+      <div class="ta-stat-label">Admins</div>
+      <div class="ta-stat-value"><?= $roleCount['admin'] ?? 0 ?></div>
     </div>
   </div>
   
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium text-gray-600">Guards</p>
-        <p class="text-3xl font-bold text-gray-900 mt-1"><?= $roleCount['guard'] ?? 0 ?></p>
-      </div>
-      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
-        <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon green">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+      </svg>
+    </div>
+    <div class="ta-stat-content">
+      <div class="ta-stat-label">Guards</div>
+      <div class="ta-stat-value"><?= $roleCount['guard'] ?? 0 ?></div>
     </div>
   </div>
 </div>

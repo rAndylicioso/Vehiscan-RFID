@@ -5,6 +5,7 @@ ob_start();
 
 // Database connection - use centralized config
 require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 // Start session with default name first
 if (session_status() === PHP_SESSION_NONE) {
@@ -28,6 +29,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
+    
+    // Rate limiting: 5 attempts per 15 minutes per IP
+    $rateLimiter = new RateLimiter($pdo);
+    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rateCheck = $rateLimiter->check($clientIp, 'login', 5, 15);
+    
+    if (!$rateCheck['allowed']) {
+        $error = "Too many login attempts. Please try again in 15 minutes.";
+    } else {
     
     $authenticated = false;
     $redirectUrl = '';
@@ -71,6 +81,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 } elseif ($result['role'] === 'homeowner') {
                     $redirectUrl = '../homeowners/portal.php';
                 }
+            }
+        }
+    }
+    
+    // Try homeowner_auth table if not authenticated yet
+    if (!$authenticated) {
+        $stmt = $pdo->prepare("
+            SELECT ha.id, ha.homeowner_id, ha.username, ha.password_hash, ha.is_active,
+                   h.account_status
+            FROM homeowner_auth ha
+            JOIN homeowners h ON ha.homeowner_id = h.id
+            WHERE ha.username = ? OR ha.email = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$username, $username]);
+        $result = $stmt->fetch();
+        
+        if ($result && $result['is_active'] && $result['account_status'] === 'approved') {
+            $passwordMatch = password_verify($password, $result['password_hash']);
+            
+            if ($passwordMatch) {
+                $authenticated = true;
+                $userRole = 'homeowner';
+                $userId = $result['homeowner_id']; // Use homeowner_id, not auth ID
+                $redirectUrl = '../homeowners/portal.php';
+                
+                // Update last_login
+                $pdo->prepare("UPDATE homeowner_auth SET last_login = NOW(), failed_login_attempts = 0 WHERE id = ?")->execute([$result['id']]);
+            } else {
+                // Track failed login
+                $pdo->prepare("UPDATE homeowner_auth SET failed_login_attempts = failed_login_attempts + 1, last_failed_login = NOW() WHERE id = ?")->execute([$result['id']]);
             }
         }
     }
@@ -121,8 +162,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         header("Location: $redirectUrl");
         exit();
     } else {
+        // Record failed login attempt for rate limiting
+        $rateLimiter->recordAttempt($clientIp, 'login', ['username' => $username]);
         $error = "Invalid credentials. Please check your username and password.";
     }
+    } // end rate-limit else
     } // end CSRF else
 }
 

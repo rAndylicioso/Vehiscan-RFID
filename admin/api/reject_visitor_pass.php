@@ -7,6 +7,15 @@ require_once __DIR__ . '/../../includes/cache_invalidator.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
+
+// CSRF validation
+$csrf = $data['csrf_token'] ?? '';
+if (empty($csrf) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit();
+}
+
 $pass_id = isset($data['pass_id']) ? InputSanitizer::sanitizeInt($data['pass_id']) : 0;
 $reason = isset($data['reason']) ? InputSanitizer::sanitizeString($data['reason']) : '';
 
