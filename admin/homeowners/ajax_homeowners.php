@@ -64,21 +64,21 @@ foreach ($rows as $row) {
     
     echo "<tr>
         <td>{$row['id']}</td>
-        <td>" . htmlspecialchars($row['name']) . "</td>
-        <td>" . htmlspecialchars($row['contact']) . "</td>
-        <td>" . htmlspecialchars($row['address']) . "</td>
-        <td>" . htmlspecialchars($row['vehicle_type']) . "</td>
-        <td>" . htmlspecialchars($row['color']) . "</td>
-        <td>" . htmlspecialchars($row['plate_number']) . "</td>
+        <td>" . htmlspecialchars($row['name'] ?? '') . "</td>
+        <td>" . htmlspecialchars($row['contact'] ?? '') . "</td>
+        <td>" . htmlspecialchars($row['address'] ?? '') . "</td>
+        <td>" . htmlspecialchars($row['vehicle_type'] ?? '') . "</td>
+        <td>" . htmlspecialchars($row['color'] ?? '') . "</td>
+        <td>" . htmlspecialchars($row['plate_number'] ?? '') . "</td>
         <td>";
         if ($ownerPath) {
-            echo "<img src='../".htmlspecialchars($ownerPath)."' width='60' onerror=\"this.style.display='none'\">";
+            echo "<img src='../".htmlspecialchars($ownerPath ?? '')."' width='60' onerror=\"this.style.display='none'\">";
         } else {
             echo "—";
         }
     echo "</td><td>";
         if ($carPath) {
-            echo "<img src='../".htmlspecialchars($carPath)."' width='60' onerror=\"this.style.display='none'\">";
+            echo "<img src='../".htmlspecialchars($carPath ?? '')."' width='60' onerror=\"this.style.display='none'\">";
         } else {
             echo "—";
         }

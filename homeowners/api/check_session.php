@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../includes/security_headers.php';
 
 // Use the same session name as login
-session_name('vehiscan_session');
+session_name('vehiscan_homeowner');
 session_start();
 
 header('Content-Type: application/json');

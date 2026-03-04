@@ -26,7 +26,7 @@ if (isset($_GET['classic'])) {
     }
     $dest = $testDir . 'test_' . basename($_FILES['test_image']['name']);
     if (move_uploaded_file($_FILES['test_image']['tmp_name'], $dest)) {
-      echo '<p>Classic upload succeeded and saved as ' . htmlspecialchars($dest) . '</p>';
+      echo '<p>Classic upload succeeded and saved as ' . htmlspecialchars($dest ?? '') . '</p>';
     } else {
       echo '<p>Classic upload received the file but failed to save.</p>';
     }
@@ -415,7 +415,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p class="subtitle">Set up your homeowner account for seamless gate access.</p>
 
     <form id="registrationForm" enctype="multipart/form-data">
-      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf ?? '') ?>">
 
       <!-- Homeowner Details -->
       <fieldset>

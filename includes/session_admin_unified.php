@@ -60,9 +60,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Session timeout check (30 minutes = 1800 seconds)
-// DISABLED FOR LOCALHOST DEBUGGING - Re-enable for production
-// Uncomment the code below when deploying
-/*
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
     session_unset();
     session_destroy();
@@ -84,7 +81,7 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
     header("Location: /Vehiscan-RFID/auth/login.php?timeout=1");
     exit;
 }
-*/
+
 // Update last activity timestamp
 $_SESSION['last_activity'] = time();
 
@@ -92,14 +89,16 @@ if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-function logAudit($action, $table = null, $record_id = null, $details = null) {
-    if (!isset($_SESSION['username'])) return;
-    global $pdo;
-    if (!isset($pdo)) return;
-    try {
-        $check = $pdo->query("SHOW TABLES LIKE 'audit_logs'")->fetch();
-        if (!$check) return;
-        $stmt = $pdo->prepare("INSERT INTO audit_logs (username, action, table_name, record_id, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$_SESSION['username'], $action, $table, $record_id, $details, $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
-    } catch (Exception $e) {}
+if (!function_exists('logAudit')) {
+    function logAudit($action, $table = null, $record_id = null, $details = null) {
+        if (!isset($_SESSION['username'])) return;
+        global $pdo;
+        if (!isset($pdo)) return;
+        try {
+            $check = $pdo->query("SHOW TABLES LIKE 'audit_logs'")->fetch();
+            if (!$check) return;
+            $stmt = $pdo->prepare("INSERT INTO audit_logs (username, action, table_name, record_id, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$_SESSION['username'], $action, $table, $record_id, $details, $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
+        } catch (Exception $e) {}
+    }
 }

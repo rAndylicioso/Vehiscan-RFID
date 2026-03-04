@@ -53,8 +53,8 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
     class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent filter-select">
     <option value="">All Actions</option>
     <?php foreach ($actions as $action): ?>
-      <option value="<?php echo htmlspecialchars($action); ?>" <?php echo $action === $filter_action ? 'selected' : ''; ?>>
-        <?php echo htmlspecialchars($action); ?>
+      <option value="<?php echo htmlspecialchars($action ?? ''); ?>" <?php echo $action === $filter_action ? 'selected' : ''; ?>>
+        <?php echo htmlspecialchars($action ?? ''); ?>
       </option>
     <?php endforeach; ?>
   </select>
@@ -90,8 +90,8 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
         <?php foreach ($logs as $log): ?>
           <tr class="hover:bg-slate-100 transition-colors even:bg-slate-50">
             <td class="px-4 py-3 text-slate-700"><?php echo date('M d, H:i:s', strtotime($log['created_at'])); ?></td>
-            <td class="px-4 py-3 font-medium text-slate-900"><?php echo htmlspecialchars($log['username']); ?></td>
-            <td class="px-4 py-3"><span class="action-badge"><?php echo htmlspecialchars($log['action']); ?></span></td>
+            <td class="px-4 py-3 font-medium text-slate-900"><?php echo htmlspecialchars($log['username'] ?? ''); ?></td>
+            <td class="px-4 py-3"><span class="action-badge"><?php echo htmlspecialchars($log['action'] ?? ''); ?></span></td>
             <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($log['table_name'] ?? '-'); ?></td>
           </tr>
         <?php endforeach; ?>

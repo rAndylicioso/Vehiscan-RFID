@@ -141,8 +141,8 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
       <tr class="log-row<?php echo !empty($log['visitor_pass_id']) ? ' has-visitor-pass' : ''; ?>" 
           data-log-id="<?php echo $log['log_id']; ?>" 
           data-log-date="<?php echo $log['created_at']; ?>"
-          data-plate="<?php echo htmlspecialchars($log['plate_number']); ?>"
-          data-name="<?php echo htmlspecialchars($userName); ?>"
+          data-plate="<?php echo htmlspecialchars($log['plate_number'] ?? ''); ?>"
+          data-name="<?php echo htmlspecialchars($userName ?? ''); ?>"
           data-status="<?php echo $log['status']; ?>"
           data-visitor="<?php echo !empty($log['visitor_pass_id']) ? '1' : '0'; ?>">
         <td>
@@ -152,13 +152,13 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
             </div>
             <div class="user-info">
               <div class="user-name">
-                <?php echo htmlspecialchars($userName); ?>
+                <?php echo htmlspecialchars($userName ?? ''); ?>
                 <?php if (!empty($log['visitor_pass_id'])): ?>
                   <span class="badge-visitor" title="Visitor Pass: <?php echo htmlspecialchars($log['visitor_name'] ?? 'N/A'); ?>">🎫</span>
                 <?php endif; ?>
               </div>
               <?php if (!empty($log['visitor_name'])): ?>
-                <div class="text-xs text-gray-500">Visitor: <?php echo htmlspecialchars($log['visitor_name']); ?></div>
+                <div class="text-xs text-gray-500">Visitor: <?php echo htmlspecialchars($log['visitor_name'] ?? ''); ?></div>
               <?php endif; ?>
             </div>
           </div>

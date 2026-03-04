@@ -168,7 +168,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                     <!-- Username (Read-only) -->
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
-                        <input type="text" value="<?= htmlspecialchars($employee['username']) ?>" 
+                        <input type="text" value="<?= htmlspecialchars($employee['username'] ?? '') ?>" 
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" 
                                disabled>
                         <p class="text-sm text-gray-500 mt-1">Username cannot be changed</p>
@@ -206,7 +206,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                         <a href="employee_list.php" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
                             Cancel
                         </a>
-                        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg font-medium">
+                        <button type="submit" class="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-all shadow-lg font-medium">
                             Update Employee
                         </button>
                     </div>

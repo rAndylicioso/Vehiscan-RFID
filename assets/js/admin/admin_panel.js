@@ -215,9 +215,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ---------- Global Session Expiration Handler ---------- */
-  const originalFetch = window.fetch;
-  window.fetch = async function (...args) {
-    const response = await originalFetch.apply(this, args);
+  if (!window.__fetchPatched) {
+    window.__fetchPatched = true;
+    const originalFetch = window.fetch;
+    window.fetch = async function (...args) {
+      const response = await originalFetch.apply(this, args);
 
     // Check for session expiration on any AJAX request
     if (response.status === 403) {
@@ -243,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return response;
   };
+  } // end __fetchPatched guard
 
   /* ---------- Toast Notifications (replacing Growl) ---------- */
   function showGrowl(msg, type = "success") {
@@ -376,7 +379,9 @@ document.addEventListener("DOMContentLoaded", () => {
         'audit': 'Audit Logs',
         'simulator': 'RFID Simulator',
         'visitors': 'Visitor Passes',
-        'employees': 'Employee Management'
+        'employees': 'Employee Management',
+        'profile_requests': 'Profile Requests',
+        'approvals': 'Account Approvals'
       };
       if (pageTitle && pageNames[page]) {
         pageTitle.textContent = pageNames[page];

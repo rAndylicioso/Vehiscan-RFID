@@ -78,7 +78,7 @@ $defaultUntil = date('Y-m-d\TH:i', strtotime('+2 hours'));
       <select name="homeowner_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         <option value="">-- Select Homeowner (Optional) --</option>
         <?php foreach ($homeowners as $h): ?>
-          <option value="<?php echo $h['id']; ?>"><?php echo htmlspecialchars($h['name']); ?></option>
+          <option value="<?php echo $h['id']; ?>"><?php echo htmlspecialchars($h['name'] ?? ''); ?></option>
         <?php endforeach; ?>
       </select>
     </label>
@@ -136,7 +136,7 @@ $defaultUntil = date('Y-m-d\TH:i', strtotime('+2 hours'));
   
   <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 form-actions">
     <button type="button" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-colors btn warn cancel-btn">Cancel</button>
-    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg btn btn-success">✓ Create Pass</button>
+    <button type="submit" class="px-6 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg btn btn-success">✓ Create Pass</button>
   </div>
 </form>
 

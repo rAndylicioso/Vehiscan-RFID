@@ -41,16 +41,18 @@ if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-function logAudit($action, $table = null, $record_id = null, $details = null) {
-    if (!isset($_SESSION['username'])) return;
-    global $pdo;
-    if (!isset($pdo)) return;
-    try {
-        $check = $pdo->query("SHOW TABLES LIKE 'audit_logs'")->fetch();
-        if (!$check) return;
-        $stmt = $pdo->prepare("INSERT INTO audit_logs (username, action, table_name, record_id, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$_SESSION['username'], $action, $table, $record_id, $details, $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
-    } catch (Exception $e) {
-        error_log("Audit log error: " . $e->getMessage());
+if (!function_exists('logAudit')) {
+    function logAudit($action, $table = null, $record_id = null, $details = null) {
+        if (!isset($_SESSION['username'])) return;
+        global $pdo;
+        if (!isset($pdo)) return;
+        try {
+            $check = $pdo->query("SHOW TABLES LIKE 'audit_logs'")->fetch();
+            if (!$check) return;
+            $stmt = $pdo->prepare("INSERT INTO audit_logs (username, action, table_name, record_id, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$_SESSION['username'], $action, $table, $record_id, $details, $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
+        } catch (Exception $e) {
+            error_log("Audit log error: " . $e->getMessage());
+        }
     }
 }

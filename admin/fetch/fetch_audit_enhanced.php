@@ -27,12 +27,15 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'a
 // Check authentication
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     http_response_code(403);
+    header('Content-Type: application/json');
     echo json_encode([
         'success' => false,
         'message' => 'Unauthorized access'
     ]);
     exit;
 }
+
+header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/audit_logger.php';
@@ -78,10 +81,8 @@ try {
     $countStmt->execute($params);
     $totalCount = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // Add ordering and pagination
-    $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limit;
-    $params[] = $offset;
+    // Add ordering and pagination - use integer casting to avoid PDO string quoting
+    $sql .= " ORDER BY created_at DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -113,9 +114,10 @@ try {
     ]);
     
 } catch (Exception $e) {
+    error_log('Audit log fetch error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Failed to fetch audit logs: ' . $e->getMessage()
+        'message' => 'Failed to fetch audit logs. Please try again later.'
     ]);
 }

@@ -8,7 +8,7 @@ ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.cookie_secure', 0);
 
 // Use the same session name as login
-session_name('vehiscan_session');
+session_name('vehiscan_homeowner');
 session_start();
 
 header('Content-Type: application/json');

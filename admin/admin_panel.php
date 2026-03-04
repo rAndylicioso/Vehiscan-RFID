@@ -28,13 +28,13 @@ $page = 'dashboard';
 
   <!-- CSS Files - Load in Order -->
   <link rel="stylesheet" href="../assets/css/tailwind.css">
-  <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo time(); ?>">
+  <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/system.css'); ?>">
 
   <!-- Skeleton loaders are now centralized in system.css -->
 
-  <link rel="stylesheet" href="../assets/css/admin/admin.css?v=<?php echo time(); ?>">
-  <link rel="stylesheet" href="../assets/css/button-system.css?v=<?php echo time(); ?>">
-  <link rel="stylesheet" href="css/visitor-passes.css?v=<?php echo time(); ?>">
+  <link rel="stylesheet" href="../assets/css/admin/admin.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/admin/admin.css'); ?>">
+  <link rel="stylesheet" href="../assets/css/button-system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/button-system.css'); ?>">
+  <link rel="stylesheet" href="css/visitor-passes.css?v=<?php echo @filemtime(__DIR__ . '/css/visitor-passes.css') ?: time(); ?>">
 
   <!-- External Libraries - CDN (Must load before custom scripts) -->
   <script src="../assets/js/libs/jquery-3.7.1.min.js"></script>
@@ -45,8 +45,8 @@ $page = 'dashboard';
   <script defer src="../assets/js/libs/alpine.min.js"></script>
 
   <!-- Core Utilities - Load before main scripts -->
-  <script src="../assets/js/toast.js?v=<?php echo time(); ?>"></script>
-  <script src="../assets/js/session-timeout.js?v=<?php echo time(); ?>"></script>
+  <script src="../assets/js/toast.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/toast.js'); ?>"></script>
+  <script src="../assets/js/session-timeout.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/session-timeout.js'); ?>"></script>
 
   <style>
     /* Session timeout warning modal styling */
@@ -171,6 +171,16 @@ $page = 'dashboard';
                 </path>
               </svg>
               <span class="sidebar-text">Employee Management</span>
+            </a>
+
+            <a href="#"
+              class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+              data-page="profile_requests">
+              <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              <span class="sidebar-text">Profile Requests</span>
             </a>
 
             <?php if ($isSuperAdmin): ?>
@@ -317,12 +327,12 @@ $page = 'dashboard';
   <script>window.__ADMIN_CSRF__ = <?php echo json_encode($csrf); ?>;</script>
 
   <!-- Main Application Scripts - Load in order: core -> handlers -> features -->
-  <script src="../assets/js/admin/datatables-init.js?v=<?php echo time(); ?>"></script>
-  <script src="../assets/js/admin/realtime-updates.js?v=<?php echo time(); ?>"></script>
-  <script src="../assets/js/admin/admin_panel.js?v=<?php echo time(); ?>"></script>
-  <script src="../assets/js/admin/modal-handler.js?v=<?php echo time(); ?>"></script>
-  <script src="js/qr-modal.js?v=<?php echo time(); ?>"></script>
-  <script src="../assets/js/keyboard-shortcuts.js?v=<?php echo time(); ?>"></script>
-  <script src="../assets/js/mobile-gestures.js?v=<?php echo time(); ?>"></script>
-  <script src="js/admin-dark-mode.js?v=<?php echo time(); ?>"></script>
+  <script src="../assets/js/admin/datatables-init.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/datatables-init.js'); ?>"></script>
+  <script src="../assets/js/admin/realtime-updates.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/realtime-updates.js'); ?>"></script>
+  <script src="../assets/js/admin/admin_panel.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/admin_panel.js'); ?>"></script>
+  <script src="../assets/js/admin/modal-handler.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/modal-handler.js'); ?>"></script>
+  <script src="js/qr-modal.js?v=<?php echo @filemtime(__DIR__ . '/js/qr-modal.js') ?: time(); ?>"></script>
+  <script src="../assets/js/keyboard-shortcuts.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/keyboard-shortcuts.js'); ?>"></script>
+  <script src="../assets/js/mobile-gestures.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/mobile-gestures.js'); ?>"></script>
+  <script src="js/admin-dark-mode.js?v=<?php echo @filemtime(__DIR__ . '/js/admin-dark-mode.js') ?: time(); ?>"></script>
 </body>

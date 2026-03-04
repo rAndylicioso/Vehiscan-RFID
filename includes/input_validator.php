@@ -152,7 +152,7 @@ class InputValidator {
      * @return string
      */
     public static function sanitizeOutput($string) {
-        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
     }
     
     /**

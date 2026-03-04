@@ -17,23 +17,23 @@ if (!$h): ?>
   <p>Record not found.</p>
 <?php else: ?>
 <form id="editHomeownerForm">
-  <input type="hidden" name="id" value="<?= htmlspecialchars($h['id']) ?>">
+  <input type="hidden" name="id" value="<?= htmlspecialchars($h['id'] ?? '') ?>">
   <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
 
   <label>Name
-    <input type="text" name="name" value="<?= htmlspecialchars($h['name']) ?>" required>
+    <input type="text" name="name" value="<?= htmlspecialchars($h['name'] ?? '') ?>" required>
   </label>
   <label>Plate Number
-    <input type="text" name="plate_number" value="<?= htmlspecialchars($h['plate_number']) ?>" required>
+    <input type="text" name="plate_number" value="<?= htmlspecialchars($h['plate_number'] ?? '') ?>" required>
   </label>
   <label>Vehicle Type
-    <input type="text" name="vehicle_type" value="<?= htmlspecialchars($h['vehicle_type']) ?>">
+    <input type="text" name="vehicle_type" value="<?= htmlspecialchars($h['vehicle_type'] ?? '') ?>">
   </label>
   <label>Contact
-    <input type="text" name="contact" value="<?= htmlspecialchars($h['contact']) ?>">
+    <input type="text" name="contact" value="<?= htmlspecialchars($h['contact'] ?? '') ?>">
   </label>
   <label>Address
-    <textarea name="address"><?= htmlspecialchars($h['address']) ?></textarea>
+    <textarea name="address"><?= htmlspecialchars($h['address'] ?? '') ?></textarea>
   </label>
 
   <div style="display:flex;justify-content:end;gap:10px;margin-top:10px;">

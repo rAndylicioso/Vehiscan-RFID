@@ -41,10 +41,10 @@ try {
     <select id="vehicleSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 sim-select">
       <option value="">-- Select Vehicle to Scan --</option>
       <?php foreach ($homeowners as $h): ?>
-        <option value="<?php echo htmlspecialchars($h['plate_number']); ?>" 
-                data-name="<?php echo htmlspecialchars($h['name']); ?>"
-                data-type="<?php echo htmlspecialchars($h['vehicle_type']); ?>">
-          <?php echo htmlspecialchars($h['plate_number']); ?> - <?php echo htmlspecialchars($h['name']); ?> (<?php echo htmlspecialchars($h['vehicle_type']); ?>)
+        <option value="<?php echo htmlspecialchars($h['plate_number'] ?? ''); ?>" 
+                data-name="<?php echo htmlspecialchars($h['name'] ?? ''); ?>"
+                data-type="<?php echo htmlspecialchars($h['vehicle_type'] ?? ''); ?>">
+          <?php echo htmlspecialchars($h['plate_number'] ?? ''); ?> - <?php echo htmlspecialchars($h['name'] ?? ''); ?> (<?php echo htmlspecialchars($h['vehicle_type'] ?? ''); ?>)
         </option>
       <?php endforeach; ?>
     </select>
@@ -89,7 +89,7 @@ try {
           <?php foreach ($recent as $r): ?>
             <tr>
               <td><?php echo date('H:i:s', strtotime($r['created_at'])); ?></td>
-              <td><?php echo htmlspecialchars($r['plate_number']); ?></td>
+              <td><?php echo htmlspecialchars($r['plate_number'] ?? ''); ?></td>
               <td><?php echo htmlspecialchars($r['name'] ?? 'Unknown'); ?></td>
               <td><?php echo htmlspecialchars($r['vehicle_type'] ?? '-'); ?></td>
               <td>

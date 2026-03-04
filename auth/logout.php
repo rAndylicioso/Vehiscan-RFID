@@ -11,7 +11,7 @@ try {
     AuditLogger::init($pdo);
     
     // Try to get username from any active session
-    foreach (['vehiscan_superadmin', 'vehiscan_admin', 'vehiscan_guard', 'vehiscan_session'] as $sName) {
+    foreach (['vehiscan_superadmin', 'vehiscan_admin', 'vehiscan_guard', 'vehiscan_homeowner', 'vehiscan_session'] as $sName) {
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_write_close();
         }
@@ -54,7 +54,7 @@ function destroySessionByName($sessionName) {
 }
 
 // Destroy all possible session types (including Super Admin)
-$sessionTypes = ['vehiscan_superadmin', 'vehiscan_admin', 'vehiscan_guard', 'vehiscan_session'];
+$sessionTypes = ['vehiscan_superadmin', 'vehiscan_admin', 'vehiscan_guard', 'vehiscan_homeowner', 'vehiscan_session'];
 
 foreach ($sessionTypes as $sessionName) {
     destroySessionByName($sessionName);

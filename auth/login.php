@@ -3,18 +3,8 @@
 // Start output buffering to prevent header issues
 ob_start();
 
-// Database connection
-$host = 'localhost';
-$dbname = 'vehiscan_vdp';
-$db_username = 'root';
-$db_password = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $db_username, $db_password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+// Database connection - use centralized config
+require_once __DIR__ . '/../db.php';
 
 // Start session with default name first
 if (session_status() === PHP_SESSION_NONE) {
@@ -31,6 +21,11 @@ $success = '';
 
 // Handle login
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Validate CSRF token
+    $submittedToken = $_POST['csrf_token'] ?? '';
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken)) {
+        $error = "Invalid form submission. Please try again.";
+    } else {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     
@@ -45,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $result = $stmt->fetch();
     
     if ($result) {
-        $passwordMatch = password_verify($password, $result['password_hash']) || $password === $result['password_hash'];
+        $passwordMatch = password_verify($password, $result['password_hash']);
         
         if ($passwordMatch) {
             $authenticated = true;
@@ -62,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $result = $stmt->fetch();
         
         if ($result) {
-            $passwordMatch = password_verify($password, $result['password']) || $password === $result['password'];
+            $passwordMatch = password_verify($password, $result['password']);
             
             if ($passwordMatch) {
                 $authenticated = true;
@@ -128,6 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         $error = "Invalid credentials. Please check your username and password.";
     }
+    } // end CSRF else
 }
 
 // Check for URL parameters
@@ -198,7 +194,7 @@ ob_end_flush();
                     <input type="checkbox" name="remember">
                     <span>Remember Me</span>
                 </label>
-                <a href="#" class="forgot-link" onclick="handleForgotPassword(event)">Forgot Password?</a>
+                <a href="forgot-password.php" class="forgot-link">Forgot Password?</a>
             </div>
 
             <button type="submit" class="btn-primary" id="submitBtn">

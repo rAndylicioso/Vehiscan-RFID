@@ -20,34 +20,37 @@ if (typeof Swal === 'undefined') {
 }
 
 /* ---------- Global Session Expiration Handler ---------- */
-const originalFetch = window.fetch;
-window.fetch = async function (...args) {
-  const response = await originalFetch.apply(this, args);
+if (!window.__fetchPatched) {
+  window.__fetchPatched = true;
+  const originalFetch = window.fetch;
+  window.fetch = async function (...args) {
+    const response = await originalFetch.apply(this, args);
 
-  // Check for session expiration on any AJAX request
-  if (response.status === 403) {
-    try {
-      const clone = response.clone();
-      const json = await clone.json();
-      if (json.error === 'Session expired' && json.redirect) {
-        await Swal.fire({
-          title: 'Session Expired',
-          text: 'Your session has expired. Please login again.',
-          icon: 'warning',
-          confirmButtonText: 'Login',
-          allowOutsideClick: false,
-          heightAuto: false
-        });
-        window.location.href = json.redirect;
-        return new Response(JSON.stringify(json), { status: 403 });
+    // Check for session expiration on any AJAX request
+    if (response.status === 403) {
+      try {
+        const clone = response.clone();
+        const json = await clone.json();
+        if (json.error === 'Session expired' && json.redirect) {
+          await Swal.fire({
+            title: 'Session Expired',
+            text: 'Your session has expired. Please login again.',
+            icon: 'warning',
+            confirmButtonText: 'Login',
+            allowOutsideClick: false,
+            heightAuto: false
+          });
+          window.location.href = json.redirect;
+          return new Response(JSON.stringify(json), { status: 403 });
+        }
+      } catch (e) {
+        // Not JSON or other error, continue with original response
       }
-    } catch (e) {
-      // Not JSON or other error, continue with original response
     }
-  }
 
-  return response;
-};
+    return response;
+  };
+} // end __fetchPatched guard
 
 /* ---------- No Session Timeout for Guard (24/7 Access) ---------- */
 // Guard needs to be logged in 24/7, so no timeout warnings
@@ -654,7 +657,7 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       __vsLog('[GUARD] Fetching homeowners...');
       // Use configured endpoint or fallback and build absolute URL
-      const endpoint = window.vehiscanConfig?.apiEndpoints?.homeowners || 'fetch_homeowners.php';
+      const endpoint = window.vehiscanConfig?.apiEndpoints?.homeowners || '/Vehiscan-RFID/guard/pages/fetch_homeowners.php';
       const base = window.vehiscanConfig?.baseUrl || window.baseUrl || window.location.origin;
       let baseResolved = base;
       if (baseResolved.startsWith('/')) baseResolved = window.location.origin + baseResolved;
@@ -1138,7 +1141,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!current || !current.plate_number) return;
 
       // Request single homeowner by plate (tolerant) to get updated image flags/urls
-      const endpoint = window.vehiscanConfig?.apiEndpoints?.homeowners || 'fetch_homeowners.php';
+      const endpoint = window.vehiscanConfig?.apiEndpoints?.homeowners || '/Vehiscan-RFID/guard/pages/fetch_homeowners.php';
       const base = window.vehiscanConfig?.baseUrl || window.baseUrl || window.location.origin;
       let baseResolved = base;
       if (baseResolved.startsWith('/')) baseResolved = window.location.origin + baseResolved;

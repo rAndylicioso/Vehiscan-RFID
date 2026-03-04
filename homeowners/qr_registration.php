@@ -316,11 +316,11 @@ $isLocalFallback = in_array($hostName, $loopbackHosts, true);
     </section>
 
     <div class="link-box" aria-label="Direct registration link">
-      <span><?= htmlspecialchars($registrationUrl) ?></span>
-      <button class="copy-btn" type="button" data-copy="<?= htmlspecialchars($registrationUrl) ?>">COPY</button>
+      <span><?= htmlspecialchars($registrationUrl ?? '') ?></span>
+      <button class="copy-btn" type="button" data-copy="<?= htmlspecialchars($registrationUrl ?? '') ?>">COPY</button>
     </div>
 
-    <a class="action-btn" href="<?= htmlspecialchars($registrationUrl) ?>" target="_blank" rel="noopener">
+    <a class="action-btn" href="<?= htmlspecialchars($registrationUrl ?? '') ?>" target="_blank" rel="noopener">
       <span>Open Registration Form</span>
       <span aria-hidden="true">↗</span>
     </a>

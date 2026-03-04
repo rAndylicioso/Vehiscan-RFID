@@ -93,7 +93,7 @@ if (!empty($_GET['ajax'])):
         type="text"
         name="name"
         required
-        value="<?php echo htmlspecialchars($homeowner['name']); ?>"
+        value="<?php echo htmlspecialchars($homeowner['name'] ?? ''); ?>"
         placeholder="Full name"
         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
@@ -120,7 +120,7 @@ if (!empty($_GET['ajax'])):
         required
         placeholder="Full address"
         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-      ><?php echo htmlspecialchars($homeowner['address']); ?></textarea>
+      ><?php echo htmlspecialchars($homeowner['address'] ?? ''); ?></textarea>
     </label>
 
     <!-- Row 3 -->
@@ -129,7 +129,7 @@ if (!empty($_GET['ajax'])):
       <input
         type="text"
         name="vehicle_type"
-        value="<?php echo htmlspecialchars($homeowner['vehicle_type']); ?>"
+        value="<?php echo htmlspecialchars($homeowner['vehicle_type'] ?? ''); ?>"
         placeholder="e.g., Sedan, SUV"
         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
@@ -140,7 +140,7 @@ if (!empty($_GET['ajax'])):
       <input
         type="text"
         name="color"
-        value="<?php echo htmlspecialchars($homeowner['color']); ?>"
+        value="<?php echo htmlspecialchars($homeowner['color'] ?? ''); ?>"
         placeholder="e.g., Blue, Red"
         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
@@ -152,7 +152,7 @@ if (!empty($_GET['ajax'])):
       <input
         type="text"
         name="plate_number"
-        value="<?php echo htmlspecialchars($homeowner['plate_number']); ?>"
+        value="<?php echo htmlspecialchars($homeowner['plate_number'] ?? ''); ?>"
         placeholder="e.g., ABC123"
         class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
@@ -168,7 +168,7 @@ if (!empty($_GET['ajax'])):
               $ownerImgPath = 'uploads/' . ltrim($ownerImgPath, '/');
           }
         ?>
-        <img src="../../<?php echo htmlspecialchars($ownerImgPath); ?>" class="preview-img rounded-lg border border-gray-300 mb-2" style="max-width:100px;display:block;" onerror="this.style.display='none'">
+        <img src="../../<?php echo htmlspecialchars($ownerImgPath ?? ''); ?>" class="preview-img rounded-lg border border-gray-300 mb-2" style="max-width:100px;display:block;" onerror="this.style.display='none'">
       <?php endif; ?>
       <input
         type="file"
@@ -188,7 +188,7 @@ if (!empty($_GET['ajax'])):
               $carImgPath = 'uploads/' . ltrim($carImgPath, '/');
           }
         ?>
-        <img src="../../<?php echo htmlspecialchars($carImgPath); ?>" class="preview-img rounded-lg border border-gray-300 mb-2" style="max-width:100px;display:block;" onerror="this.style.display='none'">
+        <img src="../../<?php echo htmlspecialchars($carImgPath ?? ''); ?>" class="preview-img rounded-lg border border-gray-300 mb-2" style="max-width:100px;display:block;" onerror="this.style.display='none'">
       <?php endif; ?>
       <input
         type="file"

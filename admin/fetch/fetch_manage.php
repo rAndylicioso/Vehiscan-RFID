@@ -104,10 +104,10 @@ try {
     <tbody class="divide-y divide-slate-200">
       <?php foreach ($rows as $r): ?>
         <tr class="hover:bg-slate-100 transition-colors even:bg-slate-50">
-          <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($r['name']); ?></td>
-          <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($r['plate_number']); ?></td>
-          <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['vehicle_type']); ?></td>
-          <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['contact_number']); ?></td>
+          <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($r['name'] ?? ''); ?></td>
+          <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($r['plate_number'] ?? ''); ?></td>
+          <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['vehicle_type'] ?? ''); ?></td>
+          <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($r['contact_number'] ?? ''); ?></td>
           <td class="px-4 py-3">
             <div class="flex items-center justify-center gap-2">
               <button

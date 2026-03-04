@@ -85,7 +85,7 @@ if (!$stats) {
     <div>
       <p class="text-sm font-medium text-gray-500 mb-1">Total Homeowners</p>
       <div class="flex items-baseline gap-2">
-        <p class="text-3xl font-bold text-gray-900"><?php echo htmlspecialchars($totalHomeowners); ?></p>
+        <p class="text-3xl font-bold text-gray-900"><?php echo htmlspecialchars($totalHomeowners ?? ''); ?></p>
         <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+2.5%</span>
       </div>
       <p class="text-xs text-gray-500 mt-2">Registered residents</p>
@@ -106,7 +106,7 @@ if (!$stats) {
     <div>
       <p class="text-sm font-medium text-gray-500 mb-1">24h Access Logs</p>
       <div class="flex items-baseline gap-2">
-        <p class="text-3xl font-bold text-gray-900"><?php echo htmlspecialchars($recentLogsCount); ?></p>
+        <p class="text-3xl font-bold text-gray-900"><?php echo htmlspecialchars($recentLogsCount ?? ''); ?></p>
         <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Coming soon</span>
       </div>
       <p class="text-xs text-gray-500 mt-2">Activity in last 24h</p>
@@ -142,7 +142,7 @@ if (!$stats) {
       </div>
     </div>
     <p class="text-sm font-medium text-gray-600 mb-1">Total Homeowners</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo number_format($totalHomeowners); ?></p>
+    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($totalHomeowners) ? number_format($totalHomeowners) : $totalHomeowners; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-400"></div>
   </div>
 
@@ -157,7 +157,7 @@ if (!$stats) {
       </div>
     </div>
     <p class="text-sm font-medium text-gray-600 mb-1">Entries Today</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo number_format($allowedToday); ?></p>
+    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($allowedToday) ? number_format($allowedToday) : $allowedToday; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-green-500 to-green-400"></div>
   </div>
 
@@ -172,7 +172,7 @@ if (!$stats) {
       </div>
     </div>
     <p class="text-sm font-medium text-gray-600 mb-1">Exits Today</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo number_format($deniedToday); ?></p>
+    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($deniedToday) ? number_format($deniedToday) : $deniedToday; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-red-500 to-red-400"></div>
   </div>
 
@@ -188,7 +188,7 @@ if (!$stats) {
       </div>
     </div>
     <p class="text-sm font-medium text-gray-600 mb-1">Total Logs Today</p>
-    <p class="text-2xl font-bold text-gray-900"><?php echo number_format($logsToday); ?></p>
+    <p class="text-2xl font-bold text-gray-900"><?php echo is_numeric($logsToday) ? number_format($logsToday) : $logsToday; ?></p>
     <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-purple-500 to-purple-400"></div>
   </div>
 </div>

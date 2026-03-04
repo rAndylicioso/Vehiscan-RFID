@@ -135,10 +135,10 @@ try {
         <?php foreach ($logs as $log): ?>
           <tr class="hover:bg-slate-100 transition-colors even:bg-slate-50">
             <td class="px-4 py-3 text-slate-700"><?php echo date('M d, Y H:i:s', strtotime($log['created_at'])); ?></td>
-            <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($log['plate_number']); ?></td>
+            <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($log['plate_number'] ?? ''); ?></td>
             <td class="px-4 py-3">
               <span class="status-badge status-<?php echo strtolower($log['status']); ?>">
-                <?php echo htmlspecialchars($log['status']); ?>
+                <?php echo htmlspecialchars($log['status'] ?? ''); ?>
               </span>
             </td>
             <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($log['name'] ?? 'Unknown'); ?></td>

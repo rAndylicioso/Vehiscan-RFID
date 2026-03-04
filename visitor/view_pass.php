@@ -394,7 +394,7 @@ if (!$pdo) {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </div>
-                    <h1 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;"><?= htmlspecialchars($error) ?></h1>
+                    <h1 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;"><?= htmlspecialchars($error ?? '') ?></h1>
                     <p style="color: #6b7280; font-size: 0.875rem;">The QR code may be invalid, expired, or not yet approved by the administrator.</p>
                     <p style="color: #9ca3af; font-size: 0.75rem; margin-top: 1rem;">If you believe this is an error, please contact the subdivision office.</p>
                 </div>
@@ -419,29 +419,29 @@ if (!$pdo) {
                 <div class="pass-body">
                     <div class="info-row">
                         <span class="info-label">Visitor Name</span>
-                        <span class="info-value"><?= htmlspecialchars($pass['visitor_name']) ?></span>
+                        <span class="info-value"><?= htmlspecialchars($pass['visitor_name'] ?? '') ?></span>
                     </div>
                     
                     <div class="info-row">
                         <span class="info-label">Purpose</span>
-                        <span class="info-value"><?= htmlspecialchars($pass['purpose']) ?></span>
+                        <span class="info-value"><?= htmlspecialchars($pass['purpose'] ?? '') ?></span>
                     </div>
                     
                     <?php if (!empty($pass['visitor_plate'])): ?>
                     <div class="info-row">
                         <span class="info-label">Vehicle Plate</span>
-                        <span class="info-value" style="font-family: monospace; font-size: 1.125rem;"><?= htmlspecialchars($pass['visitor_plate']) ?></span>
+                        <span class="info-value" style="font-family: monospace; font-size: 1.125rem;"><?= htmlspecialchars($pass['visitor_plate'] ?? '') ?></span>
                     </div>
                     <?php endif; ?>
                     
                     <div class="info-row">
                         <span class="info-label">Host</span>
-                        <span class="info-value"><?= htmlspecialchars($pass['homeowner_name']) ?></span>
+                        <span class="info-value"><?= htmlspecialchars($pass['homeowner_name'] ?? '') ?></span>
                     </div>
                     
                     <div class="info-row">
                         <span class="info-label">Address</span>
-                        <span class="info-value"><?= htmlspecialchars($pass['homeowner_address']) ?></span>
+                        <span class="info-value"><?= htmlspecialchars($pass['homeowner_address'] ?? '') ?></span>
                     </div>
                     
                     <div class="info-row">
@@ -464,9 +464,9 @@ if (!$pdo) {
                     $host = $_SERVER['HTTP_HOST'];
                     $currentUrl = $protocol . '://' . $host . $_SERVER['REQUEST_URI'];
                     ?>
-                    <a href="<?= htmlspecialchars($currentUrl) ?>" target="_blank" style="display: inline-block; text-decoration: none;">
+                    <a href="<?= htmlspecialchars($currentUrl ?? '') ?>" target="_blank" style="display: inline-block; text-decoration: none;">
                         <div class="qr-code" style="cursor: pointer; transition: transform 0.2s ease;">
-                            <img src="<?= htmlspecialchars($pass['qr_code']) ?>" alt="QR Code">
+                            <img src="<?= htmlspecialchars($pass['qr_code'] ?? '') ?>" alt="QR Code">
                         </div>
                     </a>
                     <p class="qr-label">Scan to Verify</p>

@@ -73,12 +73,12 @@ $passes = $pdo->query("
       <?php else: ?>
         <?php foreach ($passes as $p): ?>
           <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($p['visitor_name']); ?></td>
-            <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($p['visitor_plate']); ?></td>
-            <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($p['homeowner_name']); ?></td>
+            <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($p['visitor_name'] ?? ''); ?></td>
+            <td class="px-4 py-3 text-slate-700"><?php echo htmlspecialchars($p['visitor_plate'] ?? ''); ?></td>
+            <td class="px-4 py-3 text-slate-600"><?php echo htmlspecialchars($p['homeowner_name'] ?? ''); ?></td>
             <td class="px-4 py-3 text-center">
-              <?php if ($p['qr_code']): ?>
-                <img src="<?php echo htmlspecialchars($p['qr_code']); ?>" alt="QR Code" class="w-16 h-16 mx-auto qr-clickable" style="image-rendering: pixelated;">
+              <?php if (!empty($p['qr_code'])): ?>
+                <img src="<?php echo htmlspecialchars($p['qr_code'] ?? ''); ?>" alt="QR Code" class="w-16 h-16 mx-auto qr-clickable" style="image-rendering: pixelated;">
               <?php else: ?>
                 <span class="text-slate-400 text-xs">No QR</span>
               <?php endif; ?>

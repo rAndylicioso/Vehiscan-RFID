@@ -90,7 +90,7 @@
                 </div>
                 <div class="flex flex-col items-start flex-1">
                     <span
-                        class="text-sm font-medium text-gray-900 dark:text-gray-200"><?php echo htmlspecialchars($homeowner['name']); ?></span>
+                        class="text-sm font-medium text-gray-900 dark:text-gray-200"><?php echo htmlspecialchars($homeowner['name'] ?? ''); ?></span>
                     <span class="text-xs text-gray-600">Homeowner</span>
                 </div>
                 <svg id="user-chevron" class="ml-auto h-4 w-4 transition-transform rotate-180" fill="none"

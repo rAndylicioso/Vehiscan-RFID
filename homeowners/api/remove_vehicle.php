@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../db.php';
 header('Content-Type: application/json');
 
+session_name('vehiscan_homeowner');
 session_start();
 $homeownerId = $_SESSION['homeowner_id'] ?? null;
 
@@ -25,5 +26,6 @@ try {
     
     echo json_encode(['success' => true, 'message' => 'Vehicle removed']);
 } catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    error_log('Remove vehicle error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Database error. Please try again later.']);
 }

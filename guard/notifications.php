@@ -124,9 +124,9 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php else: ?>
             <?php foreach ($notifications as $n): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($n['type']); ?></td>
-                    <td><?php echo htmlspecialchars($n['message']); ?></td>
-                    <td><?php echo htmlspecialchars($n['created_at']); ?></td>
+                    <td><?php echo htmlspecialchars($n['type'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($n['message'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($n['created_at'] ?? ''); ?></td>
                     <td class="<?php echo $n['is_read'] ? 'status-read' : 'status-unread'; ?>">
                         <?php echo $n['is_read'] ? 'Read' : 'Unread'; ?>
                     </td>

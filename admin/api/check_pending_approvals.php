@@ -15,15 +15,6 @@ require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/input_sanitizer.php';
 
 try {
-    // Check if account_status column exists, if not create it
-    $checkColumn = $pdo->query("SHOW COLUMNS FROM homeowners LIKE 'account_status'");
-    
-    if ($checkColumn->rowCount() === 0) {
-        // Column doesn't exist, add it
-        $pdo->exec("ALTER TABLE homeowners ADD COLUMN account_status ENUM('pending','approved','rejected') DEFAULT 'approved' AFTER email");
-        error_log("Added account_status column to homeowners table");
-    }
-    
     // Count pending homeowner approvals
     $stmt = $pdo->query("
         SELECT COUNT(*) 
@@ -32,16 +23,16 @@ try {
     ");
     $pendingCount = (int)$stmt->fetchColumn();
     
-    header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
         'pending_count' => $pendingCount
     ]);
     
 } catch (Exception $e) {
+    error_log('Check pending approvals error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to check approvals: ' . $e->getMessage()
+        'error' => 'Failed to check approvals. Please try again later.'
     ]);
 }

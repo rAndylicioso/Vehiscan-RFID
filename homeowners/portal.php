@@ -1,46 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/security_headers.php';
-
-// Configure session for local network testing
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_samesite', 'Lax');
-// Enable secure cookie if HTTPS is active
-$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-    (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
-ini_set('session.cookie_secure', $isHttps ? 1 : 0);
-
-// Use the same session name as login
-session_name('vehiscan_session');
-session_start();
-
-// Check if homeowner is logged in
-if (!isset($_SESSION['homeowner_id']) || $_SESSION['role'] !== 'homeowner') {
-    header("Location: ../auth/login.php");
-    exit();
-}
-
-// Session timeout check (30 minutes)
-$session_lifetime = 1800; // 30 minutes
-if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $session_lifetime)) {
-    // Log session timeout for security audit
-    error_log("Homeowner session timeout: " . $_SESSION['username'] . " (ID: " . $_SESSION['homeowner_id'] . ")");
-    session_unset();
-    session_destroy();
-    header('Location: ../auth/login.php?timeout=1');
-    exit();
-}
-
-// Regenerate session ID periodically for security (every 10 minutes)
-if (!isset($_SESSION['last_regeneration'])) {
-    $_SESSION['last_regeneration'] = time();
-} elseif (time() - $_SESSION['last_regeneration'] > 600) {
-    session_regenerate_id(true);
-    $_SESSION['last_regeneration'] = time();
-}
-
-$_SESSION['last_activity'] = time();
-
+require_once __DIR__ . '/../includes/session_homeowner.php';
 require_once __DIR__ . '/../db.php';
 
 // Get homeowner data
@@ -70,8 +30,13 @@ $stmt = $pdo->prepare("
 $stmt->execute([$_SESSION['homeowner_id']]);
 $stats = $stmt->fetch();
 
-$csrf_token = bin2hex(random_bytes(32));
-$_SESSION['csrf_token'] = $csrf_token;
+// Only generate CSRF token if not already set (prevents multi-tab breakage)
+if (empty($_SESSION['csrf_token'])) {
+    $csrf_token = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = $csrf_token;
+} else {
+    $csrf_token = $_SESSION['csrf_token'];
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -157,7 +122,7 @@ $_SESSION['csrf_token'] = $csrf_token;
                                         <div class="flex items-center gap-3 mb-2">
                                             <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight"
                                                 style="text-shadow: 0 4px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);">
-                                                Welcome back, <?= htmlspecialchars($homeowner['name']) ?>!
+                                                Welcome back, <?= htmlspecialchars($homeowner['name'] ?? '') ?>!
                                             </h2>
                                             <span
                                                 class="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/20 text-white backdrop-blur-sm border border-white/30">
@@ -452,14 +417,14 @@ $_SESSION['csrf_token'] = $csrf_token;
                                                 ?>
                                                 <div
                                                     class="aspect-square rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 shadow-md hover:shadow-xl transition-shadow duration-300">
-                                                    <img src="<?= htmlspecialchars($ownerImgPath) ?>" alt="Owner Photo"
+                                                    <img src="<?= htmlspecialchars($ownerImgPath ?? '') ?>" alt="Owner Photo"
                                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
-                                                        onclick="viewImage('<?= htmlspecialchars($ownerImgPath) ?>', 'Owner Photo')">
+                                                        onclick="viewImage('<?= htmlspecialchars($ownerImgPath ?? '') ?>', 'Owner Photo')">
                                                 </div>
                                                 <div
                                                     class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                     <button
-                                                        onclick="viewImage('<?= htmlspecialchars($ownerImgPath) ?>', 'Owner Photo')"
+                                                        onclick="viewImage('<?= htmlspecialchars($ownerImgPath ?? '') ?>', 'Owner Photo')"
                                                         class="p-2 bg-white/90 rounded-lg shadow-lg hover:bg-white transition-colors">
                                                         <svg class="h-5 w-5 text-gray-700" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
@@ -514,14 +479,14 @@ $_SESSION['csrf_token'] = $csrf_token;
                                                 ?>
                                                 <div
                                                     class="aspect-square rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50 shadow-md hover:shadow-xl transition-shadow duration-300">
-                                                    <img src="<?= htmlspecialchars($carImgPath) ?>" alt="Vehicle Photo"
+                                                    <img src="<?= htmlspecialchars($carImgPath ?? '') ?>" alt="Vehicle Photo"
                                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
-                                                        onclick="viewImage('<?= htmlspecialchars($carImgPath) ?>', 'Vehicle Photo')">
+                                                        onclick="viewImage('<?= htmlspecialchars($carImgPath ?? '') ?>', 'Vehicle Photo')">
                                                 </div>
                                                 <div
                                                     class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                     <button
-                                                        onclick="viewImage('<?= htmlspecialchars($carImgPath) ?>', 'Vehicle Photo')"
+                                                        onclick="viewImage('<?= htmlspecialchars($carImgPath ?? '') ?>', 'Vehicle Photo')"
                                                         class="p-2 bg-white/90 rounded-lg shadow-lg hover:bg-white transition-colors">
                                                         <svg class="h-5 w-5 text-gray-700" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
@@ -580,11 +545,11 @@ $_SESSION['csrf_token'] = $csrf_token;
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <span class="block text-sm font-medium text-gray-500 mb-1">Full Name</span>
-                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['name']) ?></p>
+                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['name'] ?? '') ?></p>
                                 </div>
                                 <div>
                                     <span class="block text-sm font-medium text-gray-500 mb-1">Address</span>
-                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['address']) ?>
+                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['address'] ?? '') ?>
                                     </p>
                                 </div>
                                 <div>
@@ -597,18 +562,18 @@ $_SESSION['csrf_token'] = $csrf_token;
                                     <span class="block text-sm font-medium text-gray-500 mb-1">Plate Number</span>
                                     <p
                                         class="text-base text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded inline-block">
-                                        <?= htmlspecialchars($homeowner['plate_number']) ?>
+                                        <?= htmlspecialchars($homeowner['plate_number'] ?? '') ?>
                                     </p>
                                 </div>
                                 <div>
                                     <span class="block text-sm font-medium text-gray-500 mb-1">Vehicle Type</span>
                                     <p class="text-base text-gray-900">
-                                        <?= htmlspecialchars($homeowner['vehicle_type']) ?>
+                                        <?= htmlspecialchars($homeowner['vehicle_type'] ?? '') ?>
                                     </p>
                                 </div>
                                 <div>
                                     <span class="block text-sm font-medium text-gray-500 mb-1">Vehicle Color</span>
-                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['color']) ?></p>
+                                    <p class="text-base text-gray-900"><?= htmlspecialchars($homeowner['color'] ?? '') ?></p>
                                 </div>
                             </div>
                         </div>

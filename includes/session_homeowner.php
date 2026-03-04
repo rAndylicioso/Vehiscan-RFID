@@ -12,7 +12,7 @@ $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
            (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
 ini_set('session.cookie_secure', $isHttps ? 1 : 0);
 
-session_name('vehiscan_session');
+session_name('vehiscan_homeowner');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

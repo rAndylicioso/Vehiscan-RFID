@@ -72,28 +72,28 @@ if (!$token) {
         <p style="text-align: center; color: #666;">This is a test page without security headers</p>
         
         <?php if ($error): ?>
-            <div class="error"><?= htmlspecialchars($error) ?></div>
+            <div class="error"><?= htmlspecialchars($error ?? '') ?></div>
         <?php else: ?>
             <h2>Visitor Pass Details:</h2>
             <div class="info">
-                <strong>Visitor:</strong> <?= htmlspecialchars($pass['visitor_name']) ?>
+                <strong>Visitor:</strong> <?= htmlspecialchars($pass['visitor_name'] ?? '') ?>
             </div>
             <div class="info">
-                <strong>Purpose:</strong> <?= htmlspecialchars($pass['purpose']) ?>
+                <strong>Purpose:</strong> <?= htmlspecialchars($pass['purpose'] ?? '') ?>
             </div>
             <div class="info">
-                <strong>Host:</strong> <?= htmlspecialchars($pass['homeowner_name']) ?>
+                <strong>Host:</strong> <?= htmlspecialchars($pass['homeowner_name'] ?? '') ?>
             </div>
             <div class="info">
-                <strong>Status:</strong> <?= htmlspecialchars($pass['status']) ?>
+                <strong>Status:</strong> <?= htmlspecialchars($pass['status'] ?? '') ?>
             </div>
         <?php endif; ?>
         
         <hr style="margin: 20px 0;">
         <p style="font-size: 12px; color: #999; text-align: center;">
             If you see this page, the issue is in security_headers.php<br>
-            Current URL: <?= htmlspecialchars($_SERVER['REQUEST_URI']) ?><br>
-            Host: <?= htmlspecialchars($_SERVER['HTTP_HOST']) ?>
+            Current URL: <?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '') ?><br>
+            Host: <?= htmlspecialchars($_SERVER['HTTP_HOST'] ?? '') ?>
         </p>
     </div>
 </body>

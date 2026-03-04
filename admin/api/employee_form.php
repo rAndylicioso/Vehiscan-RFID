@@ -23,8 +23,9 @@ $isEdit = !empty($employee);
 <div class="p-6">
     <h3 class="text-2xl font-bold text-gray-900 mb-6"><?= $isEdit ? 'Edit Employee' : 'Create New Employee' ?></h3>
 
-    <form id="employeeForm" class="space-y-6" action="/Vehiscan-RFID/admin/api/employee_save.php" method="POST">
+    <form id="employeeForm" class="space-y-6" action="api/employee_save.php" method="POST">
         <input type="hidden" name="id" value="<?= $employee['id'] ?? '' ?>">
+        <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
         
         <!-- Username -->
         <div>
@@ -107,7 +108,7 @@ $isEdit = !empty($employee);
             <button type="button" onclick="closeModal()" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
                 Cancel
             </button>
-            <button type="submit" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg font-medium">
+            <button type="submit" class="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-all shadow-lg font-medium">
                 <?= $isEdit ? 'Update Employee' : 'Create Employee' ?>
             </button>
         </div>

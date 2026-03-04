@@ -22,6 +22,7 @@
       if (table.length && !$.fn.DataTable.isDataTable('#employeesTable')) {
         table.DataTable({
           pageLength: 10,
+          scrollX: true,
           lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
           order: [[3, 'desc']], // Sort by Created date descending
           columnDefs: [

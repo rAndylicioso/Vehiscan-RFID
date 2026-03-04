@@ -120,7 +120,7 @@ try {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <h2 class="text-2xl font-bold text-gray-800 mb-2">❌ Invalid Pass</h2>
-          <p class="text-gray-600"><?php echo htmlspecialchars($error); ?></p>
+          <p class="text-gray-600"><?php echo htmlspecialchars($error ?? ''); ?></p>
         </div>
       <?php else: ?>
         <div class="space-y-4">
@@ -161,26 +161,26 @@ try {
           <div class="bg-gray-50 rounded-lg p-4 space-y-3">
             <div>
               <p class="text-sm text-gray-500 font-semibold">Visitor Name</p>
-              <p class="text-lg font-bold text-gray-900"><?php echo htmlspecialchars($pass['visitor_name']); ?></p>
+              <p class="text-lg font-bold text-gray-900"><?php echo htmlspecialchars($pass['visitor_name'] ?? ''); ?></p>
             </div>
             
             <div>
               <p class="text-sm text-gray-500 font-semibold">Vehicle Plate</p>
-              <p class="text-lg font-bold text-gray-900 font-mono"><?php echo htmlspecialchars($pass['visitor_plate']); ?></p>
+              <p class="text-lg font-bold text-gray-900 font-mono"><?php echo htmlspecialchars($pass['visitor_plate'] ?? ''); ?></p>
             </div>
             
             <div>
               <p class="text-sm text-gray-500 font-semibold">Visiting</p>
-              <p class="text-base font-semibold text-gray-900"><?php echo htmlspecialchars($pass['homeowner_name']); ?></p>
+              <p class="text-base font-semibold text-gray-900"><?php echo htmlspecialchars($pass['homeowner_name'] ?? ''); ?></p>
               <?php if ($pass['address']): ?>
-                <p class="text-sm text-gray-600"><?php echo htmlspecialchars($pass['address']); ?></p>
+                <p class="text-sm text-gray-600"><?php echo htmlspecialchars($pass['address'] ?? ''); ?></p>
               <?php endif; ?>
             </div>
             
             <?php if ($pass['purpose']): ?>
             <div>
               <p class="text-sm text-gray-500 font-semibold">Purpose</p>
-              <p class="text-base text-gray-900"><?php echo htmlspecialchars($pass['purpose']); ?></p>
+              <p class="text-base text-gray-900"><?php echo htmlspecialchars($pass['purpose'] ?? ''); ?></p>
             </div>
             <?php endif; ?>
           </div>

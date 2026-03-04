@@ -95,13 +95,13 @@ if ($format === 'excel') {
     if (!empty($data)) {
         echo "<tr>";
         foreach (array_keys($data[0]) as $key) {
-            echo "<th>".htmlspecialchars($key)."</th>";
+            echo "<th>".htmlspecialchars($key ?? '')."</th>";
         }
         echo "</tr>";
         foreach ($data as $row) {
             echo "<tr>";
             foreach ($row as $val) {
-                echo "<td>".htmlspecialchars($val)."</td>";
+                echo "<td>".htmlspecialchars($val ?? '')."</td>";
             }
             echo "</tr>";
         }
@@ -115,7 +115,7 @@ if ($format === 'excel') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?= htmlspecialchars($title) ?></title>
+    <title><?= htmlspecialchars($title ?? '') ?></title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
@@ -129,10 +129,10 @@ if ($format === 'excel') {
 </head>
 <body>
     <div class="report-header">
-        <h1><?= htmlspecialchars($title) ?></h1>
+        <h1><?= htmlspecialchars($title ?? '') ?></h1>
         <div class="report-meta">
             Generated: <?= date('F d, Y H:i:s') ?><br>
-            By: <?= htmlspecialchars($_SESSION['username']) ?><br>
+            By: <?= htmlspecialchars($_SESSION['username'] ?? '') ?><br>
             Total Records: <?= count($data) ?>
         </div>
     </div>

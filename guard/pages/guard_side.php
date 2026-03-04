@@ -12,7 +12,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guard') {
 $_SESSION['last_activity'] = time();
 
 if (!isset($_SESSION['csrf_token'])) {
-  $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 $csrf = $_SESSION['csrf_token'];
 

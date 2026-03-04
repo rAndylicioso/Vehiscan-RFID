@@ -5,7 +5,7 @@
  */
 require_once __DIR__ . '/../../includes/security_headers.php';
 
-session_name('vehiscan_session');
+session_name('vehiscan_homeowner');
 session_start();
 
 if (!isset($_SESSION['homeowner_id']) || $_SESSION['role'] !== 'homeowner') {

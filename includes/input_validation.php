@@ -21,7 +21,7 @@ function sanitizeString($input, $allowBasicHtml = false) {
     }
     
     // Strip all HTML tags and trim whitespace
-    return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    return htmlspecialchars(strip_tags(trim($input ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
 /**

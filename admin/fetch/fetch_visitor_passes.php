@@ -14,7 +14,7 @@
 <script>
     async function loadPendingPasses() {
         try {
-            const response = await fetch('../api/get_pending_passes.php');
+            const response = await fetch('api/get_pending_passes.php');
             const passes = await response.json();
 
             const container = document.getElementById('pendingPassesContainer');
@@ -81,7 +81,7 @@
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch('../api/approve_visitor_pass.php', {
+                const response = await fetch('api/approve_visitor_pass.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ pass_id: passId })
@@ -129,7 +129,7 @@
 
         if (reason) {
             try {
-                const response = await fetch('../api/reject_visitor_pass.php', {
+                const response = await fetch('api/reject_visitor_pass.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ pass_id: passId, reason: reason })
