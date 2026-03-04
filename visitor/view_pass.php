@@ -3,22 +3,13 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 0); // Don't show errors to user, log them instead
 
-// Direct database connection without config dependencies
-try {
-    $pdo = new PDO(
-        'mysql:host=localhost;dbname=vehiscan_vdp;charset=utf8mb4',
-        'root',
-        '',
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ]
-    );
-} catch (PDOException $e) {
-    error_log("[VISITOR_PASS] Database connection failed: " . $e->getMessage());
+// Use centralized database connection
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../db.php';
+
+if (!isset($pdo)) {
+    error_log("[VISITOR_PASS] Database connection not available");
     $error = 'Database Connection Failed';
-    $pdo = null;
 }
 
 $token = $_GET['token'] ?? '';
@@ -405,7 +396,7 @@ if (!$pdo) {
                 <!-- Header -->
                 <div class="pass-header">
                     <div class="logo-circle">
-                        <img src="../ville_de_palme.png" alt="Ville de Palme Logo">
+                        <img src="../assets/images/ville_de_palme.png" alt="Ville de Palme Logo">
                     </div>
                     <h1 style="color: white; font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 0.025em;">VISITOR PASS</h1>
                     <p style="color: rgba(255,255,255,0.9); font-size: 0.875rem; font-weight: 400;">VehiScan Security System</p>

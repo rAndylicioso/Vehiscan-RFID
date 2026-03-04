@@ -23,7 +23,7 @@ $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) as total,
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-        SUM(CASE WHEN status = 'approved' AND NOW() BETWEEN valid_from AND valid_until THEN 1 ELSE 0 END) as active
+        SUM(CASE WHEN status = 'active' AND NOW() BETWEEN valid_from AND valid_until THEN 1 ELSE 0 END) as active
     FROM visitor_passes 
     WHERE homeowner_id = ?
 ");

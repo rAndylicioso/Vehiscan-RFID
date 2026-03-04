@@ -12,7 +12,7 @@ if (strpos($origin, '/guard/') !== false) {
 } elseif (strpos($origin, '/admin/') !== false) {
     require_once __DIR__ . '/../includes/session_admin_unified.php';
 } elseif (strpos($origin, '/homeowners/') !== false) {
-    session_name('vehiscan_session');
+    session_name('vehiscan_homeowner');
     session_start();
 } else {
     // Default session start

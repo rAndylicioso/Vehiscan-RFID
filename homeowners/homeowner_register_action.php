@@ -2,6 +2,11 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../db.php';
 
+// Ensure session is started for CSRF validation
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 header('Content-Type: application/json');
 
 $posted_csrf = $_POST['csrf'] ?? '';

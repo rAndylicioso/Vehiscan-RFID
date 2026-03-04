@@ -11,8 +11,8 @@ try {
     $stmt = $pdo->prepare("
         SELECT vp.*, 
                CASE 
-                   WHEN vp.status = 'approved' AND NOW() BETWEEN vp.valid_from AND vp.valid_until THEN 'active'
-                   WHEN vp.status = 'approved' AND NOW() > vp.valid_until THEN 'expired'
+                   WHEN vp.status = 'active' AND NOW() > vp.valid_until THEN 'expired'
+                   WHEN vp.status = 'active' AND NOW() < vp.valid_from THEN 'upcoming'
                    ELSE vp.status
                END as display_status
         FROM visitor_passes vp

@@ -10,7 +10,7 @@ if (!$token) {
 
 try {
     $stmt = $pdo->prepare("
-        SELECT vp.*, h.name as homeowner_name, h.address, h.phone
+        SELECT vp.*, h.name as homeowner_name, h.address, h.contact_number
         FROM visitor_passes vp
         JOIN homeowners h ON vp.homeowner_id = h.id
         WHERE vp.qr_token = ?

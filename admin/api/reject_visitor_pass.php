@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+if (!in_array($_SESSION['role'] ?? '', ['super_admin', 'admin'])) {
+    http_response_code(403);
+    exit(json_encode(['success' => false, 'message' => 'Unauthorized']));
+}
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/input_sanitizer.php';
 require_once __DIR__ . '/../../includes/cache_invalidator.php';
@@ -34,9 +38,17 @@ try {
         WHERE id = ? AND status = 'pending'
     ");
 
-    $stmt->execute([$reason, $_SESSION['admin_id'] ?? $_SESSION['user_id'], $pass_id]);
+    $stmt->execute([$reason, $_SESSION['user_id'] ?? null, $pass_id]);
 
     if ($stmt->rowCount() > 0) {
+        // Invalidate caches
+        CacheInvalidator::invalidatePasses();
+        CacheInvalidator::invalidateDashboard();
+
+        if (function_exists('logAudit')) {
+            logAudit('VISITOR_PASS_REJECTED', 'visitor_passes', $pass_id, "Rejected visitor pass #$pass_id: $reason");
+        }
+
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Pass not found or already processed']);

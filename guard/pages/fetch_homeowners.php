@@ -15,7 +15,7 @@ try {
     $plateFilter = isset($_GET['plate']) ? trim($_GET['plate']) : null;
 
     // Fetch raw DB fields using prepared statement
-    $sql = "SELECT h.id, h.name, h.address, h.contact_number, h.vehicle_type, h.color, h.plate_number, h.created_at, h.owner_img AS owner_img_raw, h.car_img AS car_img_raw FROM homeowners h WHERE h.name IS NOT NULL ORDER BY h.id ASC";
+    $sql = "SELECT h.id, h.name, h.address, h.contact_number, h.vehicle_type, h.color, h.plate_number, h.created_at, h.owner_img AS owner_img_raw, h.car_img AS car_img_raw FROM homeowners h WHERE h.name IS NOT NULL AND h.account_status = 'approved' ORDER BY h.id ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

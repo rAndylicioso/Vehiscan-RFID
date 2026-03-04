@@ -19,7 +19,7 @@ try {
             address,
             contact_number
         FROM homeowners
-        WHERE account_status = 'active'
+        WHERE account_status = 'approved'
         ORDER BY name ASC
     ";
 

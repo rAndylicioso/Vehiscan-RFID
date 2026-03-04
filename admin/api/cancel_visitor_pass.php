@@ -22,8 +22,13 @@ if (!$id) {
 }
 
 try {
-    $stmt = $pdo->prepare("UPDATE visitor_passes SET status = 'cancelled' WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE visitor_passes SET status = 'cancelled' WHERE id = ? AND status IN ('pending', 'active')");
     $stmt->execute([$id]);
+
+    if ($stmt->rowCount() === 0) {
+        echo json_encode(['success' => false, 'message' => 'Pass not found or already processed']);
+        exit;
+    }
 
     // Invalidate cache after cancellation
     CacheInvalidator::invalidatePasses();

@@ -134,9 +134,6 @@ try {
 
     $pass_id = $pdo->lastInsertId();
 
-    // Reset rate limit on successful creation
-    $rateLimiter->reset("homeowner_$homeownerId", 'visitor_pass');
-
     echo json_encode([
         'success' => true,
         'message' => 'Visitor pass created successfully',

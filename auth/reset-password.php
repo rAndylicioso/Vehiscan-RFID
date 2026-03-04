@@ -49,8 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tokenValid) {
         $newPassword = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        if (strlen($newPassword) < 8) {
-            $message = 'Password must be at least 8 characters long.';
+        $minLen = defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8;
+        if (strlen($newPassword) < $minLen) {
+            $message = "Password must be at least $minLen characters long.";
             $messageType = 'error';
         } elseif ($newPassword !== $confirmPassword) {
             $message = 'Passwords do not match.';
@@ -111,7 +112,7 @@ ob_end_flush();
                     <div class="password-wrapper">
                         <div class="input-icon-wrapper">
                             <input id="password" name="password" type="password"
-                                   placeholder="••••••••••••••" required minlength="8"
+                                   placeholder="••••••••••••••" required minlength="<?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8 ?>"
                                    aria-label="New password" autocomplete="new-password">
                             <span class="input-icon">🔒</span>
                         </div>
@@ -124,7 +125,7 @@ ob_end_flush();
                     <div class="password-wrapper">
                         <div class="input-icon-wrapper">
                             <input id="confirm_password" name="confirm_password" type="password"
-                                   placeholder="••••••••••••••" required minlength="8"
+                                   placeholder="••••••••••••••" required minlength="<?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8 ?>"
                                    aria-label="Confirm new password" autocomplete="new-password">
                             <span class="input-icon">🔒</span>
                         </div>

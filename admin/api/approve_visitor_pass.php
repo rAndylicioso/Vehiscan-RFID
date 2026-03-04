@@ -49,7 +49,7 @@ try {
     ");
 
     $stmt->execute([
-        $_SESSION['admin_id'] ?? $_SESSION['user_id'],
+        $_SESSION['user_id'] ?? null,
         $qrCode,
         $pass_id
     ]);

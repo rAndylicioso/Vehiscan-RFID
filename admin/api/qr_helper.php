@@ -29,7 +29,7 @@ function generateVisitorPassQR($passId, $token, $pdo)
         QRcode::png($verifyUrl, $tempFile, QR_ECLEVEL_H, 8, 2); // Higher error correction for logo
 
         // Add logo overlay
-        $logoPath = __DIR__ . '/../../ville_de_palme.png';
+        $logoPath = __DIR__ . '/../../assets/images/ville_de_palme.png';
         if (file_exists($logoPath)) {
             addLogoToQR($tempFile, $logoPath, $finalFile);
             // Use the final file with logo
