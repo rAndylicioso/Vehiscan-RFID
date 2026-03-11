@@ -7,7 +7,7 @@ require_once __DIR__ . '/qr_helper.php';
 header('Content-Type: application/json');
 
 // Validate CSRF token using InputSanitizer
-$posted = InputSanitizer::post('csrf', 'string');
+$posted = InputSanitizer::post('csrf_token', 'string');
 if (!InputSanitizer::validateCsrf($posted)) {
     echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
     exit;
@@ -22,8 +22,42 @@ $valid_from = InputSanitizer::post('valid_from', 'string');
 $valid_until = InputSanitizer::post('valid_until', 'string');
 $is_recurring = InputSanitizer::post('is_recurring', 'int', 0);
 
-if (!$homeowner_id || !$visitor_name || !$visitor_plate || !$valid_from || !$valid_until) {
-    echo json_encode(['success' => false, 'message' => 'All fields required']);
+if (!$visitor_name || !$visitor_plate || !$valid_from || !$valid_until) {
+    echo json_encode(['success' => false, 'message' => 'Visitor name, plate, and dates are required']);
+    exit;
+}
+
+// Validate visitor name length
+if (strlen($visitor_name) < 2 || strlen($visitor_name) > 100) {
+    echo json_encode(['success' => false, 'message' => 'Visitor name must be 2-100 characters']);
+    exit;
+}
+
+// Validate date formats and logic
+$fromTs = strtotime($valid_from);
+$untilTs = strtotime($valid_until);
+
+if ($fromTs === false || $untilTs === false) {
+    echo json_encode(['success' => false, 'message' => 'Invalid date format']);
+    exit;
+}
+
+if ($untilTs <= $fromTs) {
+    echo json_encode(['success' => false, 'message' => 'End date must be after start date']);
+    exit;
+}
+
+// Prevent passes more than 90 days in duration
+$maxDuration = 90 * 24 * 60 * 60;
+if (($untilTs - $fromTs) > $maxDuration) {
+    echo json_encode(['success' => false, 'message' => 'Visitor pass duration cannot exceed 90 days']);
+    exit;
+}
+
+// Don't allow start dates more than 1 day in the past
+$oneDayAgo = time() - (24 * 60 * 60);
+if ($fromTs < $oneDayAgo) {
+    echo json_encode(['success' => false, 'message' => 'Start date cannot be in the past']);
     exit;
 }
 

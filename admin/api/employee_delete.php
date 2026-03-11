@@ -12,7 +12,7 @@ header('Content-Type: application/json');
 
 try {
     // CSRF validation using InputSanitizer
-    $csrfToken = InputSanitizer::post('csrf', 'string');
+    $csrfToken = InputSanitizer::post('csrf_token', 'string');
     if (!InputSanitizer::validateCsrf($csrfToken)) {
         throw new Exception('Invalid CSRF token');
     }

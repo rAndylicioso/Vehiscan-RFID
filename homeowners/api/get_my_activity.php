@@ -66,8 +66,8 @@ try {
                 COALESCE(al.created_at, al.log_time) as created_at,
                 COALESCE(v.vehicle_type, h.vehicle_type) as vehicle_type,
                 COALESCE(v.color, h.color) as color,
-                COALESCE(v.brand, h.brand) as brand,
-                COALESCE(v.model, h.model) as model
+                v.brand,
+                v.model
             FROM recent_logs al
             LEFT JOIN vehicles v ON al.plate_number = v.plate_number
             LEFT JOIN homeowners h ON al.plate_number = h.plate_number
@@ -85,8 +85,8 @@ try {
                 COALESCE(al.created_at, al.log_time) as created_at,
                 h.vehicle_type,
                 h.color,
-                h.brand,
-                h.model
+                NULL as brand,
+                NULL as model
             FROM recent_logs al
             LEFT JOIN homeowners h ON al.plate_number = h.plate_number
             WHERE al.plate_number IN ($placeholders)

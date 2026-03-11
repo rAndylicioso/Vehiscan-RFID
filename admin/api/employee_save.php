@@ -15,7 +15,7 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'a
 
 try {
     // CSRF validation using InputSanitizer
-    $postCsrf = InputSanitizer::post('csrf', 'string');
+    $postCsrf = InputSanitizer::post('csrf_token', 'string');
     
     if (!InputSanitizer::validateCsrf($postCsrf)) {
         throw new Exception('Invalid CSRF token');
@@ -57,7 +57,7 @@ try {
             if (strlen($newPassword) < 8) {
                 throw new Exception('Password must be at least 8 characters');
             }
-            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $passwordUpdate = true;
         }
         
@@ -104,7 +104,7 @@ try {
             throw new Exception('Username already exists');
         }
         
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
         $stmt->execute([$username, $hashedPassword, $role]);
         

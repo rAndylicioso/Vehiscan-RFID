@@ -36,9 +36,20 @@ require_once __DIR__ . '/../../db.php';
   <link rel="stylesheet" href="../css/guard-qr-modal.css?v=<?php echo time(); ?>">
 
   <style>
-    /* Skeleton Loader */
+    /* Skeleton Loader — adapts to light/dark mode */
+    :root {
+      --skeleton-from: #e5e7eb;
+      --skeleton-to: #f1f5f9;
+    }
+
+    body.dark,
+    body.dark-mode {
+      --skeleton-from: #1e293b;
+      --skeleton-to: #334155;
+    }
+
     .skeleton {
-      background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+      background: linear-gradient(90deg, var(--skeleton-from) 25%, var(--skeleton-to) 50%, var(--skeleton-from) 75%);
       background-size: 200% 100%;
       animation: skeleton-loading 1.5s infinite;
     }
@@ -121,22 +132,22 @@ require_once __DIR__ . '/../../db.php';
                 <div class="filter-toggle-group" data-type="multiple">
                   <button id="filterToday" class="filter-toggle-item" data-variant="today" data-value="today"
                     aria-label="Filter today's logs">
-                    <span>📅</span>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <span>Today</span>
                   </button>
                   <button id="filterIn" class="filter-toggle-item" data-variant="in" data-value="in"
                     aria-label="Filter IN logs">
-                    <span>🟢</span>
+                    <svg class="h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
                     <span>IN Only</span>
                   </button>
                   <button id="filterOut" class="filter-toggle-item" data-variant="out" data-value="out"
                     aria-label="Filter OUT logs">
-                    <span>🔴</span>
+                    <svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
                     <span>OUT Only</span>
                   </button>
                   <button id="filterVisitors" class="filter-toggle-item" data-variant="visitors" data-value="visitors"
                     aria-label="Filter visitor logs">
-                    <span>🎫</span>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
                     <span>Visitors</span>
                   </button>
                 </div>
@@ -207,7 +218,8 @@ require_once __DIR__ . '/../../db.php';
               <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="px-4 py-3 font-semibold"
                   style="background: var(--card, #fff); color: var(--guard-accent-dark, #222);">
-                  🚗 Vehicle Information
+                  <svg class="h-5 w-5 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10m10 0h4m-4 0H9m10 0a1 1 0 001-1v-4a1 1 0 00-1-1h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 00-.293.707V16"/></svg>
+                  Vehicle Information
                 </div>
                 <div class="p-4">
                   <div class="aspect-video bg-white dark:bg-slate-700 rounded-lg overflow-hidden mb-4 cursor-zoom-in"
@@ -223,9 +235,10 @@ require_once __DIR__ . '/../../db.php';
               </div>
               <!-- Owner Card -->
               <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-                <div class="px-4 py-3 fonts-semibold"
+                <div class="px-4 py-3 font-semibold"
                   style="background: var(--card, #fff); color: var(--guard-accent-dark, #222);">
-                  👤 Owner Information
+                  <svg class="h-5 w-5 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  Owner Information
                 </div>
                 <div class="p-4">
                   <div class="aspect-video bg-white dark:bg-slate-700 rounded-lg overflow-hidden mb-4 cursor-zoom-in"
@@ -241,12 +254,12 @@ require_once __DIR__ . '/../../db.php';
                 <div class="bg-white dark:bg-slate-800 px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center">
                   <button id="prevOwner"
                     class="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
-                    ◄ Prev
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>Prev
                   </button>
                   <span id="ownerCounter" class="text-sm font-medium text-gray-600">-/-</span>
                   <button id="nextOwner"
                     class="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
-                    Next ►
+                    Next<svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
                   </button>
                 </div>
               </div>
@@ -261,7 +274,7 @@ require_once __DIR__ . '/../../db.php';
               <div
                 class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-2 font-semibold">
-                  <span>📹</span>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                   <span>Live Camera Feed</span>
                 </div>
                 <div class="flex items-center gap-3">
@@ -317,7 +330,7 @@ require_once __DIR__ . '/../../db.php';
                     <div class="flex justify-center gap-3">
                       <button id="toggleCamera"
                         class="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg font-bold text-sm uppercase tracking-wide hover:from-gray-700 hover:to-gray-800 shadow-md hover:shadow-lg transition-all flex items-center gap-2">
-                        <i id="powerIcon" class="fas fa-power-off"></i>
+                        <span id="powerIcon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9"/></svg></span>
                         <span id="cameraBtnText">Start Camera</span>
                       </button>
                     </div>
@@ -325,13 +338,13 @@ require_once __DIR__ . '/../../db.php';
                     <div id="secondaryControls" class="flex justify-center gap-3" style="display: none;">
                       <button id="snapshotBtn"
                         class="px-6 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition-all flex items-center gap-2">
-                        <i class="fas fa-camera"></i>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
                         <span>Snapshot</span>
                       </button>
                       <button id="switchCameraBtn"
                         class="px-6 py-2 bg-gray-700 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all flex items-center gap-2"
                         style="display: none;">
-                        <i class="fas fa-sync-alt"></i>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         <span>Switch Camera</span>
                       </button>
                     </div>
@@ -363,13 +376,13 @@ require_once __DIR__ . '/../../db.php';
               </div>
               <button id="refreshVisitorPasses"
                 class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm">
-                🔄 Refresh
+                                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Refresh
               </button>
             </div>
 
             <!-- Search Bar -->
             <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
-              <input type="text" id="visitorSearchInput" placeholder="🔍 Search by visitor name, plate number..."
+              <input type="text" id="visitorSearchInput" placeholder="Search by visitor name, plate number..."
                 class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 dark:text-gray-200">
             </div>
 
@@ -501,9 +514,57 @@ require_once __DIR__ . '/../../db.php';
     </div>
   </div>
 
+  <!-- RFID Scan Alert Overlay -->
+  <div id="rfidScanOverlay" class="rfid-scan-overlay" style="display:none;">
+    <div class="rfid-scan-card">
+      <!-- Close button -->
+      <button id="rfidScanClose" class="rfid-scan-close" title="Dismiss">&times;</button>
+      <!-- Status Banner -->
+      <div id="rfidScanBanner" class="rfid-scan-banner rfid-scan-in">
+        <div class="rfid-scan-direction-icon" id="rfidScanDirIcon">
+          <svg id="rfidIconIn" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+          <svg id="rfidIconOut" class="w-8 h-8" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </div>
+        <div>
+          <span id="rfidScanStatus" class="rfid-scan-status-text">VEHICLE IN</span>
+          <span id="rfidScanTime" class="rfid-scan-time"></span>
+        </div>
+      </div>
+      <!-- Body -->
+      <div class="rfid-scan-body">
+        <div class="rfid-scan-grid">
+          <!-- Owner column -->
+          <div class="rfid-scan-col">
+            <div class="rfid-scan-img-wrap">
+              <img id="rfidScanOwnerImg" src="" alt="Owner" class="rfid-scan-img">
+            </div>
+            <div class="rfid-scan-info">
+              <p class="rfid-scan-label">Homeowner</p>
+              <p id="rfidScanName" class="rfid-scan-value-lg">—</p>
+              <p id="rfidScanAddress" class="rfid-scan-value-sm">—</p>
+              <p id="rfidScanContact" class="rfid-scan-value-sm">—</p>
+            </div>
+          </div>
+          <!-- Vehicle column -->
+          <div class="rfid-scan-col">
+            <div class="rfid-scan-img-wrap">
+              <img id="rfidScanCarImg" src="" alt="Vehicle" class="rfid-scan-img">
+            </div>
+            <div class="rfid-scan-info">
+              <p class="rfid-scan-label">Vehicle</p>
+              <p id="rfidScanPlate" class="rfid-scan-value-lg font-mono">—</p>
+              <p id="rfidScanVehicleType" class="rfid-scan-value-sm">—</p>
+              <p id="rfidScanColor" class="rfid-scan-value-sm">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Image Zoom Modal -->
-  <div id="imageZoomModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4"
-    style="display: none; z-index: var(--z-imagezoom);" onclick="closeImageZoom()">
+  <div id="imageZoomModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 hidden"
+    style="z-index: var(--z-imagezoom);" onclick="closeImageZoom()">
     <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 transition-colors"
       onclick="(event||window.event).stopPropagation(); closeImageZoom()">&times;</button>
     <img id="zoomedImage" src="" alt="Zoomed" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">

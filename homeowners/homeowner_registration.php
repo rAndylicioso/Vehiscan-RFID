@@ -7,6 +7,10 @@ require_once __DIR__ . '/../includes/common_utilities.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
+    $appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
+    if (!is_dir($appSavePath)) { mkdir($appSavePath, 0700, true); }
+    ini_set('session.save_path', $appSavePath);
+    ini_set('session.gc_maxlifetime', 3600);
     session_start();
 }
 
@@ -18,23 +22,7 @@ $csrf = $_SESSION['csrf_token'];
 
 // formatContactNumber() now comes from common_utilities.php
 
-if (isset($_GET['classic'])) {
-  if (!empty($_FILES['test_image']['tmp_name']) && is_uploaded_file($_FILES['test_image']['tmp_name'])) {
-    $testDir = __DIR__ . '/../uploads/homeowners/';
-    if (!is_dir($testDir)) {
-      mkdir($testDir, 0755, true);
-    }
-    $dest = $testDir . 'test_' . basename($_FILES['test_image']['name']);
-    if (move_uploaded_file($_FILES['test_image']['tmp_name'], $dest)) {
-      echo '<p>Classic upload succeeded and saved as ' . htmlspecialchars($dest ?? '') . '</p>';
-    } else {
-      echo '<p>Classic upload received the file but failed to save.</p>';
-    }
-  } else {
-    echo '<p>No file received by classic upload handler.</p>';
-  }
-  exit;
-}
+// Debug classic upload handler removed for security — was allowing unauthenticated uploads
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   header('Content-Type: application/json');
@@ -182,11 +170,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $destination = $uploadDir . $filename;
     $relativePath = $fieldName === 'owner_img' ? 'homeowners/' : 'vehicles/';
 
-    error_log(sprintf("Saving %s to: %s", $fieldLabel, $destination));
-
     if (!move_uploaded_file($file['tmp_name'], $destination)) {
       $uploadErrors[] = sprintf('%s could not be saved. Error: %s', $fieldLabel, error_get_last()['message'] ?? 'Unknown error');
-      error_log(sprintf("Upload failed for %s: %s", $fieldLabel, error_get_last()['message'] ?? 'Unknown error'));
       return null;
     }
 
@@ -246,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->query("SELECT 1 FROM homeowner_auth LIMIT 1");
         $tableExists = true;
       } catch (PDOException $e) {
-        error_log("homeowner_auth table does not exist - will create it");
+        // Table doesn't exist yet
       }
       
       // If table doesn't exist, create it now
@@ -268,7 +253,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             INDEX idx_email (email)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ");
-        error_log("Created homeowner_auth table automatically");
       }
       
       // Start transaction for data consistency
@@ -314,15 +298,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       echo json_encode([
         'success' => true, 
         'message' => 'Registration successful! Your account is pending approval by the administrator. You will be notified via email once approved.',
-        'homeowner_id' => $homeowner_id,
-        'plate_number' => $plate_number,
-        'username' => $username,
-        'email' => $email,
         'status' => 'pending'
       ]);
-      
-      // Log registration for admin review
-      error_log("New homeowner registration: $username ($email) - Status: Pending Approval");
     } catch (PDOException $e) {
       // Rollback transaction on error
       if ($pdo->inTransaction()) {
@@ -387,7 +364,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homeowner Registration — VehiScan</title>
 <link rel="stylesheet" href="../assets/css/registration.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../assets/js/libs/sweetalert2.all.min.js"></script>
 </head>
 <body>
   <!-- Background decorations -->
@@ -531,7 +508,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               title="Must be at least 12 characters with letters and numbers"
             >
             <button type="button" class="toggle-password" data-target="passwordInput" aria-label="Toggle password visibility" tabindex="-1">
-              <span class="eye-icon">👁️</span>
+              <span class="eye-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
             </button>
           </div>
           <p class="form-hint">At least 12 characters with letters and numbers</p>
@@ -552,7 +529,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               maxlength="100"
             >
             <button type="button" class="toggle-password" data-target="confirmPasswordInput" aria-label="Toggle confirm password visibility" tabindex="-1">
-              <span class="eye-icon">👁️</span>
+              <span class="eye-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
             </button>
           </div>
         </div>
@@ -653,7 +630,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Your Photo <span class="required">*</span>
           </label>
           <div class="upload-box" id="ownerUploadBox" data-for="owner_img">
-            <div class="upload-icon">📸</div>
+            <div class="upload-icon"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
             <div class="upload-text">
               <p class="upload-title">Click to upload or drag and drop</p>
               <p class="upload-subtitle">JPG, PNG, or WEBP (max 4MB)</p>
@@ -668,11 +645,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             >
             <div class="upload-preview" id="ownerPreview" style="display: none;">
               <img id="ownerPreviewImg" alt="Owner preview">
-              <button type="button" class="preview-remove" data-for="owner_img">✕</button>
+              <button type="button" class="preview-remove" data-for="owner_img"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="upload-actions">
-              <button type="button" class="camera-btn" data-for="owner_img">📸 Use Camera</button>
-              <button type="button" class="gallery-btn" data-for="owner_img">🖼️ Choose from Gallery</button>
+              <button type="button" class="camera-btn" data-for="owner_img"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Use Camera</button>
+              <button type="button" class="gallery-btn" data-for="owner_img"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Choose from Gallery</button>
             </div>
             <div class="note" id="ownerImgLabel">Owner photo is required for verification</div>
           </div>
@@ -680,10 +657,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="form-group">
           <label class="form-label">
-            Vehicle Photo <span class="text-gray-400">(Optional)</span>
+            Vehicle Photo <span class="text-gray-400"></span>
           </label>
           <div class="upload-box" id="carUploadBox" data-for="car_img">
-            <div class="upload-icon">🚗</div>
+            <div class="upload-icon"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
             <div class="upload-text">
               <p class="upload-title">Click to upload or drag and drop</p>
               <p class="upload-subtitle">JPG, PNG, or WEBP (max 4MB)</p>
@@ -697,11 +674,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             >
             <div class="upload-preview" id="carPreview" style="display: none;">
               <img id="carPreviewImg" alt="Vehicle preview">
-              <button type="button" class="preview-remove" data-for="car_img">✕</button>
+              <button type="button" class="preview-remove" data-for="car_img"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="upload-actions">
-              <button type="button" class="camera-btn" data-for="car_img">📸 Use Camera</button>
-              <button type="button" class="gallery-btn" data-for="car_img">🖼️ Choose from Gallery</button>
+              <button type="button" class="camera-btn" data-for="car_img"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Use Camera</button>
+              <button type="button" class="gallery-btn" data-for="car_img"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Choose from Gallery</button>
             </div>
             <div class="note" id="carImgLabel">Helps guards identify your vehicle</div>
           </div>
@@ -764,11 +741,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           if (input) {
             if (input.type === 'password') {
               input.type = 'text';
-              eyeIcon.textContent = '🙈';
+              eyeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
               this.setAttribute('aria-label', 'Hide password');
             } else {
               input.type = 'password';
-              eyeIcon.textContent = '👁️';
+              eyeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
               this.setAttribute('aria-label', 'Show password');
             }
           }

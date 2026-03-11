@@ -14,7 +14,7 @@ header('Content-Type: application/json');
 
 // Validate CSRF token
 $csrf = $_SESSION['csrf_token'] ?? '';
-$posted = $_POST['csrf'] ?? '';
+$posted = $_POST['csrf_token'] ?? '';
 if (!hash_equals($csrf, (string)$posted)) {
     echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
     exit;
@@ -42,5 +42,5 @@ try {
     }
 } catch (Exception $e) {
     error_log("Delete log error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'A database error occurred while deleting the log.']);
 }

@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../db.php';
 header('Content-Type: application/json');
 
 $csrf = $_SESSION['csrf_token'] ?? '';
-$posted = $_POST['csrf'] ?? '';
+$posted = $_POST['csrf_token'] ?? '';
 if (!hash_equals($csrf, (string)$posted)) {
     echo json_encode(['success'=>false,'message'=>'Invalid CSRF token']); exit;
 }
@@ -25,5 +25,6 @@ try {
     $ok = $stmt->execute([$id]);
     echo json_encode(['success'=>$ok,'message'=> $ok ? "Deleted homeowner #{$id}" : 'Delete failed']);
 } catch (Exception $e) {
-    echo json_encode(['success'=>false,'message'=>'DB error: '.$e->getMessage()]);
+    error_log('[HOMEOWNER_DELETE] DB error: ' . $e->getMessage());
+    echo json_encode(['success'=>false,'message'=>'A database error occurred. Please try again.']);
 }

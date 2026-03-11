@@ -778,15 +778,21 @@ input[type="file"]::-webkit-file-upload-button:hover {
 }
 
 .swal2-confirm {
-  background: #000 !important;
+  background: var(--swal2-confirm-button-background-color, #3b82f6) !important;
+  color: #fff !important;
   border-radius: 6px;
   padding: 0.625rem 1.5rem;
   font-weight: 500;
   font-size: 0.875rem;
 }
 
+.swal2-cancel {
+  background: var(--ta-swal-cancel, #6b7280) !important;
+  color: #fff !important;
+}
+
 .swal2-confirm:hover {
-  background: #1f1f1f !important;
+  filter: brightness(1.1);
 }
 
 /* Form animations */

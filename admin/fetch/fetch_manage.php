@@ -46,8 +46,7 @@ try {
 
 <!-- Action Bar -->
 <div class="flex items-center gap-2 mb-4 flex-wrap">
-  <button id="refreshBtn"
-    class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
+  <button id="refreshBtn" class="ta-btn ta-btn-secondary">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -55,21 +54,27 @@ try {
     </svg>
     Refresh
   </button>
-  <button id="openCreateBtn"
-    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
+  <button id="openCreateBtn" class="ta-btn ta-btn-primary">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
     </svg>
     Add New
   </button>
-  <button id="exportManageBtn"
-    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+  <button id="exportManageBtn" class="ta-btn ta-btn-success">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
       </path>
     </svg>
     Export CSV
+  </button>
+  <button id="qrRegistrationBtn" class="ta-btn ta-btn-secondary">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm2 2v3h3V5h-3zM5 5v3h3V5H5zm0 11v3h3v-3H5zm9 1h1v1h-1v-1zm2 0h1v1h-1v-1zm-2 2h1v1h-1v-1zm2 0h1v1h-1v-1zm2-2h1v1h-1v-1zm0 2h1v1h-1v-1z">
+      </path>
+    </svg>
+    QR Registration
   </button>
   <div class="flex items-center gap-2 ml-auto">
     <div class="relative flex items-center">
@@ -79,7 +84,7 @@ try {
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
       <input type="text" id="searchInput"
-        class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
+        class="ta-input pl-10 min-w-[280px]"
         placeholder="Search records...">
     </div>
     <span id="searchCount" class="text-sm text-gray-600 font-medium whitespace-nowrap"></span>
@@ -98,30 +103,41 @@ try {
         LEFT JOIN vehicles v ON v.homeowner_id = h.id AND v.plate_number = h.plate_number
         WHERE h.account_status = 'approved'
         ORDER BY h.id DESC
+        LIMIT 1000
     ");
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-  // Debug output
-  error_log("Fetched " . count($rows) . " APPROVED homeowner records for Manage Records");
 } catch (Exception $e) {
   error_log("Error fetching homeowners: " . $e->getMessage());
   $rows = [];
 }
 ?>
 
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-  <table id="homeownersTable" class="w-full text-sm">
-    <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+<div class="ta-table-wrapper">
+  <table id="homeownersTable" class="ta-table">
+    <thead>
       <tr>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Name</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Contact</th>
-        <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">RFID</th>
-        <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+        <th>Name</th>
+        <th>Plate</th>
+        <th>Vehicle</th>
+        <th>Contact</th>
+        <th class="text-center">RFID</th>
+        <th class="text-center">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+    <tbody>
+      <?php if (empty($rows)): ?>
+        <tr>
+          <td colspan="6">
+            <div class="ta-empty-state">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <p>No approved homeowners found</p>
+            </div>
+          </td>
+        </tr>
+      <?php endif; ?>
       <?php foreach ($rows as $r): ?>
         <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50">
           <td class="px-4 py-3 text-slate-700 dark:text-slate-300"><?php echo htmlspecialchars($r['name'] ?? ''); ?></td>
@@ -149,27 +165,24 @@ try {
             <?php endif; ?>
           </td>
           <td class="px-4 py-3">
-            <div class="flex items-center justify-center gap-2">
-              <button
-                class="inline-flex items-center px-3 py-1.5 bg-gray-700 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors gap-1 btn-edit"
-                data-id="<?php echo $r['id']; ?>">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                  </path>
-                </svg>
-                Edit
-              </button>
-              <button
-                class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 transition-colors gap-1 deleteBtn"
-                data-id="<?php echo $r['id']; ?>">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                  </path>
-                </svg>
-                Delete
-              </button>
+            <div class="flex items-center justify-center">
+              <div class="ta-action-dropdown">
+                <button type="button" class="ta-action-btn">
+                  Actions
+                  <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                </button>
+                <div class="ta-action-menu">
+                  <button type="button" class="ta-action-menu-item btn-edit" data-id="<?php echo $r['id']; ?>">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit
+                  </button>
+                  <div class="ta-action-divider"></div>
+                  <button type="button" class="ta-action-menu-item red deleteBtn" data-id="<?php echo $r['id']; ?>">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
           </td>
         </tr>

@@ -102,7 +102,7 @@
         await enumerateCameras();
         
         if (window.toast) {
-          window.toast.success('📹 Camera started');
+          window.toast.success('Camera started');
         }
       } catch (error) {
         // Only log non-permission errors to reduce console spam
@@ -112,11 +112,11 @@
           __vsLog('[MAIN-CAMERA] Camera permission denied by user');
         }
         
-        let errorMsg = '❌ Camera access denied. Please allow camera access in your browser.';
+        let errorMsg = 'Camera access denied. Please allow camera access in your browser.';
         if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-          errorMsg = '❌ No camera found. Please connect a camera device.';
+          errorMsg = 'No camera found. Please connect a camera device.';
         } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-          errorMsg = '❌ Camera is already in use by another application.';
+          errorMsg = 'Camera is already in use by another application.';
         }
         
         if (window.toast) {
@@ -156,7 +156,7 @@
         if (cameraTimestamp) cameraTimestamp.classList.add('hidden');
         
         if (window.toast) {
-          window.toast.info('📹 Camera stopped');
+          window.toast.info('Camera stopped');
         }
       }
     }
@@ -193,7 +193,7 @@
       });
       
       if (window.toast) {
-        window.toast.success('📸 Snapshot saved');
+        window.toast.success('Snapshot saved');
       }
     }
     

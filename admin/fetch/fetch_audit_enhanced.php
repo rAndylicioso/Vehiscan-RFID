@@ -8,21 +8,7 @@
  * @version 1.0.0
  * @created 2025-11-20
  */
-
-// Check session first
-session_name('vehiscan_superadmin');
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// If no super admin session, try admin
-if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
-    session_write_close();
-    session_name('vehiscan_admin');
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-}
+require_once __DIR__ . '/../../includes/session_admin_unified.php';
 
 // Check authentication
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {

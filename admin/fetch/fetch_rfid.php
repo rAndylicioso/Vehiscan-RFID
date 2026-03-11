@@ -99,43 +99,37 @@ try {
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                </svg>
-            </div>
-            <div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= $totalVehicles ?></p>
-                <p class="text-xs text-gray-500">Total Vehicles</p>
-            </div>
+    <div class="ta-stat-card">
+        <div class="ta-stat-icon blue">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+        </div>
+        <div class="ta-stat-content">
+            <p class="ta-stat-label">Total Vehicles</p>
+            <p class="ta-stat-value"><?= $totalVehicles ?></p>
         </div>
     </div>
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                </svg>
-            </div>
-            <div>
-                <p class="text-2xl font-bold text-green-600"><?= $boundCount ?></p>
-                <p class="text-xs text-gray-500">RFID Bound</p>
-            </div>
+    <div class="ta-stat-card">
+        <div class="ta-stat-icon green">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+        </div>
+        <div class="ta-stat-content">
+            <p class="ta-stat-label">RFID Bound</p>
+            <p class="ta-stat-value" style="color: #059669;"><?= $boundCount ?></p>
         </div>
     </div>
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                </svg>
-            </div>
-            <div>
-                <p class="text-2xl font-bold text-amber-600"><?= $unboundCount ?></p>
-                <p class="text-xs text-gray-500">Unbound</p>
-            </div>
+    <div class="ta-stat-card">
+        <div class="ta-stat-icon amber">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+        </div>
+        <div class="ta-stat-content">
+            <p class="ta-stat-label">Unbound</p>
+            <p class="ta-stat-value" style="color: #d97706;"><?= $unboundCount ?></p>
         </div>
     </div>
 </div>
@@ -148,7 +142,7 @@ try {
             <div class="flex items-center gap-4">
                 <div class="relative">
                     <div class="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl rfid-pulse">
-                        📡
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.007H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
                     </div>
                 </div>
                 <div>
@@ -180,8 +174,7 @@ try {
 
 <!-- Action Bar -->
 <div class="flex items-center gap-2 mb-4 flex-wrap">
-    <button id="rfidRefreshBtn"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
+    <button id="rfidRefreshBtn" class="ta-btn ta-btn-secondary">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -204,22 +197,22 @@ try {
 </div>
 
 <!-- Main Table: Vehicles with RFID Status -->
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
-    <table id="rfidTable" class="w-full text-sm">
-        <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+<div class="ta-table-wrapper" style="margin-bottom: 1.5rem;">
+    <table id="rfidTable" class="ta-table">
+        <thead>
             <tr>
-                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Owner</th>
-                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Plate</th>
-                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Vehicle</th>
-                <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">RFID Status</th>
-                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">RFID UID</th>
-                <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Bound Date</th>
-                <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+                <th>Owner</th>
+                <th>Plate</th>
+                <th>Vehicle</th>
+                <th class="text-center">RFID Status</th>
+                <th>RFID UID</th>
+                <th>Bound Date</th>
+                <th class="text-center">Actions</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+        <tbody>
             <?php if (empty($vehicles)): ?>
-                <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No vehicles found</td></tr>
+                <tr><td colspan="7"><div class="ta-empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg><p>No vehicles found</p></div></td></tr>
             <?php else: ?>
                 <?php foreach ($vehicles as $v): ?>
                     <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50" data-vehicle-id="<?= $v['vehicle_id'] ?>">
@@ -233,15 +226,9 @@ try {
                         </td>
                         <td class="px-4 py-3 text-center">
                             <?php if (!empty($v['rfid_uid'])): ?>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                                    Bound
-                                </span>
+                                <span class="ta-badge success">Bound</span>
                             <?php else: ?>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                                    Unbound
-                                </span>
+                                <span class="ta-badge warning">Unbound</span>
                             <?php endif; ?>
                         </td>
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">
@@ -253,7 +240,7 @@ try {
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-2">
                                 <?php if (empty($v['rfid_uid'])): ?>
-                                    <button class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors gap-1 btn-bind-rfid"
+                                    <button class="ta-btn ta-btn-primary ta-btn-sm btn-bind-rfid"
                                             data-vehicle-id="<?= $v['vehicle_id'] ?>"
                                             data-plate="<?= htmlspecialchars($v['plate_number'] ?? '') ?>"
                                             data-owner="<?= htmlspecialchars($v['owner_name'] ?? '') ?>">
@@ -263,7 +250,7 @@ try {
                                         Bind RFID
                                     </button>
                                 <?php else: ?>
-                                    <button class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 transition-colors gap-1 btn-unbind-rfid"
+                                    <button class="ta-btn ta-btn-danger ta-btn-sm btn-unbind-rfid"
                                             data-vehicle-id="<?= $v['vehicle_id'] ?>"
                                             data-plate="<?= htmlspecialchars($v['plate_number'] ?? '') ?>"
                                             data-uid="<?= htmlspecialchars($v['rfid_uid'] ?? '') ?>">
@@ -290,21 +277,21 @@ try {
         </svg>
         Recent RFID Scans
     </h3>
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700">
+    <div class="ta-table-wrapper">
+        <table class="ta-table">
+            <thead>
                 <tr>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Time</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">RFID UID</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Vehicle</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Owner</th>
-                    <th class="text-center px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Result</th>
-                    <th class="text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Source</th>
+                    <th>Time</th>
+                    <th>RFID UID</th>
+                    <th>Vehicle</th>
+                    <th>Owner</th>
+                    <th class="text-center">Result</th>
+                    <th>Source</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-slate-700" id="recentScanLog">
+            <tbody id="recentScanLog">
                 <?php if (empty($recentScans)): ?>
-                    <tr><td colspan="6" class="px-3 py-6 text-center text-gray-400 dark:text-gray-500">No scan history yet</td></tr>
+                    <tr><td colspan="6"><div class="ta-empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><p>No scan history yet</p></div></td></tr>
                 <?php else: ?>
                     <?php foreach ($recentScans as $scan): ?>
                         <tr class="hover:bg-gray-50 dark:hover:bg-slate-700">

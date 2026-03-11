@@ -134,7 +134,7 @@ class DesktopNotificationManager {
    */
   notifyAccessLog(log) {
     const isGranted = log.status === 'Access Granted';
-    const icon = isGranted ? '✅' : '❌';
+    const icon = isGranted ? '[OK]' : '[X]';
     const sound = isGranted ? 'granted' : 'denied';
     
     const title = `${icon} New Vehicle Access`;
@@ -164,7 +164,7 @@ class DesktopNotificationManager {
    * @param {object} pass - Visitor pass data
    */
   notifyVisitorPass(pass) {
-    const title = '🎫 Visitor Pass Created';
+    const title = 'Visitor Pass Created';
     const body = `Visitor: ${pass.visitor_name}\nPlate: ${pass.visitor_plate}\nValid until: ${pass.valid_until}`;
     
     this.send(title, {
@@ -181,7 +181,7 @@ class DesktopNotificationManager {
    * @param {number} count - Number of expiring passes
    */
   notifyExpiringPasses(count) {
-    const title = '⚠️ Expiring Visitor Passes';
+    const title = 'Expiring Visitor Passes';
     const body = `${count} visitor pass${count > 1 ? 'es' : ''} expiring soon`;
     
     this.send(title, {
@@ -224,7 +224,7 @@ class DesktopNotificationManager {
    * Test notification
    */
   test() {
-    this.send('🧪 Test Notification', {
+    this.send('Test Notification', {
       body: 'If you can see this, notifications are working!',
       duration: 5000
     });

@@ -14,6 +14,18 @@
  */
 
 header('Content-Type: application/json');
+
+// CORS: only allow same-origin and configured trusted origins
+$allowedOrigins = ['http://localhost', 'https://localhost', 'http://127.0.0.1'];
+$wifiIp = getenv('WIFI_IP');
+if ($wifiIp) {
+    $allowedOrigins[] = 'http://' . $wifiIp;
+    $allowedOrigins[] = 'https://' . $wifiIp;
+}
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-API-Key, X-Reader-ID');
 
@@ -67,7 +79,13 @@ if (!empty($apiKey)) {
     }
 } else {
     // Session-based authentication (simulator or admin)
-    require_once __DIR__ . '/../../includes/session_admin_unified.php';
+    // Use guard session ONLY when no admin/superadmin cookie exists
+    $hasAdminCookie = isset($_COOKIE['vehiscan_admin']) || isset($_COOKIE['vehiscan_superadmin']);
+    if (isset($_COOKIE['vehiscan_guard']) && !$hasAdminCookie) {
+        require_once __DIR__ . '/../../includes/session_guard.php';
+    } else {
+        require_once __DIR__ . '/../../includes/session_admin_unified.php';
+    }
     if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin', 'guard'])) {
         http_response_code(403);
         exit(json_encode(['success' => false, 'message' => 'Unauthorized']));
@@ -75,8 +93,12 @@ if (!empty($apiKey)) {
 
     // CSRF validation for session-based requests
     $csrf = $_SESSION['csrf_token'] ?? '';
-    $posted = $_POST['csrf'] ?? '';
+    $posted = $_POST['csrf_token'] ?? '';
     if (!hash_equals($csrf, (string)$posted)) {
+        error_log('[RFID_SCAN] CSRF mismatch — session_name=' . session_name()
+            . ', role=' . ($_SESSION['role'] ?? 'none')
+            . ', has_session_token=' . (!empty($csrf) ? 'yes' : 'no')
+            . ', has_posted_token=' . (!empty($posted) ? 'yes' : 'no'));
         http_response_code(403);
         exit(json_encode(['success' => false, 'message' => 'Invalid security token']));
     }
@@ -106,8 +128,6 @@ if (strlen($rfidUid) > 32 || strlen($rfidUid) < 4) {
     http_response_code(400);
     exit(json_encode(['success' => false, 'message' => 'Invalid RFID UID format']));
 }
-
-error_log("[RFID_SCAN] Scan received - UID: $rfidUid, Source: $inputSource, Reader: $readerId");
 
 try {
     $pdo->beginTransaction();
@@ -167,8 +187,6 @@ try {
 
         $pdo->commit();
 
-        error_log("[RFID_SCAN] Binding completed - UID: $rfidUid bound to vehicle #{$targetId}");
-
         exit(json_encode([
             'success' => true,
             'scan_result' => 'uid_bound',
@@ -225,8 +243,6 @@ try {
         logScan($pdo, $rfidUid, $readerId, $apiKeyId, 'access_granted', $inputSource, $vehicle['id'], null, null);
 
         $pdo->commit();
-
-        error_log("[RFID_SCAN] Access granted - UID: $rfidUid, Plate: {$vehicle['plate_number']}, Status: $newStatus");
 
         exit(json_encode([
             'success' => true,

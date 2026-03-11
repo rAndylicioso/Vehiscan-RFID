@@ -12,7 +12,14 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/security_headers.php';
-require_once __DIR__ . '/../../includes/session_admin_unified.php';
+
+// Multi-role session: use guard session ONLY when no admin/superadmin cookie exists
+$hasAdminCookie = isset($_COOKIE['vehiscan_admin']) || isset($_COOKIE['vehiscan_superadmin']);
+if (isset($_COOKIE['vehiscan_guard']) && !$hasAdminCookie) {
+    require_once __DIR__ . '/../../includes/session_guard.php';
+} else {
+    require_once __DIR__ . '/../../includes/session_admin_unified.php';
+}
 
 // Auth check
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin', 'guard'])) {

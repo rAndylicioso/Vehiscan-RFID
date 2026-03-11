@@ -12,10 +12,10 @@ try {
     $days = isset($_GET['days']) ? (int)$_GET['days'] : 7;
     
     $stmt = $pdo->prepare("
-        SELECT DATE(timestamp) as date, COUNT(*) as count 
-        FROM access_logs 
-        WHERE timestamp >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-        GROUP BY DATE(timestamp)
+        SELECT DATE(created_at) as date, COUNT(*) as count 
+        FROM recent_logs 
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+        GROUP BY DATE(created_at)
         ORDER BY date ASC
     ");
     $stmt->execute([$days]);

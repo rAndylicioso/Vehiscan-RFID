@@ -8,6 +8,14 @@ $homeownerId = $_SESSION['homeowner_id'];
 $data = json_decode(file_get_contents('php://input'), true);
 $vehicleId = $data['vehicle_id'] ?? null;
 
+// Validate CSRF token
+$csrfToken = $data['csrf_token'] ?? '';
+if (empty($csrfToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit();
+}
+
 if (!$vehicleId) {
     echo json_encode(['success' => false, 'message' => 'Vehicle ID required']);
     exit();

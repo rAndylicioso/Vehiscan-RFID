@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/cache_invalidator.php';
 header('Content-Type: application/json');
 
 // Validate CSRF token using InputSanitizer
-$posted = InputSanitizer::post('csrf', 'string');
+$posted = InputSanitizer::post('csrf_token', 'string');
 if (!InputSanitizer::validateCsrf($posted)) {
     echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
     exit;

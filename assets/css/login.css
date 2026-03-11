@@ -479,10 +479,17 @@ h1 {
 }
 
 .swal2-confirm {
+  background: var(--swal2-confirm-button-background-color, #3b82f6) !important;
+  color: #fff !important;
   border-radius: 6px;
   padding: 0.625rem 1.5rem;
   font-weight: 500;
   font-size: 0.875rem;
+}
+
+.swal2-cancel {
+  background: var(--ta-swal-cancel, #6b7280) !important;
+  color: #fff !important;
 }
 
 /* Responsive design */
@@ -505,5 +512,158 @@ h1 {
 
   .logo-image {
     height: 48px;
+  }
+}
+
+/* ───── Dark Mode (system preference) ───── */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0f172a;
+  }
+
+  .bg-decoration-1 {
+    background: radial-gradient(circle, #60a5fa 0%, transparent 70%);
+  }
+
+  .bg-decoration-2 {
+    border-color: #60a5fa;
+  }
+
+  .bg-decoration-3 {
+    background: radial-gradient(circle, #60a5fa 0%, transparent 70%);
+  }
+
+  .login-container {
+    background: #1e293b;
+    border: 1px solid #334155;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  h1 {
+    color: #f1f5f9;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+  }
+
+  .role-btn {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+  }
+
+  .role-btn:hover:not(.active) {
+    background: #334155;
+    border-color: #475569;
+  }
+
+  .role-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .role-btn.active::before {
+    background: #3b82f6;
+  }
+
+  .form-label {
+    color: #cbd5e1;
+  }
+
+  .form-group input {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-color: #334155;
+  }
+
+  .form-group input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+  }
+
+  .form-group input::placeholder {
+    color: #64748b;
+  }
+
+  .form-group input:invalid:not(:placeholder-shown) {
+    border-color: #ef4444;
+  }
+
+  .form-group input:valid:not(:placeholder-shown) {
+    border-color: #22c55e;
+  }
+
+  .input-icon {
+    color: #64748b;
+  }
+
+  .form-group input:focus ~ .input-icon {
+    color: #60a5fa;
+  }
+
+  .password-wrapper button {
+    color: #94a3b8;
+  }
+
+  .password-wrapper button:hover {
+    color: #f1f5f9;
+    background: #334155;
+  }
+
+  .remember-me {
+    color: #cbd5e1;
+  }
+
+  .remember-me input[type="checkbox"] {
+    accent-color: #3b82f6;
+  }
+
+  .forgot-link {
+    color: #93c5fd;
+  }
+
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .divider {
+    color: #64748b;
+  }
+
+  .divider::before,
+  .divider::after {
+    border-color: #334155;
+  }
+
+  .signup-link {
+    color: #94a3b8;
+  }
+
+  .signup-link a {
+    color: #93c5fd;
+    border-bottom-color: #60a5fa;
+  }
+
+  .keyboard-hint {
+    background: rgba(30, 41, 59, 0.9);
+  }
+
+  .strength-indicator {
+    background: #334155;
+  }
+
+  /* SweetAlert2 dark overrides */
+  .swal2-popup {
+    background: #1e293b;
+    color: #f1f5f9;
   }
 }

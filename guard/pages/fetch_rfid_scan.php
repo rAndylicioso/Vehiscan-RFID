@@ -32,7 +32,7 @@ try {
             LEFT JOIN homeowners h ON r.plate_number = h.plate_number
             LEFT JOIN vehicles v ON r.plate_number = v.plate_number AND v.is_active = 1
             LEFT JOIN homeowners h2 ON v.homeowner_id = h2.id
-            WHERE r.log_time >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            WHERE r.created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
             ORDER BY r.created_at DESC
             LIMIT 5
         ");
@@ -51,7 +51,7 @@ try {
     // Default: Single most recent scan
     // Join with both homeowners (legacy) and vehicles (RFID-aware)
     $stmt = $pdo->query("
-        SELECT r.plate_number, r.rfid_uid, r.status, r.log_time,
+        SELECT r.plate_number, r.rfid_uid, r.status, r.log_time, r.created_at,
                COALESCE(h.name, h2.name) AS name,
                COALESCE(h.address, h2.address) AS address,
                COALESCE(h.contact_number, h2.contact_number) AS contact,
@@ -116,7 +116,8 @@ try {
             'owner_img' => $scan['owner_img'],
             'car_img' => $scan['car_img'],
             'status' => $scan['status'],
-            'log_time' => $scan['log_time']
+            'log_time' => $scan['log_time'],
+            'created_at' => $scan['created_at']
         ]
     ]);
 

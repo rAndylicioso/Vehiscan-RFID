@@ -19,12 +19,35 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/security_headers.php';
 require_once __DIR__ . '/../../includes/input_sanitizer.php';
-require_once __DIR__ . '/../../includes/session_admin_unified.php';
+
+// Multi-role session: use guard session ONLY when no admin/superadmin cookie exists.
+// When admin cookies are present, always use admin_unified so the CSRF token matches.
+$hasAdminCookie = isset($_COOKIE['vehiscan_admin']) || isset($_COOKIE['vehiscan_superadmin']);
+if (isset($_COOKIE['vehiscan_guard']) && !$hasAdminCookie) {
+    require_once __DIR__ . '/../../includes/session_guard.php';
+} else {
+    require_once __DIR__ . '/../../includes/session_admin_unified.php';
+}
 
 // Auth check - admin, super_admin, or guard can bind RFID
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin', 'guard'])) {
     http_response_code(403);
     exit(json_encode(['success' => false, 'message' => 'Unauthorized']));
+}
+
+/**
+ * Validate CSRF token with diagnostic logging on failure
+ */
+function requireCsrf($context) {
+    $csrfToken = InputSanitizer::post('csrf_token', 'string');
+    if (!InputSanitizer::validateCsrf($csrfToken)) {
+        error_log("[RFID_BIND] CSRF mismatch on {$context} — session_name=" . session_name()
+            . ', role=' . ($_SESSION['role'] ?? 'none')
+            . ', has_session_token=' . (isset($_SESSION['csrf_token']) ? 'yes' : 'no')
+            . ', has_posted_token=' . (!empty($csrfToken) ? 'yes' : 'no'));
+        http_response_code(403);
+        exit(json_encode(['success' => false, 'message' => 'Invalid security token']));
+    }
 }
 
 $action = '';
@@ -63,12 +86,7 @@ switch ($action) {
 function handleInitiate() {
     global $pdo;
 
-    // CSRF validation
-    $csrfToken = InputSanitizer::post('csrf_token', 'string');
-    if (!InputSanitizer::validateCsrf($csrfToken)) {
-        http_response_code(403);
-        exit(json_encode(['success' => false, 'message' => 'Invalid security token']));
-    }
+    requireCsrf('initiate');
 
     $vehicleId = InputSanitizer::post('vehicle_id', 'int');
     if (!$vehicleId) {
@@ -135,8 +153,6 @@ function handleInitiate() {
         logAudit('RFID binding initiated', 'vehicles', $vehicleId, 
             "Binding session #{$sessionId} for {$vehicle['plate_number']}");
 
-        error_log("[RFID_BIND] Session #{$sessionId} initiated for vehicle #{$vehicleId} ({$vehicle['plate_number']})");
-
         exit(json_encode([
             'success' => true,
             'message' => "Binding session started for {$vehicle['plate_number']}. Scan an RFID tag within 5 minutes.",
@@ -165,12 +181,7 @@ function handleInitiate() {
 function handleCancel() {
     global $pdo;
 
-    // CSRF validation
-    $csrfToken = InputSanitizer::post('csrf_token', 'string');
-    if (!InputSanitizer::validateCsrf($csrfToken)) {
-        http_response_code(403);
-        exit(json_encode(['success' => false, 'message' => 'Invalid security token']));
-    }
+    requireCsrf('cancel');
 
     $sessionId = InputSanitizer::post('session_id', 'int');
     if (!$sessionId) {
@@ -207,12 +218,7 @@ function handleCancel() {
 function handleUnbind() {
     global $pdo;
 
-    // CSRF validation
-    $csrfToken = InputSanitizer::post('csrf_token', 'string');
-    if (!InputSanitizer::validateCsrf($csrfToken)) {
-        http_response_code(403);
-        exit(json_encode(['success' => false, 'message' => 'Invalid security token']));
-    }
+    requireCsrf('unbind');
 
     $vehicleId = InputSanitizer::post('vehicle_id', 'int');
     if (!$vehicleId) {
@@ -243,8 +249,6 @@ function handleUnbind() {
         logAudit('RFID unbound', 'vehicles', $vehicleId, 
             "Removed RFID {$oldUid} from {$vehicle['plate_number']}");
 
-        error_log("[RFID_BIND] Unbound UID: $oldUid from vehicle #{$vehicleId} ({$vehicle['plate_number']})");
-
         exit(json_encode([
             'success' => true,
             'message' => "RFID tag removed from {$vehicle['plate_number']}",
@@ -267,6 +271,14 @@ function handleUnbind() {
  */
 function handleStatus() {
     global $pdo;
+
+    // Release the session file lock early — status checks are read-only and
+    // don't modify session data.  Without this, the 2-second polling interval
+    // holds the lock during DB queries, blocking concurrent POST requests
+    // (initiate/cancel/unbind) that need CSRF validation from the same session.
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
 
     $sessionId = null;
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {

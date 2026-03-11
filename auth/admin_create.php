@@ -1,7 +1,8 @@
 <?php
-require_once __DIR__ . '/../includes/session_config.php';
-if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
+require_once __DIR__ . '/../includes/session_admin_unified.php';
+require_once __DIR__ . '/../includes/security_headers.php';
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'super_admin') {
+    header("Location: login.php");
     exit();
 }
 
@@ -16,7 +17,7 @@ $csrf = $_SESSION['csrf_token'];
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate CSRF token
-    $posted_csrf = $_POST['csrf'] ?? '';
+    $posted_csrf = $_POST['csrf_token'] ?? '';
     if (!hash_equals($csrf, (string)$posted_csrf)) {
         $message = 'Invalid security token. Please refresh and try again.';
     } else {
@@ -26,6 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$username || !$password || !$role) {
         $message = "All fields required.";
+    } elseif (strlen($password) < (defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12)) {
+        $minLen = defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12;
+        $message = "Password must be at least {$minLen} characters long.";
+    } elseif (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+        $message = "Password must contain uppercase, lowercase, and a number.";
     } else {
         $check = $pdo->prepare("SELECT id FROM users WHERE username=?");
         $check->execute([$username]);
@@ -35,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (username,password,role) VALUES (?,?,?)");
             $stmt->execute([$username,$hash,$role]);
-            $message = "✅ Account created successfully.";
+            $message = "Account created successfully.";
         }
     }
     }
@@ -55,16 +61,16 @@ button:hover{background:#2980b9;}
 <body>
 <div class="container">
 <h2>Create Account</h2>
-<?php if($message) echo "<p class='message'>$message</p>"; ?>
+<?php if($message) echo "<p class='message'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>"; ?>
 <form method="POST">
-  <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
+  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
   <input name="username" placeholder="Username" required>
   <input type="password" name="password" placeholder="Password" required>
   <select name="role" required>
     <option value="">Select Role</option>
     <option value="admin">Admin</option>
     <option value="guard">Guard</option>
-    <option value="owner">Owner</option>
+    <option value="owner">Homeowner</option>
   </select>
   <button type="submit">Create</button>
   <button type="button" onclick="location.href='../admin/admin_panel.php'">Cancel</button>

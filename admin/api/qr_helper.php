@@ -19,8 +19,6 @@ function generateVisitorPassQR($passId, $token, $pdo)
         $baseUrl = getQrCodeUrl(); // Use WiFi-aware URL
         $verifyUrl = "$baseUrl/visitor/scan.php?token=$token";
 
-        error_log("[QR] Generated URL: $verifyUrl (from: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ")");
-
         // Generate QR code with logo overlay
         $tempFile = $qrDir . "/pass_$passId.png";
         $finalFile = $qrDir . "/pass_{$passId}_final.png";

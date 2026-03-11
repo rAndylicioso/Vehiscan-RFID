@@ -2,8 +2,15 @@
 // admin/homeowners/homeowner_edit.php
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
 require_once __DIR__ . '/../../db.php';
+require_once __DIR__ . '/../../includes/input_validator.php';
 
-if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+// Authorization check
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
+    http_response_code(403);
+    exit('Unauthorized');
+}
+
+if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 $csrf = $_SESSION['csrf_token'];
 
 $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
@@ -18,17 +25,43 @@ if (!$homeowner && $_SERVER['REQUEST_METHOD'] !== 'POST') {
 // POST update (AJAX)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
-    $posted = $_POST['csrf'] ?? '';
+    $posted = $_POST['csrf_token'] ?? '';
     if (!hash_equals($csrf, (string)$posted)) {
         echo json_encode(['success'=>false,'message'=>'Invalid CSRF']); exit;
     }
 
     $name = trim($_POST['name'] ?? $homeowner['name']);
-    $contact = trim($_POST['contact'] ?? $homeowner['contact']);
+    $contact = trim($_POST['contact'] ?? $homeowner['contact_number']);
     $address = trim($_POST['address'] ?? $homeowner['address']);
     $vehicle_type = trim($_POST['vehicle_type'] ?? $homeowner['vehicle_type']);
     $color = trim($_POST['color'] ?? $homeowner['color']);
     $plate_number = trim($_POST['plate_number'] ?? $homeowner['plate_number']);
+
+    // Validate name
+    if (strlen($name) < 2 || strlen($name) > 100) {
+        echo json_encode(['success'=>false,'message'=>'Name must be 2-100 characters']); exit;
+    }
+
+    // Validate plate number
+    $plateCheck = InputValidator::validatePlateNumber($plate_number);
+    if (!$plateCheck['valid']) {
+        echo json_encode(['success'=>false,'message'=>$plateCheck['message']]); exit;
+    }
+    $plate_number = $plateCheck['formatted'];
+
+    // Validate phone if provided
+    if ($contact !== '') {
+        $phoneCheck = InputValidator::validatePhoneNumber($contact);
+        if (!$phoneCheck['valid']) {
+            echo json_encode(['success'=>false,'message'=>$phoneCheck['message']]); exit;
+        }
+        $contact = $phoneCheck['formatted'];
+    }
+
+    // Validate address length
+    if ($address !== '' && strlen($address) > 255) {
+        echo json_encode(['success'=>false,'message'=>'Address must not exceed 255 characters']); exit;
+    }
 
     // handle simple image uploads if present (optional)
     $owner_img = $homeowner['owner_img'] ?? null;
@@ -45,32 +78,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     $allowed = ['jpg','jpeg','png','webp','heic'];
+    $allowed_mimes = ['image/jpeg','image/png','image/webp','image/heic','image/heif'];
 
     foreach (['owner_img','car_img'] as $field) {
-        if (!empty($_FILES[$field]['name'])) {
+        if (!empty($_FILES[$field]['name']) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
-            if (in_array($ext, $allowed)) {
-                $filename = date('Ymd_His_') . $field . '_' . time() . '.' . $ext;
-                $upload_dir = $field === 'owner_img' ? $owners_upload_dir : $vehicles_upload_dir;
-                $relative_path = $field === 'owner_img' ? 'homeowners/' : 'vehicles/';
+            if (!in_array($ext, $allowed)) continue;
+
+            // MIME validation via finfo
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($_FILES[$field]['tmp_name']);
+            if (!in_array($mime, $allowed_mimes)) {
+                error_log("[HOMEOWNER_EDIT] Rejected upload: MIME $mime for field $field");
+                continue;
+            }
+
+            $filename = date('Ymd_His_') . $field . '_' . time() . '.' . $ext;
+            $upload_dir = $field === 'owner_img' ? $owners_upload_dir : $vehicles_upload_dir;
+            $relative_path = $field === 'owner_img' ? 'homeowners/' : 'vehicles/';
                 
-                if (move_uploaded_file($_FILES[$field]['tmp_name'], $upload_dir . $filename)) {
-                    if ($field === 'owner_img') {
-                        $owner_img = $relative_path . $filename;
-                    } else {
-                        $car_img = $relative_path . $filename;
-                    }
+            if (move_uploaded_file($_FILES[$field]['tmp_name'], $upload_dir . $filename)) {
+                if ($field === 'owner_img') {
+                    $owner_img = $relative_path . $filename;
+                } else {
+                    $car_img = $relative_path . $filename;
                 }
             }
         }
     }
 
     try {
-        $stmt = $pdo->prepare("UPDATE homeowners SET name=?, contact=?, address=?, vehicle_type=?, color=?, plate_number=?, owner_img=?, car_img=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE homeowners SET name=?, contact_number=?, address=?, vehicle_type=?, color=?, plate_number=?, owner_img=?, car_img=? WHERE id=?");
         $ok = $stmt->execute([$name,$contact,$address,$vehicle_type,$color,$plate_number,$owner_img,$car_img,$id]);
         echo json_encode(['success'=>$ok,'message'=>$ok ? 'Record updated' : 'Update failed']);
     } catch (Exception $e) {
-        echo json_encode(['success'=>false,'message'=>'DB error: '.$e->getMessage()]);
+        error_log('[HOMEOWNER_EDIT] DB error: ' . $e->getMessage());
+        echo json_encode(['success'=>false,'message'=>'A database error occurred. Please try again.']);
     }
     exit;
 }
@@ -79,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (!empty($_GET['ajax'])):
 ?>
 <form id="editForm" method="post" enctype="multipart/form-data" class="modern-form compact-form" action="homeowners/homeowner_edit.php?id=<?php echo intval($id); ?>">
-  <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
+  <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf); ?>">
   <input type="hidden" name="id" value="<?php echo intval($id); ?>">
 
   <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center form-title">Edit Homeowner</h3>
@@ -202,7 +245,7 @@ if (!empty($_GET['ajax'])):
 
   <div class="flex items-center justify-end gap-3 pt-4 mt-6 border-t border-gray-200 form-actions">
     <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
-    <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+    <button type="submit" class="btn btn-primary"><svg style="width:1em;height:1em;vertical-align:-0.15em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M7 3v4h7"/><path d="M7 17h10"/><path d="M7 13h10"/></svg> Save Changes</button>
   </div>
 </form>
 <?php endif; ?>

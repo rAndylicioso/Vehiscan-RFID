@@ -78,6 +78,10 @@ function loadPage(page) {
     // Load data if needed
     if (page === 'passes') {
         loadVisitorPasses();
+    } else if (page === 'vehicles') {
+        if (typeof loadVehicles === 'function') loadVehicles();
+    } else if (page === 'activity') {
+        if (typeof loadVehicleActivity === 'function') loadVehicleActivity();
     }
     
     // Scroll to top smoothly
@@ -288,12 +292,18 @@ function displayVisitorPasses() {
     
     if (visitorPasses.length === 0) {
         container.innerHTML = `
-            <div class="text-center py-12 text-gray-500">
-                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                </svg>
-                <p class="text-lg font-medium">No visitor passes yet</p>
-                <p class="text-sm mt-2">Click "Add Visitor Pass" to create one.</p>
+            <div class="ta-empty-state">
+                <div class="ta-empty-icon">
+                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                    </svg>
+                </div>
+                <p class="ta-empty-title">No visitor passes yet</p>
+                <p class="ta-empty-desc">Create your first visitor pass to get started.</p>
+                <button onclick="showAddVisitorPassModal()" class="ta-btn ta-btn-primary mt-3">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add Visitor Pass
+                </button>
             </div>
         `;
         return;
@@ -310,20 +320,20 @@ function createPassCard(pass) {
     const qrButton = (pass.display_status === 'active' || pass.display_status === 'approved') ? `
         <button onclick="viewQRCode('${pass.qr_token}', '${escapeHtml(pass.visitor_name)}')" 
                 class="btn-primary">
-            📱 View QR Code
+            <svg class="w-4 h-4 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="17" r="1"/></svg> View QR Code
         </button>
     ` : '';
     
     const rejectionNote = pass.display_status === 'rejected' && pass.rejection_reason ? `
         <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-            <strong class="flex items-center gap-1">❌ Rejection Reason:</strong>
+            <strong class="flex items-center gap-1"><svg class="w-4 h-4 inline flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg> Rejection Reason:</strong>
             <p class="mt-1">${escapeHtml(pass.rejection_reason)}</p>
         </div>
     ` : '';
     
     const pendingNote = pass.display_status === 'pending' ? `
         <div class="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-yellow-800">
-            ⏳ Waiting for admin approval
+            <svg class="w-3.5 h-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16.5 12"/></svg> Waiting for admin approval
         </div>
     ` : '';
     
@@ -523,12 +533,12 @@ async function submitVisitorPass(formData) {
         if (result.success) {
             await Swal.fire({
                 icon: 'success',
-                title: '✓ Visitor Pass Created!',
+                title: 'Visitor Pass Created!',
                 html: `
                     <div class="text-left">
                         <p class="mb-3">Your visitor pass request has been submitted successfully.</p>
                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-gray-700">
-                            <strong>⏳ Status:</strong> Pending Admin Approval<br>
+                            <strong><svg style="width:0.85em;height:0.85em;vertical-align:-0.1em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16.5 12"/></svg> Status:</strong> Pending Admin Approval<br>
                             <span class="text-xs text-gray-600 mt-1 block">You will be notified once the admin reviews your request.</span>
                         </div>
                     </div>
@@ -563,8 +573,9 @@ function viewQRCode(token, visitorName) {
         html: `
             <div class="text-center">
                 <p class="mb-4 text-gray-700">Share this QR code or link with <strong>${visitorName}</strong></p>
-                <div class="mb-4 p-4 bg-white border-2 border-gray-300 rounded-lg inline-block">
+                <div class="mb-4 p-4 bg-white border-2 border-gray-300 rounded-lg inline-block" style="position:relative;">
                     <img src="${qrCodeSrc}" alt="QR Code" style="width: 200px; height: 200px; image-rendering: pixelated;">
+                    <img src="../assets/images/ville_de_palme.png" alt="Logo" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:36px; height:36px; object-fit:contain; border-radius:50%; background:white; padding:2px; box-shadow:0 2px 6px rgba(0,0,0,0.15); pointer-events:none;">
                 </div>
                 <div class="mt-4 p-3 bg-gray-50 rounded-lg text-left">
                     <p class="text-xs font-medium text-gray-600 mb-2">Share Link:</p>

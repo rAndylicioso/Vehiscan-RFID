@@ -1,15 +1,15 @@
-# 🛠️ Admin Utilities
+﻿# Admin Utilities
 
 This directory contains utility scripts for database operations, reports, and maintenance tasks.
 
 ---
 
-## 📁 Files
+## Files
 
 ### backup_database.php
-**Purpose:** Create complete database backup  
-**Method:** POST  
-**Access:** Admin only (AJAX)  
+**Purpose:** Create complete database backup 
+**Method:** POST 
+**Access:** Admin only (AJAX) 
 **Called by:** `assets/js/admin/admin_panel.js` (Backup button)
 
 **Response:**
@@ -42,9 +42,9 @@ This directory contains utility scripts for database operations, reports, and ma
 ---
 
 ### generate_report.php
-**Purpose:** Generate various system reports  
-**Method:** GET  
-**Access:** Admin only  
+**Purpose:** Generate various system reports 
+**Method:** GET 
+**Access:** Admin only 
 **Parameters:**
 - `type` - Report type (daily, weekly, monthly)
 - `format` - Output format (html, pdf, csv)
@@ -78,11 +78,11 @@ This directory contains utility scripts for database operations, reports, and ma
 
 ---
 
-## 🔄 Usage
+## Usage
 
 ### Database Backup
 **From Admin Panel:**
-1. Click "💾 Database Backup" in sidebar
+1. Click " Database Backup" in sidebar
 2. Confirm backup creation
 3. Wait for completion
 4. Check `backups/` directory
@@ -106,15 +106,15 @@ http://localhost/Vehiscan-RFID/admin/utilities/generate_report.php?type=daily&fo
 
 **Parameters:**
 ```
-type=daily      Report timeframe
-format=html     Output format
+type=daily Report timeframe
+format=html Output format
 from=2025-11-12 Start date
-to=2025-11-12   End date
+to=2025-11-12 End date
 ```
 
 ---
 
-## 🔧 Technical Details
+## Technical Details
 
 ### Backup Process
 ```php
@@ -139,7 +139,7 @@ mysqldump -h localhost -u root -p[password] vehiscan_vdp > backup_file.sql
 
 ---
 
-## 📊 Database Tables Backed Up
+## Database Tables Backed Up
 
 All tables in `vehiscan_vdp`:
 - `users` - Admin/guard accounts
@@ -151,7 +151,7 @@ All tables in `vehiscan_vdp`:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Backup Fails
 **Possible Issues:**
@@ -180,18 +180,18 @@ chmod 755 backups/
 
 ---
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 admin/utilities/
-├── backup_database.php   # Database backup
-├── generate_report.php   # Report generation
-└── README.md            # This file
+├── backup_database.php # Database backup
+├── generate_report.php # Report generation
+└── README.md # This file
 ```
 
 ---
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 **Backup Features:**
 - [ ] Automatic scheduled backups
@@ -211,7 +211,7 @@ admin/utilities/
 
 ---
 
-## ⚠️ Important Notes
+## Important Notes
 
 **Backup Storage:**
 - Backups can grow large over time

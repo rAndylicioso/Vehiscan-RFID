@@ -3,6 +3,12 @@
 let activityChart = null;
 let currentPeriod = 'week';
 
+// Get CSRF token from meta tag
+function getCSRFToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
 // Load vehicles
 async function loadVehicles() {
     try {
@@ -142,6 +148,7 @@ async function addVehicle(data) {
         formData.append('color', data.color);
         formData.append('plate_number', data.plate.toUpperCase());
         formData.append('is_primary', data.isPrimary);
+        formData.append('csrf_token', getCSRFToken());
         
         if (data.img) {
             formData.append('vehicle_img', data.img);
@@ -175,7 +182,7 @@ async function deleteVehicle(vehicleId) {
         showCancelButton: true,
         confirmButtonText: 'Yes, remove it',
         cancelButtonText: 'Cancel',
-        confirmButtonColor: '#dc2626'
+        confirmButtonColor: '#ef4444'
     });
     
     if (result.isConfirmed) {
@@ -183,7 +190,7 @@ async function deleteVehicle(vehicleId) {
             const response = await fetch('api/delete_vehicle.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ vehicle_id: vehicleId })
+                body: JSON.stringify({ vehicle_id: vehicleId, csrf_token: getCSRFToken() })
             });
             
             const data = await response.json();
@@ -206,7 +213,7 @@ async function loadVehicleActivity(period = 'week') {
     currentPeriod = period;
     
     // Update active period button
-    document.querySelectorAll('.period-btn').forEach(btn => {
+    document.querySelectorAll('.ta-pill-tab').forEach(btn => {
         btn.classList.remove('active', 'bg-blue-100', 'text-blue-700');
         if (btn.dataset.period === period) {
             btn.classList.add('active', 'bg-blue-100', 'text-blue-700');
@@ -312,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addVehicleBtn.addEventListener('click', showAddVehicleModal);
     }
     
-    document.querySelectorAll('.period-btn').forEach(btn => {
+    document.querySelectorAll('.ta-pill-tab').forEach(btn => {
         btn.addEventListener('click', function() {
             loadVehicleActivity(this.dataset.period);
         });

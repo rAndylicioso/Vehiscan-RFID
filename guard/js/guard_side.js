@@ -430,11 +430,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     dropdown.innerHTML = searchHistory.map(term =>
       `<div class="history-item" data-term="${term}">
-        <span class="history-icon">🕐</span>
+        <span class="history-icon"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg></span>
         <span>${term}</span>
       </div>`
     ).join('') +
-      '<div class="history-clear">🗑️ Clear History</div>';
+      '<div class="history-clear"><svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>Clear History</div>';
 
     dropdown.classList.remove('hidden');
 
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function () {
       localStorage.removeItem('guardSearchHistory');
       dropdown.classList.add('hidden');
       if (window.toast) {
-        window.toast.success('🗑️ Search history cleared');
+        window.toast.success('Search history cleared');
       }
     });
   }
@@ -964,8 +964,12 @@ document.addEventListener('DOMContentLoaded', function () {
   if (nextBtn) nextBtn.addEventListener('click', () => navigateCarousel('next'));
   else console.warn('[GUARD] nextOwner button not found');
 
-  // Add keyboard navigation (defensive - ensure button exists)
+  // Add keyboard navigation (defensive - skip when user is typing in an input)
   document.addEventListener('keydown', (e) => {
+    // Don't hijack arrow keys when user is in an input/textarea or not on homeowners page
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
     if (e.key === 'ArrowLeft') {
       if (prevBtn) prevBtn.click();
     } else if (e.key === 'ArrowRight') {
@@ -1008,6 +1012,22 @@ document.addEventListener('DOMContentLoaded', function () {
           }
 
           displayHomeowner(currentIndex);
+        } else {
+          // Show no-results empty state
+          const ownerName = document.getElementById('ownerName');
+          const ownerAddress = document.getElementById('ownerAddress');
+          const ownerContact = document.getElementById('ownerContact');
+          const vType = document.getElementById('vehicleType');
+          const vColor = document.getElementById('vehicleColor');
+          const pNum = document.getElementById('plateNumber');
+          const counter = document.getElementById('ownerCounter');
+          if (ownerName) ownerName.textContent = 'No matches found';
+          if (ownerAddress) ownerAddress.textContent = 'Try a different search term';
+          if (ownerContact) ownerContact.textContent = '';
+          if (vType) vType.textContent = 'Vehicle Type: -';
+          if (vColor) vColor.textContent = 'Color: -';
+          if (pNum) pNum.textContent = 'Plate Number: -';
+          if (counter) counter.textContent = '0/0';
         }
       }, 300); // Debounce search for performance
     });
@@ -1015,13 +1035,17 @@ document.addEventListener('DOMContentLoaded', function () {
     console.warn('[GUARD] Search input not found');
   }
 
-  // Clear button - only clears the search input
+  // Clear button - clears the search input and restores display
   if (clearSearch) {
     clearSearch.addEventListener('click', () => {
       if (searchInput) {
         searchInput.value = '';
         searchInput.focus();
-        console.log('[GUARD] Search input cleared');
+        // Restore current homeowner display after clearing search
+        if (allHomeowners.length > 0) {
+          displayHomeowner(currentIndex);
+        }
+        console.log('[GUARD] Search input cleared, display restored');
       }
     });
   } else {
@@ -1037,45 +1061,8 @@ document.addEventListener('DOMContentLoaded', function () {
     __vsLog('[GUARD] toggleCamera button not found');
   }
 
-  // Logout with confirmation
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      const result = await Swal.fire({
-        title: 'Confirm Logout',
-        text: 'Are you sure you want to logout?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, Logout',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-warn') || getComputedStyle(document.documentElement).getPropertyValue('--warn') || '#ef4444',
-        cancelButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-accent') || getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#6b7280',
-        heightAuto: false,
-        reverseButtons: true
-      });
-
-      if (result.isConfirmed) {
-        try {
-          const res = await fetch('../../auth/logout.php', {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-          });
-
-          if (res.ok) {
-            window.location.href = '../../auth/login.php';
-          } else {
-            throw new Error('Logout failed');
-          }
-        } catch (err) {
-          console.error('[GUARD] Logout error:', err);
-          window.location.href = '../../auth/logout.php';
-        }
-      }
-    });
-  } else {
-    console.warn('[GUARD] logoutBtn not found');
-  }
+  // Logout with confirmation (handled by signOutBtn listener above — line ~366)
+  // NOTE: duplicate handler removed to prevent double-firing the Swal popup
 
   // Refresh button - reloads homeowners list from server
   const reloadBtn = document.getElementById('reloadHomeowners') || document.getElementById('reloadList');
@@ -1088,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Show loading state
         if (window.toast) {
-          window.toast.info('🔄 Refreshing homeowners list...');
+          window.toast.info('Refreshing homeowners list...');
         }
 
         // Reload all homeowners from server
@@ -1096,14 +1083,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Success message
         if (window.toast) {
-          window.toast.success(`✅ Refreshed! ${allHomeowners.length} homeowners loaded`);
+          window.toast.success(`Refreshed! ${allHomeowners.length} homeowners loaded`);
         }
 
         console.log('[GUARD] Homeowners list refreshed successfully');
       } catch (err) {
         console.error('[GUARD] Refresh error:', err);
         if (window.toast) {
-          window.toast.error('❌ Failed to refresh homeowners list');
+          window.toast.error('Failed to refresh homeowners list');
         }
       } finally {
         reloadBtn.disabled = false;
@@ -1121,12 +1108,12 @@ document.addEventListener('DOMContentLoaded', function () {
           console.log('[GUARD] Delegated refresh click detected');
           await loadHomeowners();
           if (window.toast) {
-            window.toast.success(`✅ Refreshed! ${allHomeowners.length} homeowners loaded`);
+            window.toast.success(`Refreshed! ${allHomeowners.length} homeowners loaded`);
           }
         } catch (err) {
           console.error('[GUARD] Delegated refresh error:', err);
           if (window.toast) {
-            window.toast.error('❌ Failed to refresh');
+            window.toast.error('Failed to refresh');
           }
         }
       }
@@ -1482,7 +1469,7 @@ document.addEventListener('DOMContentLoaded', function () {
           </td>
           <td class="px-6 py-4">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isCurrentlyValid ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">
-              ${isCurrentlyValid ? '✓ Active Now' : '⏳ Scheduled'}
+              ${isCurrentlyValid ? '<svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>Active Now' : '<svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>Scheduled'}
             </span>
           </td>
           <td class="px-6 py-4">
@@ -1495,7 +1482,7 @@ document.addEventListener('DOMContentLoaded', function () {
           </td>
           <td class="px-6 py-4 text-right">
             ${pass.qr_code ? `
-              <button onclick="viewVisitorPassQR('${escapeHtml(pass.qr_code)}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
+              <button data-qr-src="${escapeHtml(pass.qr_code)}" class="view-qr-btn text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
                 View QR
               </button>
             ` : '<span class="text-gray-400 text-xs">No QR</span>'}
@@ -1509,6 +1496,10 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
 
     logsContainer.innerHTML = tableHTML;
+    // Bind QR view buttons via event delegation (safe, no inline onclick)
+    logsContainer.querySelectorAll('.view-qr-btn[data-qr-src]').forEach(btn => {
+      btn.addEventListener('click', () => viewVisitorPassQR(btn.dataset.qrSrc));
+    });
     __vsLog(`[VISITOR] Displayed ${passes.length} visitor passes in table`);
   }
 
@@ -1534,9 +1525,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Global function to view visitor pass QR code
   window.viewVisitorPassQR = function (qrCode) {
+    const img = document.createElement('img');
+    img.alt = 'QR Code';
+    img.style.cssText = 'max-width:300px;margin:0 auto;image-rendering:pixelated;';
+    img.src = qrCode; // safe: .src assignment auto-escapes
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(img);
     Swal.fire({
       title: 'Visitor Pass QR Code',
-      html: `<img src="${qrCode}" alt="QR Code" style="max-width: 300px; margin: 0 auto; image-rendering: pixelated;">`,
+      html: wrapper,
       confirmButtonText: 'Close',
       width: 400,
       heightAuto: false
@@ -1588,17 +1585,17 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update button text with date range
         const fromDate = result.value.from.split('-').slice(1).join('/');
         const toDate = result.value.to.split('-').slice(1).join('/');
-        updateFilterButtonText('📅', `${fromDate}-${toDate}`);
+        updateFilterButtonText('<svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>', `${fromDate}-${toDate}`);
 
         filterLogs();
 
         if (window.toast) {
-          window.toast.success(`📅 Filtered: ${result.value.from} to ${result.value.to}`);
+          window.toast.success(`Filtered: ${result.value.from} to ${result.value.to}`);
         }
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         dateRangeFilter = null;
         filterDateRange.classList.remove('active');
-        updateFilterButtonText('⚙️', 'Filters');
+        updateFilterButtonText('<svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"/></svg>', 'Filters');
         filterLogs();
       }
       closeFilterDropdown();
@@ -1628,7 +1625,7 @@ document.addEventListener('DOMContentLoaded', function () {
       __vsLog('[GUARD] Cleared all filters, showing', logRows.length, 'rows');
 
       if (window.toast) {
-        window.toast.success('✨ All filters cleared');
+        window.toast.success('All filters cleared');
       }
     });
   }
@@ -1649,7 +1646,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const cells = Array.from(row.querySelectorAll('td')).map(td => {
         let text = td.textContent.trim();
         // Remove emojis and clean up
-        text = text.replace(/[🆕🚗🟢🔴🎫]/g, '').trim();
+        text = text.replace(/[\u{1F195}\u{1F697}\u{1F7E2}\u{1F534}\u{1F3AB}]/gu, '').trim();
         // Escape commas and quotes
         if (text.includes(',') || text.includes('"')) {
           text = `"${text.replace(/"/g, '""')}"`;
@@ -1684,7 +1681,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const count = exportLogsToCSV(`guard_logs_${new Date().toISOString().split('T')[0]}.csv`);
 
       if (window.toast) {
-        window.toast.success(`📥 Exported ${count} logs to CSV`);
+        window.toast.success(`Exported ${count} logs to CSV`);
       }
       closeActionsDropdown();
     });
@@ -1702,7 +1699,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (currentLogs === 0) {
         if (window.toast) {
-          window.toast.warning('⚠️ No logs to clear');
+          window.toast.warning('No logs to clear');
         }
         return;
       }
@@ -1712,14 +1709,14 @@ document.addEventListener('DOMContentLoaded', function () {
         title: 'Clear All Logs?',
         html: `
           <p>This will permanently delete <strong>${currentLogs} log(s)</strong> from the database.</p>
-          <p style="margin-top: 10px; color: var(--guard-success, #16a34a);">✅ A backup CSV will be downloaded automatically before deletion.</p>
-          <p style="margin-top: 10px; color: var(--guard-warn, #dc2626); font-weight: 600;">⚠️ This action cannot be undone!</p>
+          <p style="margin-top: 10px; color: var(--guard-success, #16a34a);">A backup CSV will be downloaded automatically before deletion.</p>
+          <p style="margin-top: 10px; color: var(--guard-warn, #dc2626); font-weight: 600;">This action cannot be undone!</p>
         `,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: '🗑️ Yes, Clear All Logs',
+        confirmButtonText: 'Yes, Clear All Logs',
         cancelButtonText: 'Cancel',
-        confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-warn') || getComputedStyle(document.documentElement).getPropertyValue('--warn') || '#dc2626',
+        confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-warn') || getComputedStyle(document.documentElement).getPropertyValue('--warn') || '#ef4444',
         cancelButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-accent') || getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#6b7280',
         reverseButtons: true,
         heightAuto: false
@@ -1733,7 +1730,7 @@ document.addEventListener('DOMContentLoaded', function () {
       try {
         // Step 1: Download CSV backup
         if (window.toast) {
-          window.toast.info('📥 Creating backup...');
+          window.toast.info('Creating backup...');
         }
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
@@ -1747,7 +1744,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Step 2: Call API to clear all logs
         if (window.toast) {
-          window.toast.info('🗑️ Clearing logs from database...');
+          window.toast.info('Clearing logs from database...');
         }
 
         const response = await fetch('../clear_all_logs.php', {
@@ -1771,12 +1768,12 @@ document.addEventListener('DOMContentLoaded', function () {
           await Swal.fire({
             title: 'Success!',
             html: `
-              <p>✅ <strong>${data.deleted_count || exportedCount} log(s)</strong> have been cleared.</p>
-              <p style="margin-top: 10px;">📥 Backup saved as: <code style="font-size: 11px;">${backupFilename}</code></p>
+              <p><strong>${data.deleted_count || exportedCount} log(s)</strong> have been cleared.</p>
+              <p style="margin-top: 10px;">Backup saved as: <code style="font-size: 11px;">${backupFilename}</code></p>
             `,
             icon: 'success',
             confirmButtonText: 'OK',
-            confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-success') || getComputedStyle(document.documentElement).getPropertyValue('--success') || '#16a34a',
+            confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-success') || getComputedStyle(document.documentElement).getPropertyValue('--success') || '#10b981',
             heightAuto: false
           });
 
@@ -1793,18 +1790,18 @@ document.addEventListener('DOMContentLoaded', function () {
         await Swal.fire({
           title: 'Error',
           html: `
-            <p>❌ Failed to clear logs from database.</p>
+            <p>Failed to clear logs from database.</p>
             <p style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">${error.message}</p>
-            <p style="margin-top: 10px;">✅ However, your backup CSV was downloaded successfully.</p>
+            <p style="margin-top: 10px;">However, your backup CSV was downloaded successfully.</p>
           `,
           icon: 'error',
           confirmButtonText: 'OK',
-          confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-warn') || getComputedStyle(document.documentElement).getPropertyValue('--warn') || '#dc2626',
+          confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--guard-warn') || getComputedStyle(document.documentElement).getPropertyValue('--warn') || '#ef4444',
           heightAuto: false
         });
 
         if (window.toast) {
-          window.toast.error('❌ Failed to clear logs');
+          window.toast.error('Failed to clear logs');
         }
       }
       closeActionsDropdown();
@@ -1826,7 +1823,7 @@ document.addEventListener('DOMContentLoaded', function () {
       refreshLogsBtn.innerHTML = originalContent;
 
       if (window.toast) {
-        window.toast.success('✅ Logs refreshed');
+        window.toast.success('Logs refreshed');
       }
     });
   }
@@ -1847,7 +1844,7 @@ document.addEventListener('DOMContentLoaded', function () {
       refreshAllBtn.innerHTML = originalText;
 
       if (window.toast) {
-        window.toast.success('✅ All data refreshed');
+        window.toast.success('All data refreshed');
       }
     });
   }
@@ -1873,12 +1870,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.removeChild(a);
 
         if (window.toast) {
-          window.toast.success('✅ Logs exported successfully');
+          window.toast.success('Logs exported successfully');
         }
       } catch (error) {
         console.error('[GUARD] Export error:', error);
         if (window.toast) {
-          window.toast.error('❌ Failed to export logs');
+          window.toast.error('Failed to export logs');
         }
       }
     });
@@ -2008,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Show toast notification
     if (window.toast) {
-      window.toast.info(`📊 Filtered to show ${userName}'s logs. Click "Clear" to reset.`);
+      window.toast.info(`Filtered to show ${userName}'s logs. Click "Clear" to reset.`);
     }
 
     // Highlight the clear button
@@ -2036,7 +2033,7 @@ document.addEventListener('DOMContentLoaded', function () {
       await displayHomeowner(currentIndex);
 
       if (window.toast) {
-        window.toast.success(`🚗 Showing: ${allHomeowners[index].name}`);
+        window.toast.success(`Showing: ${allHomeowners[index].name}`);
       }
 
       // Smooth scroll to homeowner section
@@ -2046,15 +2043,15 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     } else {
       if (window.toast) {
-        window.toast.warning(`⚠️ Homeowner not found for plate: ${plateNumber}`);
+        window.toast.warning(`Homeowner not found for plate: ${plateNumber}`);
       }
     }
   };
 
   // ====== KEYBOARD SHORTCUTS ======
   document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd + R - Refresh logs
-    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+    // Ctrl/Cmd + Shift + R - Refresh logs (Shift added to avoid overriding browser refresh)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
       e.preventDefault();
       document.getElementById('refreshLogs')?.click();
     }
@@ -2097,7 +2094,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const data = await res.json();
 
       if (!data.success || !data.passes || data.passes.length === 0) {
-        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">🎫</div><p class="text-gray-600 dark:text-gray-400">No visitor passes found</p></div>';
+        container.innerHTML = '<div class="col-span-full ta-empty-state"><div class="ta-empty-icon"><svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg></div><p class="ta-empty-title">No visitor passes found</p><p class="ta-empty-desc">There are no active visitor passes at this time.</p></div>';
         return;
       }
 
@@ -2215,10 +2212,166 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // ====== RFID SCAN POLLING ======
+  (function initRfidScanPoller() {
+    const overlay = document.getElementById('rfidScanOverlay');
+    if (!overlay) { console.warn('[RFID-POLL] Scan overlay element not found'); return; }
+
+    const els = {
+      banner:      document.getElementById('rfidScanBanner'),
+      status:      document.getElementById('rfidScanStatus'),
+      time:        document.getElementById('rfidScanTime'),
+      name:        document.getElementById('rfidScanName'),
+      address:     document.getElementById('rfidScanAddress'),
+      contact:     document.getElementById('rfidScanContact'),
+      plate:       document.getElementById('rfidScanPlate'),
+      vehicleType: document.getElementById('rfidScanVehicleType'),
+      color:       document.getElementById('rfidScanColor'),
+      ownerImg:    document.getElementById('rfidScanOwnerImg'),
+      carImg:      document.getElementById('rfidScanCarImg'),
+      closeBtn:    document.getElementById('rfidScanClose'),
+      iconIn:      document.getElementById('rfidIconIn'),
+      iconOut:     document.getElementById('rfidIconOut')
+    };
+
+    const POLL_INTERVAL = 3000;
+    const AUTO_DISMISS  = 12000;
+    const PLACEHOLDER   = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="120"%3E%3Crect fill="%23e5e7eb" width="200" height="120" rx="8"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-size="13" font-family="Arial"%3ENo Image%3C/text%3E%3C/svg%3E';
+
+    let lastLogTime = null;
+    let dismissTimer  = null;
+    let pollTimer     = null;
+    let isShowing     = false;
+    let initialPoll   = true;   // suppress overlay on first load
+
+    function imgUrl(path) {
+      if (!path) return PLACEHOLDER;
+      if (/^https?:\/\//i.test(path)) return path;
+      let p = path.replace(/^\/+/, '');
+      if (!/^uploads\//i.test(p)) p = 'uploads/' + p;
+      const base = window.location.origin + (window.vehiscanConfig?.baseUrl || '/Vehiscan-RFID');
+      return base.replace(/\/$/, '') + '/' + p;
+    }
+
+    function show(data) {
+      const isIn = (data.status || '').toUpperCase() === 'IN';
+
+      // Banner colour
+      els.banner.classList.remove('rfid-scan-in', 'rfid-scan-out');
+      els.banner.classList.add(isIn ? 'rfid-scan-in' : 'rfid-scan-out');
+
+      // Direction icon
+      els.iconIn.style.display  = isIn ? '' : 'none';
+      els.iconOut.style.display = isIn ? 'none' : '';
+
+      // Text content
+      els.status.textContent      = isIn ? 'VEHICLE ENTERING' : 'VEHICLE EXITING';
+      els.time.textContent        = data.log_time ? data.log_time : '';
+      els.name.textContent        = data.name || 'Unknown';
+      els.address.textContent     = data.address || '—';
+      els.contact.textContent     = data.contact || '—';
+      els.plate.textContent       = data.plate_number || '—';
+      els.vehicleType.textContent = data.vehicle_type || '—';
+      els.color.textContent       = data.color || '—';
+
+      // Images
+      els.ownerImg.src = imgUrl(data.owner_img);
+      els.ownerImg.onerror = function() { this.src = PLACEHOLDER; };
+      els.carImg.src   = imgUrl(data.car_img);
+      els.carImg.onerror = function() { this.src = PLACEHOLDER; };
+
+      // Display with animation
+      overlay.style.display = 'flex';
+      requestAnimationFrame(() => overlay.classList.add('rfid-scan-visible'));
+      isShowing = true;
+
+      // Play a subtle notification sound cue (Web Audio beep)
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = isIn ? 880 : 440;
+        gain.gain.value = 0.12;
+        osc.start(); osc.stop(ctx.currentTime + 0.15);
+      } catch(e) { /* audio not available */ }
+
+      // Auto-dismiss
+      clearTimeout(dismissTimer);
+      dismissTimer = setTimeout(dismiss, AUTO_DISMISS);
+
+      __vsLog('[RFID-POLL] Scan alert shown:', data.plate_number, data.status);
+    }
+
+    function dismiss() {
+      overlay.classList.remove('rfid-scan-visible');
+      clearTimeout(dismissTimer);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        isShowing = false;
+      }, 300);
+    }
+
+    // Close button
+    els.closeBtn?.addEventListener('click', dismiss);
+    // Click outside card to dismiss
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) dismiss(); });
+
+    async function poll() {
+      try {
+        const res = await fetch('../pages/fetch_rfid_scan.php?_=' + Date.now(), {
+          credentials: 'same-origin'
+        });
+        if (!res.ok) { initialPoll = false; return; }
+        const json = await res.json();
+        if (!json.success || !json.data) { initialPoll = false; return; }
+
+        const d = json.data;
+        const logKey = d.plate_number + '|' + (d.created_at || d.log_time);
+
+        if (logKey !== lastLogTime) {
+          lastLogTime = logKey;
+          // On the very first poll after page load, just record the current
+          // scan so it is not re-shown as "new" on every refresh.
+          if (initialPoll) {
+            initialPoll = false;
+            __vsLog('[RFID-POLL] Seeded initial scan key (no overlay):', logKey);
+            return;
+          }
+          show(d);
+          // Also refresh the logs table if currently on logs page
+          if (typeof loadLogs === 'function') {
+            const logsPage = document.getElementById('page-logs');
+            if (logsPage && !logsPage.classList.contains('hidden')) {
+              loadLogs(currentLogPage);
+            }
+          }
+        }
+      } catch(e) {
+        // Network error — silently retry next interval
+      }
+    }
+
+    // Start polling
+    poll();
+    pollTimer = setInterval(poll, POLL_INTERVAL);
+
+    // Pause polling when tab backgrounded, resume on focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        clearInterval(pollTimer); pollTimer = null;
+      } else {
+        if (!pollTimer) { poll(); pollTimer = setInterval(poll, POLL_INTERVAL); }
+      }
+    });
+
+    __vsLog('[RFID-POLL] Scan poller initialized (interval: ' + POLL_INTERVAL + 'ms)');
+  })();
+
   // Initial load
   loadLogs();
   loadHomeowners();
 
   console.log('[GUARD] Guard panel initialized successfully');
-  console.log('[GUARD] Keyboard shortcuts: Ctrl+K (Search), Ctrl+R (Refresh), Ctrl+E (Export)');
+  console.log('[GUARD] Keyboard shortcuts: Ctrl+K (Search), Ctrl+Shift+R (Refresh Logs), Ctrl+E (Export)');
 });

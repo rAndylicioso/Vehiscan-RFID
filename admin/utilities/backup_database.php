@@ -16,6 +16,17 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'a
     exit();
 }
 
+// CSRF validation
+$inputData = json_decode(file_get_contents('php://input'), true);
+$csrf = $inputData['csrf_token'] ?? ($_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? ''));
+if (empty($csrf) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
+    ob_end_clean();
+    header('Content-Type: application/json');
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit();
+}
+
 // Clear any accumulated output
 ob_end_clean();
 header('Content-Type: application/json');
@@ -34,14 +45,21 @@ try {
     $filename = 'vehiscan_backup_' . date('Y-m-d_His') . '.sql';
     $filepath = $backup_dir . '/' . $filename;
 
-    // Get database config
-    $host = 'localhost';
-    $db = 'vehiscan_vdp';
-    $user = 'root';
-    $pass = '';
+    // Get database config from constants
+    $host = DB_HOST;
+    $db = DB_NAME;
+    $user = DB_USER;
+    $pass = DB_PASS;
 
-    // Create backup using mysqldump
-    $command = "mysqldump --host=$host --user=$user --password=$pass $db > $filepath 2>&1";
+    // Create backup using mysqldump (shell-escape all credentials to prevent injection)
+    $command = sprintf(
+        'mysqldump --host=%s --user=%s --password=%s %s > %s 2>&1',
+        escapeshellarg($host),
+        escapeshellarg($user),
+        escapeshellarg($pass),
+        escapeshellarg($db),
+        escapeshellarg($filepath)
+    );
     exec($command, $output, $return_var);
 
     if ($return_var === 0 && file_exists($filepath)) {
@@ -105,7 +123,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Backup failed: ' . $e->getMessage()
+        'message' => 'Backup failed. Please check server logs for details.'
     ]);
 }
 exit();

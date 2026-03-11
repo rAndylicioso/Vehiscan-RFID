@@ -131,8 +131,8 @@
    * Show notification for new logs
    */
   function showNewLogsNotification(count) {
-    if (window.toast) {
-      window.toast.info(`🆕 ${count} new access log${count > 1 ? 's' : ''}`);
+    if (typeof showGrowl === 'function') {
+      showGrowl(`${count} new access log${count > 1 ? 's' : ''}`, 'info');
     }
 
     // Play sound notification (optional)
@@ -143,7 +143,7 @@
    * Update approvals badge in sidebar
    */
   function updateApprovalsBadge(count) {
-    const badge = document.querySelector('[data-page="approvals"] .badge');
+    const badge = document.getElementById('pendingApprovalsBadge');
     if (badge) {
       if (count > 0) {
         badge.textContent = count;
@@ -158,7 +158,7 @@
    * Refresh access logs table
    */
   function refreshAccessLogs() {
-    const refreshBtn = document.querySelector('#refreshAccessLogs');
+    const refreshBtn = document.querySelector('#refreshLogsBtn');
     if (refreshBtn) {
       refreshBtn.click();
     }

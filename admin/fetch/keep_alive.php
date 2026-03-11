@@ -1,31 +1,5 @@
 <?php
-// Start session first - try super_admin session, fall back to admin
-$sessionStarted = false;
-
-if (session_status() === PHP_SESSION_NONE) {
-    // Try super_admin session first
-    if (isset($_COOKIE['vehiscan_superadmin'])) {
-        session_name('vehiscan_superadmin');
-        session_start();
-        if (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin') {
-            $sessionStarted = true;
-        } else {
-            session_write_close();
-        }
-    }
-    
-    // Try admin session
-    if (!$sessionStarted) {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
-        session_name('vehiscan_admin');
-        session_start();
-        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-            $sessionStarted = true;
-        }
-    }
-}
+require_once __DIR__ . '/../../includes/session_admin_unified.php';
 
 // Check if session exists and has valid role
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {

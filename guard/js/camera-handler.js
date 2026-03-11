@@ -153,12 +153,12 @@
         updateTimestamp();
         
         if (window.toast) {
-          window.toast.success('📹 Camera started');
+          window.toast.success('Camera started');
         }
       } catch (error) {
         __vsLog('[CAMERA] Camera error:', error);
         if (window.toast) {
-          window.toast.error('❌ Camera access denied');
+          window.toast.error('Camera access denied');
         }
       }
     }
@@ -186,7 +186,7 @@
         if (btnText) btnText.textContent = 'Start';
         
         if (window.toast) {
-          window.toast.info('📹 Camera stopped');
+          window.toast.info('Camera stopped');
         }
       }
     }
@@ -227,7 +227,7 @@
       });
 
       if (window.toast) {
-        window.toast.success('📸 Snapshot saved');
+        window.toast.success('Snapshot saved');
       }
     }
 

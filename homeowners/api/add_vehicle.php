@@ -19,6 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+// Validate CSRF token
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (empty($csrfToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+    exit();
+}
+
 try {
     $vehicleType = trim($_POST['vehicle_type'] ?? '');
     $color = trim($_POST['color'] ?? '');
@@ -47,7 +55,29 @@ try {
             mkdir($uploadDir, 0755, true);
         }
         
+        // Validate file extension
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
         $ext = strtolower(pathinfo($_FILES['vehicle_img']['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExtensions)) {
+            echo json_encode(['success' => false, 'error' => 'Invalid file type. Allowed: ' . implode(', ', $allowedExtensions)]);
+            exit();
+        }
+        
+        // Validate MIME type
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($_FILES['vehicle_img']['tmp_name']);
+        if (!in_array($mimeType, $allowedMimes)) {
+            echo json_encode(['success' => false, 'error' => 'Invalid file content. Only image files are allowed.']);
+            exit();
+        }
+        
+        // Validate file size (max 5MB)
+        if ($_FILES['vehicle_img']['size'] > 5 * 1024 * 1024) {
+            echo json_encode(['success' => false, 'error' => 'File too large. Maximum size is 5MB.']);
+            exit();
+        }
+        
         $filename = 'vehicle_' . uniqid() . '.' . $ext;
         $destination = $uploadDir . $filename;
         

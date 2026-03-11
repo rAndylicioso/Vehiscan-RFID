@@ -132,7 +132,7 @@ class TableEnhancer {
       <input 
         type="text" 
         class="search-input" 
-        placeholder="🔍 Search table..."
+        placeholder="Search table..."
         aria-label="Search table"
       >
       <span class="search-count"></span>
@@ -342,10 +342,10 @@ class TableEnhancer {
     const menu = document.createElement('div');
     menu.className = 'export-menu';
     menu.innerHTML = `
-      <button class="export-option" data-format="csv">📄 Export as CSV</button>
-      <button class="export-option" data-format="excel">📊 Export as Excel</button>
-      <button class="export-option" data-format="pdf">📑 Export as PDF</button>
-      <button class="export-option" data-format="print">🖨️ Print</button>
+      <button class="export-option" data-format="csv"><svg style="width:1em;height:1em;vertical-align:-0.15em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Export as CSV</button>
+      <button class="export-option" data-format="excel"><svg style="width:1em;height:1em;vertical-align:-0.15em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Export as Excel</button>
+      <button class="export-option" data-format="pdf"><svg style="width:1em;height:1em;vertical-align:-0.15em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg> Export as PDF</button>
+      <button class="export-option" data-format="print"><svg style="width:1em;height:1em;vertical-align:-0.15em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button>
     `;
     
     document.body.appendChild(menu);

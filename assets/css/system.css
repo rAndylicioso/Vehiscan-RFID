@@ -543,12 +543,12 @@ textarea::placeholder {
 }
 
 .swal2-confirm {
-  background: var(--warn) !important;
+  background: var(--swal2-confirm-button-background-color, #3b82f6) !important;
   color: #fff !important;
 }
 
 .swal2-cancel {
-  background: #7f8c8d !important;
+  background: var(--ta-swal-cancel, #6b7280) !important;
   color: #fff !important;
 }
 

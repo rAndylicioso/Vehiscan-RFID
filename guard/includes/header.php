@@ -11,10 +11,20 @@
 
     <h1 id="page-title" class="text-lg font-semibold text-gray-900 dark:text-white">Access Logs</h1>
     <div class="ml-auto flex items-center gap-4">
+        <!-- Notification Bell -->
+        <div class="ta-notification-bell relative" id="guardNotifBellWrapper">
+            <button id="guardNotifBellBtn" class="relative flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" aria-label="Notifications">
+                <svg class="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <span class="ta-notification-dot hidden" id="guardNotifDot"></span>
+            </button>
+        </div>
+
         <!-- New Logs Badge -->
         <div id="newLogsBadge"
             class="hidden bg-gray-700 text-white px-3 py-1.5 rounded-full text-sm font-semibold animate-pulse">
-            <span class="badge-icon">🆕</span>
+            <svg class="h-3.5 w-3.5 inline-block -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
             <span id="newLogsCount">0</span> new
         </div>
 

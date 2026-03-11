@@ -10,79 +10,38 @@ require_once __DIR__ . '/../../db.php';
     </div>
 
     <!-- Pending Accounts Table -->
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+    <div class="ta-table-wrapper">
+        <div class="px-6 py-4 flex items-center justify-between flex-wrap gap-3" style="border-bottom: 1px solid var(--ta-card-border);">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pending Registrations</h3>
+            <div class="flex items-center gap-2">
+                <div class="relative flex items-center">
+                    <svg class="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" id="approvalsSearchInput"
+                        class="h-9 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[240px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
+                        placeholder="Search accounts...">
+                </div>
+                <span id="approvalsSearchCount" class="text-sm text-gray-600 font-medium whitespace-nowrap"></span>
+            </div>
         </div>
         
         <div class="overflow-x-auto">
-            <table id="approvalsTable" class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-                <thead class="bg-gray-50 dark:bg-slate-700">
+            <table id="approvalsTable" class="ta-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Registered</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="approvalsBody" class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
+                <tbody id="approvalsBody">
                     <!-- Loaded via JavaScript -->
                 </tbody>
             </table>
-        </div>
-    </div>
-</div>
-
-<!-- Approve/Reject Modal -->
-<div id="actionModal" class="hidden fixed inset-0 z-[9999] overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.5);">
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Background overlay -->
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="window.closeActionModal()">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-
-        <!-- Center modal -->
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        
-        <!-- Modal panel -->
-        <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" style="position: relative; z-index: 10000;">
-            <div class="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                    <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                        <h3 id="modalTitle" class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4"></h3>
-                        <input type="hidden" id="actionUserId">
-                        <input type="hidden" id="actionType">
-                        
-                        <div class="mt-4">
-                            <label for="actionReason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Reason/Notes (optional)
-                            </label>
-                            <textarea 
-                                id="actionReason" 
-                                rows="4" 
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Enter any notes or reason for this action..."
-                            ></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                <button 
-                    id="confirmActionBtn" 
-                    onclick="window.confirmAction()" 
-                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
-                ></button>
-                <button 
-                    onclick="window.closeActionModal()" 
-                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-slate-600 shadow-sm px-4 py-2 bg-white dark:bg-slate-600 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto sm:text-sm"
-                >
-                    Cancel
-                </button>
-            </div>
         </div>
     </div>
 </div>
@@ -94,74 +53,9 @@ require_once __DIR__ . '/../../db.php';
   console.log('[Approvals] Initializing approval controls...');
 
 // Toggle dropdown visibility with smart positioning (matches sign-out dropdown behavior)
-window.toggleActionDropdown = function(userId) {
-    const dropdown = document.getElementById(`dropdown-${userId}`);
-    const button = document.getElementById(`action-menu-${userId}`);
-    const chevron = button.querySelector('svg');
-    
-    if (!dropdown || !button) {
-        console.warn(`Dropdown elements not found for user ${userId}`);
-        return;
-    }
-    
-    // Close all other dropdowns first
-    document.querySelectorAll('[id^="dropdown-"]').forEach(dd => {
-        if (dd.id !== `dropdown-${userId}`) {
-            dd.style.display = 'none';
-            // Reset other chevrons to point down
-            const otherButton = dd.previousElementSibling;
-            if (otherButton) {
-                const otherChevron = otherButton.querySelector('svg');
-                if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
-            }
-        }
-    });
-    
-    // Toggle current dropdown with smooth transition
-    const isHidden = dropdown.style.display === 'none' || dropdown.style.display === '';
-    
-    if (isHidden) {
-        // Position dropdown dynamically
-        const buttonRect = button.getBoundingClientRect();
-        const dropdownHeight = 120; // Approximate height
-        const viewportHeight = window.innerHeight;
-        const spaceBelow = viewportHeight - buttonRect.bottom;
-        
-        // Smart positioning: above or below based on available space
-        if (spaceBelow < dropdownHeight && buttonRect.top > dropdownHeight) {
-            dropdown.style.bottom = '100%';
-            dropdown.style.top = 'auto';
-            dropdown.style.marginBottom = '0.5rem';
-            dropdown.style.marginTop = '0';
-        } else {
-            dropdown.style.top = '100%';
-            dropdown.style.bottom = 'auto';
-            dropdown.style.marginTop = '0.5rem';
-            dropdown.style.marginBottom = '0';
-        }
-        
-        dropdown.style.display = 'block';
-        if (chevron) chevron.style.transform = 'rotate(180deg)'; // Chevron points up
-    } else {
-        dropdown.style.display = 'none';
-        if (chevron) chevron.style.transform = 'rotate(0deg)'; // Chevron points down
-    }
-};
+// Now handled by shared TailAdmin dropdown CSS/JS — .ta-action-dropdown
 
-// Close dropdowns when clicking outside (matches sign-out dropdown behavior)
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('[id^="action-menu-"]') && !e.target.closest('[id^="dropdown-"]')) {
-        document.querySelectorAll('[id^="dropdown-"]').forEach(dd => {
-            dd.style.display = 'none';
-            // Reset chevron rotation
-            const button = dd.previousElementSibling;
-            if (button) {
-                const chevron = button.querySelector('svg');
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
-            }
-        });
-    }
-});
+// Close dropdowns when clicking outside — handled by shared handler in admin_panel.php
 
 // Load pending accounts
 function loadPendingAccounts() {
@@ -170,9 +64,9 @@ function loadPendingAccounts() {
     // Show skeleton loader
     tbody.innerHTML = `
         <tr><td colspan="6" class="px-6 py-4">
-            <div class="skeleton skeleton-table-row"></div>
-            <div class="skeleton skeleton-table-row"></div>
-            <div class="skeleton skeleton-table-row"></div>
+            <div class="ta-skeleton ta-skeleton-row"></div>
+            <div class="ta-skeleton ta-skeleton-row"></div>
+            <div class="ta-skeleton ta-skeleton-row"></div>
         </td></tr>
     `;
     
@@ -192,7 +86,7 @@ function loadPendingAccounts() {
             
             // Handle empty array
             if (!Array.isArray(data) || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No pending accounts</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6"><div class="ta-empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><p>No pending accounts</p></div></td></tr>';
                 return;
             }
             
@@ -216,28 +110,21 @@ function loadPendingAccounts() {
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${date}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="relative inline-block text-left">
-                                <button type="button" class="inline-flex justify-center items-center gap-x-1.5 rounded-md bg-white dark:bg-slate-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors" id="action-menu-${acc.id}" onclick="toggleActionDropdown(${acc.id})">
+                            <div class="ta-action-dropdown">
+                                <button type="button" class="ta-action-btn">
                                     Actions
-                                    <svg class="-mr-1 h-5 w-5 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor" style="transform: rotate(0deg);">
-                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                    </svg>
+                                    <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                                 </button>
-                                <div id="dropdown-${acc.id}" class="absolute right-0 z-10 w-48 origin-top-right rounded-md bg-white dark:bg-slate-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-200" style="display: none;">
-                                    <div class="py-1">
-                                        <button onclick="window.openActionModal(${acc.id}, 'approve', '${fullName.replace(/'/g, "\\'")}'); toggleActionDropdown(${acc.id})" class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 hover:text-green-900 flex items-center gap-2 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                            Approve Account
-                                        </button>
-                                        <button onclick="window.openActionModal(${acc.id}, 'reject', '${fullName.replace(/'/g, "\\'")}'); toggleActionDropdown(${acc.id})" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-900 flex items-center gap-2 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                            Reject Account
-                                        </button>
-                                    </div>
+                                <div class="ta-action-menu">
+                                    <button type="button" class="ta-action-menu-item green" onclick="window.openActionModal(${acc.id}, 'approve', '${fullName.replace(/'/g, "\\'")}')">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        Approve Account
+                                    </button>
+                                    <div class="ta-action-divider"></div>
+                                    <button type="button" class="ta-action-menu-item red" onclick="window.openActionModal(${acc.id}, 'reject', '${fullName.replace(/'/g, "\\'")}')">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        Reject Account
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -248,95 +135,45 @@ function loadPendingAccounts() {
         .catch(err => console.error('Error loading accounts:', err));
 }
 
-// Expose globally to fix onclick handlers
-window.openActionModal = function(userId, action, userName) {
-    const modal = document.getElementById('actionModal');
-    const title = document.getElementById('modalTitle');
-    const btn = document.getElementById('confirmActionBtn');
-    
-    document.getElementById('actionUserId').value = userId;
-    document.getElementById('actionType').value = action;
-    document.getElementById('actionReason').value = '';
-    
-    if (action === 'approve') {
-        title.textContent = `Approve ${userName}?`;
-        btn.textContent = 'Approve';
-        btn.className = 'w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm';
-    } else {
-        title.textContent = `Reject ${userName}?`;
-        btn.textContent = 'Reject';
-        btn.className = 'w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm';
-    }
-    
-    modal.classList.remove('hidden');
-    // Prevent body scroll when modal is open
-    document.body.style.overflow = 'hidden';
-};
-
-// Close modal and re-enable body scroll
-window.closeActionModal = function() {
-    document.getElementById('actionModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-};
-
-window.confirmAction = function() {
-    const userId = document.getElementById('actionUserId').value;
-    const action = document.getElementById('actionType').value;
-    const reason = document.getElementById('actionReason').value;
-    
-    const formData = new FormData();
-    formData.append('user_id', userId);
-    formData.append('action', action);
-    formData.append('reason', reason);
-    formData.append('csrf_token', window.__ADMIN_CSRF__ || '');
-    
-    fetch('api/approve_user_account.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        window.closeActionModal();
-        if (data.success) {
-            // Show success message
-            showNotification(data.message, 'success');
-            // Reload pending accounts
-            setTimeout(() => loadPendingAccounts(), 500);
-        } else {
-            showNotification('Error: ' + data.message, 'error');
-        }
-    })
-    .catch(err => {
-        window.closeActionModal();
-        console.error('Error:', err);
-        showNotification('An error occurred while processing the request', 'error');
+// Approve/Reject via SweetAlert2 (replaces custom modal)
+window.openActionModal = async function(userId, action, userName) {
+    const isApprove = action === 'approve';
+    const { value: reason } = await Swal.fire({
+        title: `${isApprove ? 'Approve' : 'Reject'} ${userName}?`,
+        input: 'textarea',
+        inputPlaceholder: 'Enter any notes or reason (optional)...',
+        inputAttributes: { 'aria-label': 'Reason', style: 'min-height: 80px;' },
+        icon: isApprove ? 'question' : 'warning',
+        showCancelButton: true,
+        confirmButtonText: isApprove ? 'Approve' : 'Reject',
+        confirmButtonColor: isApprove ? '#10b981' : '#ef4444',
+        cancelButtonColor: '#6b7280',
+        inputValidator: () => null // allow empty
     });
-}
 
-// Simple notification function
-function showNotification(message, type) {
-    const notificationDiv = document.createElement('div');
-    notificationDiv.className = `fixed top-4 right-4 z-[10000] max-w-sm w-full ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300`;
-    notificationDiv.innerHTML = `
-        <div class="flex items-center justify-between">
-            <p class="font-medium">${message}</p>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-        </div>
-    `;
-    document.body.appendChild(notificationDiv);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        notificationDiv.style.opacity = '0';
-        setTimeout(() => notificationDiv.remove(), 300);
-    }, 5000);
-}
+    if (reason !== undefined) {
+        try {
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('action', action);
+            formData.append('reason', reason || '');
+            formData.append('csrf_token', window.__ADMIN_CSRF__ || '');
+
+            const res = await fetch('api/approve_user_account.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                await Swal.fire({ icon: 'success', title: isApprove ? 'Approved!' : 'Rejected', text: data.message, confirmButtonColor: '#3b82f6' });
+                loadPendingAccounts();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.message, confirmButtonColor: '#ef4444' });
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred while processing the request', confirmButtonColor: '#ef4444' });
+        }
+    }
+};
 
 // Load on page show
 try {
@@ -345,15 +182,38 @@ try {
     console.error('[Approvals] Error loading pending accounts:', error);
 }
 
-// Close modal on ESC key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('actionModal');
-        if (modal && !modal.classList.contains('hidden')) {
-            window.closeActionModal();
+// Client-side search for approvals table
+(function() {
+    const searchInput = document.getElementById('approvalsSearchInput');
+    const searchCount = document.getElementById('approvalsSearchCount');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function() {
+        const term = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#approvalsBody tr');
+        let visible = 0, total = rows.length;
+
+        rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td:not(:last-child)'));
+            const text = cells.map(c => c.textContent).join(' ').toLowerCase();
+            const show = !term || text.includes(term);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        if (searchCount) {
+            searchCount.textContent = term ? `${visible} of ${total} accounts` : '';
+            searchCount.style.color = visible > 0 ? '#16a34a' : '#dc2626';
         }
-    }
-});
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            this.dispatchEvent(new Event('input'));
+        }
+    });
+})();
 
 console.log('[Approvals] Controls initialized successfully');
 
@@ -361,31 +221,10 @@ console.log('[Approvals] Controls initialized successfully');
 </script>
 
 <style>
-/* Ensure modal appears above all content */
-#actionModal {
-    z-index: 9999 !important;
-}
-
 /* Ensure table is not overlapping */
 #approvalsTable {
     position: relative;
     z-index: 1;
-}
-
-/* Smooth transitions for modal */
-#actionModal > div > div {
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 /* Better table row hover */
@@ -396,11 +235,5 @@ console.log('[Approvals] Controls initialized successfully');
 /* Ensure buttons don't wrap awkwardly */
 #approvalsTable td button {
     white-space: nowrap;
-}
-
-/* Fix textarea in modal */
-#actionReason {
-    resize: vertical;
-    min-height: 80px;
 }
 </style>

@@ -25,7 +25,7 @@ if (!$stats) {
   }
 
   try {
-    $recentLogsCount = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE log_time >= (NOW() - INTERVAL 1 DAY)")->fetchColumn();
+    $recentLogsCount = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE created_at >= (NOW() - INTERVAL 1 DAY)")->fetchColumn();
   } catch (Exception $e) {
     $recentLogsCount = 'N/A';
   }
@@ -33,9 +33,9 @@ if (!$stats) {
   try {
     // Analytics Dashboard Stats
     $totalLogs = $pdo->query("SELECT COUNT(*) FROM recent_logs")->fetchColumn();
-    $logsToday = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE DATE(log_time) = CURDATE()")->fetchColumn();
-    $allowedToday = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE DATE(log_time) = CURDATE() AND status = 'IN'")->fetchColumn();
-    $deniedToday = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE DATE(log_time) = CURDATE() AND status = 'OUT'")->fetchColumn();
+    $logsToday = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE DATE(created_at) = CURDATE()")->fetchColumn();
+    $allowedToday = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE DATE(created_at) = CURDATE() AND status = 'IN'")->fetchColumn();
+    $deniedToday = $pdo->query("SELECT COUNT(*) FROM recent_logs WHERE DATE(created_at) = CURDATE() AND status = 'OUT'")->fetchColumn();
   } catch (Exception $e) {
     $totalLogs = 'N/A';
     $logsToday = 'N/A';
@@ -71,45 +71,33 @@ if (!$stats) {
 
 <!-- Main Dashboard Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-  <div
-    class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm hover:shadow-md transition-all">
-    <div class="flex items-start justify-between mb-4">
-      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-700 border border-gray-100 dark:border-slate-600">
-        <svg class="h-6 w-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-          </path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon blue">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+        </path>
+      </svg>
     </div>
-    <div>
-      <p class="text-sm font-medium text-gray-500 mb-1">Total Homeowners</p>
-      <div class="flex items-baseline gap-2">
-        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($totalHomeowners ?? ''); ?></p>
-        <span class="text-xs font-medium text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">+2.5%</span>
-      </div>
-      <p class="text-xs text-gray-500 mt-2">Registered residents</p>
+    <div class="ta-stat-content">
+      <p class="ta-stat-label">Total Homeowners</p>
+      <p class="ta-stat-value"><?php echo htmlspecialchars($totalHomeowners ?? ''); ?></p>
+      <p class="ta-stat-trend neutral">Registered residents</p>
     </div>
   </div>
 
-  <div
-    class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm hover:shadow-md transition-all">
-    <div class="flex items-start justify-between mb-4">
-      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-50 dark:bg-slate-700 border border-gray-100 dark:border-slate-600">
-        <svg class="h-6 w-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-          </path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon purple">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+        </path>
+      </svg>
     </div>
-    <div>
-      <p class="text-sm font-medium text-gray-500 mb-1">24h Access Logs</p>
-      <div class="flex items-baseline gap-2">
-        <p class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($recentLogsCount ?? ''); ?></p>
-        <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Coming soon</span>
-      </div>
-      <p class="text-xs text-gray-500 mt-2">Activity in last 24h</p>
+    <div class="ta-stat-content">
+      <p class="ta-stat-label">24h Access Logs</p>
+      <p class="ta-stat-value"><?php echo htmlspecialchars($recentLogsCount ?? ''); ?></p>
+      <p class="ta-stat-trend neutral">Activity in last 24h</p>
     </div>
   </div>
 </div>
@@ -130,73 +118,65 @@ if (!$stats) {
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-  <div
-    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 dark:bg-slate-700">
-        <svg class="h-5 w-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-          </path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon blue">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+        </path>
+      </svg>
     </div>
-    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Homeowners</p>
-    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($totalHomeowners) ? number_format($totalHomeowners) : $totalHomeowners; ?></p>
-    <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-400"></div>
+    <div class="ta-stat-content">
+      <p class="ta-stat-label">Total Homeowners</p>
+      <p class="ta-stat-value"><?php echo is_numeric($totalHomeowners) ? number_format($totalHomeowners) : $totalHomeowners; ?></p>
+    </div>
   </div>
 
-  <div
-    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-green-50 dark:bg-green-900/30">
-        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon green">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
     </div>
-    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Entries Today</p>
-    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($allowedToday) ? number_format($allowedToday) : $allowedToday; ?></p>
-    <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-green-500 to-green-400"></div>
+    <div class="ta-stat-content">
+      <p class="ta-stat-label">Entries Today</p>
+      <p class="ta-stat-value"><?php echo is_numeric($allowedToday) ? number_format($allowedToday) : $allowedToday; ?></p>
+    </div>
   </div>
 
-  <div
-    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-red-50 dark:bg-red-900/30">
-        <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon red">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
     </div>
-    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Exits Today</p>
-    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($deniedToday) ? number_format($deniedToday) : $deniedToday; ?></p>
-    <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-red-500 to-red-400"></div>
+    <div class="ta-stat-content">
+      <p class="ta-stat-label">Exits Today</p>
+      <p class="ta-stat-value"><?php echo is_numeric($deniedToday) ? number_format($deniedToday) : $deniedToday; ?></p>
+    </div>
   </div>
 
-  <div
-    class="relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 dark:bg-slate-700">
-        <svg class="h-5 w-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-          </path>
-        </svg>
-      </div>
+  <div class="ta-stat-card">
+    <div class="ta-stat-icon purple">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+        </path>
+      </svg>
     </div>
-    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Logs Today</p>
-    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo is_numeric($logsToday) ? number_format($logsToday) : $logsToday; ?></p>
-    <div class="absolute top-0 left-0 h-0.5 w-full bg-gradient-to-r from-purple-500 to-purple-400"></div>
+    <div class="ta-stat-content">
+      <p class="ta-stat-label">Total Logs Today</p>
+      <p class="ta-stat-value"><?php echo is_numeric($logsToday) ? number_format($logsToday) : $logsToday; ?></p>
+    </div>
   </div>
 </div>
 
 <!-- Analytics Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
   <!-- Status Distribution Pie Chart -->
-  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+  <div class="ta-chart-card p-6">
     <div class="flex items-center gap-2 mb-4">
       <div class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900/30">
         <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +194,7 @@ if (!$stats) {
   </div>
 
   <!-- Weekly Activity Line Chart -->
-  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+  <div class="ta-chart-card p-6">
     <div class="flex items-center gap-2 mb-4">
       <div class="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-100 dark:bg-emerald-900/30">
         <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,25 +217,28 @@ if (!$stats) {
 
   function waitForChartJS() {
     if (typeof Chart !== 'undefined') {
-      console.log('[Dashboard] ✅ Chart.js loaded, initializing charts...');
+      console.log('[Dashboard] Chart.js loaded, initializing charts...');
       initCharts();
     } else if (chartInitAttempts < maxAttempts) {
       chartInitAttempts++;
-      console.log(`[Dashboard] ⏳ Waiting for Chart.js... (attempt ${chartInitAttempts}/${maxAttempts})`);
+      console.log(`[Dashboard] Waiting for Chart.js... (attempt ${chartInitAttempts}/${maxAttempts})`);
       setTimeout(waitForChartJS, 200);
     } else {
-      console.error('[Dashboard] ❌ Chart.js failed to load after', maxAttempts, 'attempts');
+      console.error('[Dashboard] Chart.js failed to load after', maxAttempts, 'attempts');
       // Show error message in chart containers
       ['statusPieChart', 'weeklyLineChart'].forEach(id => {
         const canvas = document.getElementById(id);
         if (canvas) {
-          canvas.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-red-500"><p>⚠️ Chart library not loaded. Please refresh the page.</p></div>';
+          canvas.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-red-500"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.832c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg><p>Chart library not loaded. Please refresh the page.</p></div>';
         }
       });
     }
   }
 
   function initCharts() {
+    // Dark mode detection
+    const isDark = document.body.classList.contains('dark') || document.body.classList.contains('dark-mode');
+
     // Status Pie Chart
     const statusCtx = document.getElementById('statusPieChart');
     if (statusCtx) {
@@ -297,12 +280,15 @@ if (!$stats) {
                     size: 13,
                     weight: '500'
                   },
+                  color: isDark ? '#cbd5e1' : '#374151',
                   usePointStyle: true,
                   pointStyle: 'circle'
                 }
               },
               tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                titleColor: isDark ? '#f1f5f9' : '#ffffff',
+                bodyColor: isDark ? '#cbd5e1' : '#ffffff',
                 padding: 12,
                 titleFont: { size: 14, weight: 'bold' },
                 bodyFont: { size: 13 },
@@ -321,10 +307,10 @@ if (!$stats) {
             }
           }
         });
-        console.log('[Dashboard] ✅ Pie chart created successfully');
+        console.log('[Dashboard] Pie chart created successfully');
       }
     } else {
-      console.warn('[Dashboard] ⚠️ statusPieChart canvas not found');
+      console.warn('[Dashboard] statusPieChart canvas not found');
     }
 
     // Weekly Line Chart - Fetch data
@@ -400,11 +386,14 @@ if (!$stats) {
                         boxHeight: 12,
                         padding: 15,
                         font: { size: 12, weight: '500' },
+                        color: isDark ? '#cbd5e1' : '#374151',
                         usePointStyle: true
                       }
                     },
                     tooltip: {
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                      titleColor: isDark ? '#f1f5f9' : '#ffffff',
+                      bodyColor: isDark ? '#cbd5e1' : '#ffffff',
                       padding: 12,
                       titleFont: { size: 14, weight: 'bold' },
                       bodyFont: { size: 13 },
@@ -418,17 +407,17 @@ if (!$stats) {
                       ticks: {
                         precision: 0,
                         font: { size: 11 },
-                        color: '#6b7280'
+                        color: isDark ? '#94a3b8' : '#6b7280'
                       },
                       grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
+                        color: isDark ? 'rgba(100, 116, 139, 0.15)' : 'rgba(0, 0, 0, 0.05)',
                         drawBorder: false
                       }
                     },
                     x: {
                       ticks: {
                         font: { size: 11 },
-                        color: '#6b7280'
+                        color: isDark ? '#94a3b8' : '#6b7280'
                       },
                       grid: {
                         display: false,
@@ -442,34 +431,34 @@ if (!$stats) {
                   }
                 }
               });
-              console.log('[Dashboard] ✅ Line chart created successfully with', data.values.length, 'data points');
+              console.log('[Dashboard] Line chart created successfully with', data.values.length, 'data points');
             }
           } else {
-            console.warn('[Dashboard] ⚠️ Weekly chart canvas not found');
+            console.warn('[Dashboard] Weekly chart canvas not found');
           }
         } else {
-          console.error('[Dashboard] ❌ API returned error:', data.error || 'Unknown error');
+          console.error('[Dashboard] API returned error:', data.error || 'Unknown error');
           const weeklyCtx = document.getElementById('weeklyLineChart');
           if (weeklyCtx) {
             weeklyCtx.parentElement.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-red-500">
             <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <p class="font-medium">⚠️ Failed to load chart data</p>
+            <p class="font-medium">Failed to load chart data</p>
             <p class="text-xs text-gray-500 mt-1">${data.error || 'Unknown error'}</p>
           </div>`;
           }
         }
       })
       .catch(err => {
-        console.error('[Dashboard] ❌ Failed to load weekly stats:', err);
+        console.error('[Dashboard] Failed to load weekly stats:', err);
         const weeklyCtx = document.getElementById('weeklyLineChart');
         if (weeklyCtx) {
           weeklyCtx.parentElement.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-red-500">
           <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <p class="font-medium">⚠️ Network Error</p>
+          <p class="font-medium">Network Error</p>
           <p class="text-xs text-gray-500 mt-1">${err.message}</p>
         </div>`;
         }
@@ -531,7 +520,7 @@ foreach ($months as $month) {
             status,
             COUNT(*) as count
         FROM recent_logs
-        WHERE DATE_FORMAT(log_time, '%Y-%m') = ?
+        WHERE DATE_FORMAT(created_at, '%Y-%m') = ?
         GROUP BY status
     ");
   $stmt->execute([$month]);
@@ -610,7 +599,7 @@ try {
   <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Visual analytics for system activity</p>
 
   <!-- Homeowner Registrations Chart -->
-  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm mb-6">
+  <div class="ta-chart-card p-6 mb-6">
     <div class="border-b border-gray-200 dark:border-slate-700 pb-4 mb-4">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Homeowner Registrations</h3>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 6 months - Approved vs Pending</p>
@@ -618,23 +607,23 @@ try {
     <div class="flex gap-6 mb-4 justify-center flex-wrap">
       <div class="flex items-center gap-2">
         <div style="width: 12px; height: 12px; border-radius: 2px; background: #3b82f6;"></div>
-        <span class="text-sm text-gray-600">Approved</span>
+        <span class="text-sm text-gray-600 dark:text-gray-400">Approved</span>
       </div>
       <div class="flex items-center gap-2">
         <div style="width: 12px; height: 12px; border-radius: 2px; background: #f59e0b;"></div>
-        <span class="text-sm text-gray-600">Pending</span>
+        <span class="text-sm text-gray-600 dark:text-gray-400">Pending</span>
       </div>
     </div>
     <div style="position: relative; height: 300px;">
       <svg id="homeownerChart" width="100%" height="100%"></svg>
-      <div id="tooltip1"
-        style="position: absolute; background: #1f2937; color: white; font-size: 12px; padding: 12px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); pointer-events: none; display: none; z-index: 1000;">
-      </div>
+      <div id="tooltip1" class="chart-tooltip"
+        style="position: absolute; font-size: 12px; padding: 12px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); pointer-events: none; display: none; z-index: 1000;"
+      ></div>
     </div>
   </div>
 
   <!-- Access Logs Chart -->
-  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm mb-6">
+  <div class="ta-chart-card p-6 mb-6">
     <div class="border-b border-gray-200 dark:border-slate-700 pb-4 mb-4">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Access Activity</h3>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 6 months - Entries vs Exits</p>
@@ -642,18 +631,18 @@ try {
     <div class="flex gap-6 mb-4 justify-center flex-wrap">
       <div class="flex items-center gap-2">
         <div style="width: 12px; height: 12px; border-radius: 2px; background: #10b981;"></div>
-        <span class="text-sm text-gray-600">Entries</span>
+        <span class="text-sm text-gray-600 dark:text-gray-400">Entries</span>
       </div>
       <div class="flex items-center gap-2">
         <div style="width: 12px; height: 12px; border-radius: 2px; background: #ef4444;"></div>
-        <span class="text-sm text-gray-600">Exits</span>
+        <span class="text-sm text-gray-600 dark:text-gray-400">Exits</span>
       </div>
     </div>
     <div style="position: relative; height: 300px;">
       <svg id="accessChart" width="100%" height="100%"></svg>
-      <div id="tooltip2"
-        style="position: absolute; background: #1f2937; color: white; font-size: 12px; padding: 12px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); pointer-events: none; display: none; z-index: 1000;">
-      </div>
+      <div id="tooltip2" class="chart-tooltip"
+        style="position: absolute; font-size: 12px; padding: 12px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); pointer-events: none; display: none; z-index: 1000;"
+      ></div>
     </div>
     <div style="padding-top: 16px; font-size: 14px;">
       <div style="color: #10b981; font-weight: 500; display: flex; align-items: center; gap: 4px;">
@@ -667,19 +656,32 @@ try {
   </div>
 
   <!-- Vehicle Registrations Chart -->
-  <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm mb-6">
+  <div class="ta-chart-card p-6 mb-6">
     <div class="border-b border-gray-200 dark:border-slate-700 pb-4 mb-4">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Vehicle Registrations</h3>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 6 months</p>
     </div>
     <div style="position: relative; height: 300px;">
       <svg id="vehicleChart" width="100%" height="100%"></svg>
-      <div id="tooltip3"
-        style="position: absolute; background: #1f2937; color: white; font-size: 12px; padding: 12px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); pointer-events: none; display: none; z-index: 1000;">
-      </div>
+      <div id="tooltip3" class="chart-tooltip"
+        style="position: absolute; font-size: 12px; padding: 12px; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); pointer-events: none; display: none; z-index: 1000;"
+      ></div>
     </div>
   </div>
 </div>
+
+<style>
+  .chart-tooltip {
+    background: #1f2937;
+    color: white;
+  }
+  body.dark .chart-tooltip,
+  body.dark-mode .chart-tooltip {
+    background: #0f172a;
+    color: #f1f5f9;
+    border: 1px solid #334155;
+  }
+</style>
 
 <script>
   // Stacked Bar Chart Data - Use let to allow redeclaration when page reloads
@@ -692,6 +694,14 @@ try {
     const tooltip = document.getElementById(tooltipId);
 
     if (!svg || !tooltip) return;
+
+    // Dark mode detection for SVG charts
+    const isDark = document.body.classList.contains('dark') || document.body.classList.contains('dark-mode');
+    const gridColor = isDark ? '#334155' : '#e5e7eb';
+    const labelColor = isDark ? '#94a3b8' : '#9ca3af';
+    const axisLabelColor = isDark ? '#94a3b8' : '#6b7280';
+    const tooltipBg = isDark ? '#0f172a' : '#1f2937';
+    const tooltipFg = isDark ? '#f1f5f9' : 'white';
 
     const svgRect = svg.getBoundingClientRect();
     const width = svgRect.width;
@@ -723,7 +733,7 @@ try {
       line.setAttribute('y1', y);
       line.setAttribute('x2', width - padding.right);
       line.setAttribute('y2', y);
-      line.setAttribute('stroke', '#e5e7eb');
+      line.setAttribute('stroke', gridColor);
       line.setAttribute('stroke-width', '1');
       svg.appendChild(line);
 
@@ -733,7 +743,7 @@ try {
       text.setAttribute('x', padding.left - 10);
       text.setAttribute('y', y + 4);
       text.setAttribute('text-anchor', 'end');
-      text.setAttribute('fill', '#9ca3af');
+      text.setAttribute('fill', labelColor);
       text.setAttribute('font-size', '11');
       text.textContent = value;
       svg.appendChild(text);
@@ -818,7 +828,7 @@ try {
       text.setAttribute('x', x + barWidth / 2);
       text.setAttribute('y', height - padding.bottom + 20);
       text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('fill', '#6b7280');
+      text.setAttribute('fill', axisLabelColor);
       text.setAttribute('font-size', '12');
       text.textContent = item.month;
       svg.appendChild(text);

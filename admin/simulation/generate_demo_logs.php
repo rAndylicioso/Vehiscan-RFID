@@ -7,6 +7,17 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_a
     exit('Unauthorized');
 }
 
+// CSRF validation
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $csrf = $data['csrf_token'] ?? ($_POST['csrf_token'] ?? '');
+    if (empty($csrf) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        exit(json_encode(['success' => false, 'message' => 'Invalid CSRF token']));
+    }
+}
+
 header('Content-Type: application/json');
 
 try {
@@ -20,11 +31,11 @@ try {
     }
     
     $count = 0;
-    $statuses = ['ALLOWED', 'ALLOWED', 'ALLOWED', 'DENIED']; // 75% allowed
+    $statuses = ['IN', 'IN', 'IN', 'OUT']; // 75% entries
     
     foreach ($plates as $plate) {
         $status = $statuses[array_rand($statuses)];
-        $log_time = date('Y-m-d H:i:s', strtotime('-' . rand(0, 60) . ' minutes'));
+        $log_time = date('H:i:s', strtotime('-' . rand(0, 60) . ' minutes'));
         
         $stmt = $pdo->prepare("INSERT INTO recent_logs (plate_number, status, log_time) VALUES (?, ?, ?)");
         $stmt->execute([$plate, $status, $log_time]);

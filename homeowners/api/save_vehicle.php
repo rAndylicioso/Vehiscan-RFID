@@ -6,6 +6,13 @@ header('Content-Type: application/json');
 $homeownerId = $_SESSION['homeowner_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // CSRF validation
+    $csrf = $_POST['csrf_token'] ?? '';
+    if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrf)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+        exit();
+    }
+
     $plateNumber = trim($_POST['plate_number'] ?? '');
     $vehicleType = trim($_POST['vehicle_type'] ?? '');
     $color = trim($_POST['color'] ?? '');

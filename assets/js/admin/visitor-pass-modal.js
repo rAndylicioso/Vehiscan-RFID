@@ -35,7 +35,7 @@ class VisitorPassModal {
         <div class="modal-container">
           <div class="modal-header">
             <h2 class="modal-title">
-              <span>🎫</span>
+              <span><svg style="width:1.25em;height:1.25em;vertical-align:-0.2em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.5a1.5 1.5 0 1 0 0 3V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1.5a1.5 1.5 0 1 0 0-3V9z"/></svg></span>
               <span id="modalTitle">Create Visitor Pass</span>
             </h2>
             <button class="modal-close" id="closeModal" aria-label="Close modal">
@@ -319,11 +319,11 @@ class VisitorPassModal {
 
   async loadHomeowners() {
     try {
-      const res = await fetch('fetch/fetch_manage.php');
+      const res = await fetch('../api/homeowners_get.php');
       const data = await res.json();
       
-      if (data.success && data.homeowners) {
-        this.homeowners = data.homeowners;
+      if (Array.isArray(data)) {
+        this.homeowners = data;
         this.populateHomeownerSelect();
       }
     } catch (err) {
@@ -459,10 +459,10 @@ class VisitorPassModal {
     try {
       const form = document.getElementById('visitorPassForm');
       const formData = new FormData(form);
-      formData.append('csrf', this.csrf);
+      formData.append('csrf_token', this.csrf);
 
       const passId = document.getElementById('pass_id').value;
-      const endpoint = passId ? '../api/update_visitor_pass.php' : '../api/create_visitor_pass.php';
+      const endpoint = passId ? 'api/update_visitor_pass.php' : 'api/create_visitor_pass.php';
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -509,19 +509,15 @@ class VisitorPassModal {
   }
 }
 
-// Initialize modal when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('[Visitor Pass Modal] Initializing...');
-  window.visitorPassModal = new VisitorPassModal();
-  console.log('[Visitor Pass Modal] Initialized successfully');
-});
+// Initialize modal once when DOM is ready (singleton)
+function initVisitorPassModal() {
+  if (!window.visitorPassModal) {
+    window.visitorPassModal = new VisitorPassModal();
+  }
+}
 
-// Also initialize immediately if DOM is already loaded
 if (document.readyState === 'loading') {
-  // DOM still loading, wait for event
+  document.addEventListener('DOMContentLoaded', initVisitorPassModal);
 } else {
-  // DOM already loaded, initialize now
-  console.log('[Visitor Pass Modal] DOM already loaded, initializing immediately...');
-  window.visitorPassModal = new VisitorPassModal();
-  console.log('[Visitor Pass Modal] Initialized successfully');
+  initVisitorPassModal();
 }

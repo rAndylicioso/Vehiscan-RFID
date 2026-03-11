@@ -81,9 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $message = 'Homeowner account approved successfully';
                 
-                // TODO: Send email notification to homeowner
-                error_log("Homeowner approved: {$homeowner['email']} - {$homeowner['first_name']} {$homeowner['last_name']}");
-                
             } else {
                 // Approve regular user account
                 $stmt = $pdo->prepare("
@@ -144,9 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 $message = 'Homeowner account rejected';
-                
-                // TODO: Send email notification to homeowner
-                error_log("Homeowner rejected: {$homeowner['email']} - Reason: $reason");
                 
             } else {
                 // Reject regular user

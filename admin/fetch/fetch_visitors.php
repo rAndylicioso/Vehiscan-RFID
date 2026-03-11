@@ -10,16 +10,21 @@ $homeowners = $pdo->query("SELECT id, name FROM homeowners ORDER BY name ASC")->
 $pendingPasses = $pdo->query("
     SELECT vp.*, h.name as homeowner_name
     FROM visitor_passes vp
-    JOIN homeowners h ON vp.homeowner_id = h.id
+    LEFT JOIN homeowners h ON vp.homeowner_id = h.id
     WHERE vp.status = 'pending'
     ORDER BY vp.created_at DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// Get all visitor passes
+// Get all visitor passes (with computed display_status for expired/upcoming)
 $passes = $pdo->query("
-    SELECT vp.*, h.name as homeowner_name
+    SELECT vp.*, h.name as homeowner_name,
+        CASE
+            WHEN vp.status IN ('active','approved') AND NOW() > vp.valid_until THEN 'expired'
+            WHEN vp.status IN ('active','approved') AND NOW() < vp.valid_from THEN 'upcoming'
+            ELSE vp.status
+        END AS display_status
     FROM visitor_passes vp
-    JOIN homeowners h ON vp.homeowner_id = h.id
+    LEFT JOIN homeowners h ON vp.homeowner_id = h.id
     ORDER BY vp.created_at DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -56,29 +61,58 @@ $passes = $pdo->query("
 
 <!-- All Visitor Passes Table -->
 
-<div class="flex items-center gap-3 mb-4 flex-wrap table-tools">
-  <button id="createPassBtn" class="btn btn-add">➕ Create Visitor Pass</button>
-  <button id="refreshPassesBtn" class="btn btn-primary">🔄 Refresh</button>
-  <button id="exportPassesBtn" class="btn btn-add">📥 Export CSV</button>
+<div class="flex items-center gap-3 mb-4 flex-wrap">
+  <button id="createPassBtn" class="ta-btn ta-btn-primary">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+    Create Visitor Pass
+  </button>
+  <button id="refreshPassesBtn" class="ta-btn ta-btn-secondary">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+    Refresh
+  </button>
+  <button id="exportPassesBtn" class="ta-btn ta-btn-success">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+    Export CSV
+  </button>
+  <div class="flex items-center gap-2 ml-auto">
+    <div class="relative flex items-center">
+      <svg class="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <input type="text" id="visitorsSearchInput"
+        class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
+        placeholder="Search visitor passes...">
+    </div>
+    <span id="visitorsSearchCount" class="text-sm text-gray-600 font-medium whitespace-nowrap"></span>
+  </div>
 </div>
 
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-  <table id="passesTable" class="w-full text-sm">
-    <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+<div class="ta-table-wrapper">
+  <table id="passesTable" class="ta-table">
+    <thead>
       <tr>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Visitor Name</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Plate Number</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Homeowner</th>
-        <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">QR Code</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Valid From</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Valid Until</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Status</th>
-        <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+        <th>Visitor Name</th>
+        <th>Plate Number</th>
+        <th>Homeowner</th>
+        <th class="text-center">QR Code</th>
+        <th>Valid From</th>
+        <th>Valid Until</th>
+        <th>Status</th>
+        <th class="text-center">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
       <?php if (empty($passes)): ?>
-        <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No visitor passes yet</td></tr>
+        <tr>
+          <td colspan="8">
+            <div class="ta-empty-state">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+              </svg>
+              <p>No visitor passes yet</p>
+            </div>
+          </td>
+        </tr>
       <?php else: ?>
         <?php foreach ($passes as $p): ?>
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
@@ -95,40 +129,47 @@ $passes = $pdo->query("
             <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo date('M d, Y H:i', strtotime($p['valid_from'])); ?></td>
             <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo date('M d, Y H:i', strtotime($p['valid_until'])); ?></td>
             <td class="px-4 py-3">
-              <span class="status-badge status-<?php echo htmlspecialchars($p['status']); ?>">
-                <?php echo htmlspecialchars(ucfirst($p['status'])); ?>
+              <?php
+                $displayStatus = $p['display_status'] ?? $p['status'];
+                $badgeMap = ['active' => 'success', 'approved' => 'success', 'used' => 'info', 'pending' => 'warning', 'expired' => 'neutral', 'upcoming' => 'info', 'cancelled' => 'danger', 'rejected' => 'danger'];
+                $badgeColor = $badgeMap[$displayStatus] ?? 'neutral';
+              ?>
+              <span class="ta-badge <?php echo $badgeColor; ?>">
+                <?php echo htmlspecialchars(ucfirst($displayStatus)); ?>
               </span>
             </td>
             <td class="px-4 py-3 text-center">
               <?php if ($p['status'] === 'pending'): ?>
-                <!-- Dropdown for pending passes -->
-                <div class="relative inline-block text-left" x-data="{ open: false }">
-                  <button @click="open = !open" @click.away="open = false" type="button" class="inline-flex items-center justify-center w-full rounded-md border border-gray-300 dark:border-slate-600 shadow-sm px-4 py-2 bg-white dark:bg-slate-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500">
+                <div class="ta-action-dropdown">
+                  <button type="button" class="ta-action-btn">
                     Actions
-                    <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
+                    <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                   </button>
-
-                  <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white dark:bg-slate-700 ring-1 ring-black ring-opacity-5 z-10" style="display: none;">
-                    <div class="py-1" role="menu">
-                      <button onclick="window.approveVisitorPass(<?php echo $p['id']; ?>)" class="w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 flex items-center gap-2" role="menuitem">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Approve
-                      </button>
-                      <button onclick="window.rejectVisitorPass(<?php echo $p['id']; ?>)" class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 flex items-center gap-2" role="menuitem">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Reject
-                      </button>
-                    </div>
+                  <div class="ta-action-menu">
+                    <button type="button" class="ta-action-menu-item green" onclick="window.approveVisitorPass(<?php echo $p['id']; ?>)">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                      Approve
+                    </button>
+                    <div class="ta-action-divider"></div>
+                    <button type="button" class="ta-action-menu-item red" onclick="window.rejectVisitorPass(<?php echo $p['id']; ?>)">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      Reject
+                    </button>
                   </div>
                 </div>
-              <?php elseif ($p['status'] === 'approved' || $p['status'] === 'active'): ?>
-                <button class="btn warn cancelPassBtn" data-id="<?php echo $p['id']; ?>">Cancel</button>
+              <?php elseif (($p['status'] === 'approved' || $p['status'] === 'active') && $displayStatus !== 'expired'): ?>
+                <div class="ta-action-dropdown">
+                  <button type="button" class="ta-action-btn">
+                    Actions
+                    <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                  </button>
+                  <div class="ta-action-menu">
+                    <button type="button" class="ta-action-menu-item red cancelPassBtn" data-id="<?php echo $p['id']; ?>">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      Cancel Pass
+                    </button>
+                  </div>
+                </div>
               <?php endif; ?>
             </td>
           </tr>

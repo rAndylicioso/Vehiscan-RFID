@@ -1,83 +1,164 @@
 <?php
 // Unified session handler for both admin and super_admin
-// SIMPLIFIED FOR LOCALHOST - Works with both admin types
+// Resolves the correct session without cross-role collision
 
 if (session_status() === PHP_SESSION_NONE) {
-    // Relaxed settings for localhost development
+    // Isolate sessions from other XAMPP apps to prevent cross-app GC.
+    // Other apps (phpMyAdmin, etc.) sharing the default C:\xampp\tmp save_path
+    // may trigger GC with their own (lower) gc_maxlifetime, deleting our session
+    // files prematurely. With use_strict_mode=1 the lost file causes PHP to issue
+    // a brand-new ID → empty session → CSRF mismatch.
+    $appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
+    if (!is_dir($appSavePath)) {
+        mkdir($appSavePath, 0700, true);
+    }
+    ini_set('session.save_path', $appSavePath);
+
+    // Secure session settings
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
     ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.cookie_secure', 0); // Allow HTTP for localhost
-    ini_set('session.use_strict_mode', 0); // Allow multiple tabs
-    
-    // Check which session cookie exists
+    ini_set('session.use_strict_mode', 1); // Reject uninitialized session IDs
+    ini_set('session.gc_maxlifetime', 3600); // 1 hour — must exceed the 30-min timeout
+
     $sessionStarted = false;
-    
-    // Try vehiscan_superadmin FIRST (super admin has priority)
-    if (isset($_COOKIE['vehiscan_superadmin'])) {
+    $hasSuperCookie = isset($_COOKIE['vehiscan_superadmin']);
+    $hasAdminCookie = isset($_COOKIE['vehiscan_admin']);
+
+    // CASE 1: Only one cookie exists — use it directly (most common case)
+    if ($hasSuperCookie && !$hasAdminCookie) {
         session_name('vehiscan_superadmin');
         session_start();
         if (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin') {
             $sessionStarted = true;
         } else {
-            session_write_close();
+            // Cookie exists but session is invalid/empty — clean it up
+            $_SESSION = [];
+            session_destroy();
+            setcookie('vehiscan_superadmin', '', time() - 3600, '/');
         }
-    }
-    
-    // Try vehiscan_admin if super admin didn't work
-    if (!$sessionStarted && isset($_COOKIE['vehiscan_admin'])) {
+    } elseif ($hasAdminCookie && !$hasSuperCookie) {
         session_name('vehiscan_admin');
         session_start();
         if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
             $sessionStarted = true;
         } else {
-            session_write_close();
+            $_SESSION = [];
+            session_destroy();
+            setcookie('vehiscan_admin', '', time() - 3600, '/');
         }
-    }
-    
-    // Fallback: try both without cookie check (for edge cases after login redirect)
-    if (!$sessionStarted) {
-        // Try superadmin first
+    } elseif ($hasSuperCookie && $hasAdminCookie) {
+        // CASE 2: Both cookies exist — anomalous state.
+        // Temporarily disable strict_mode so session_id() + session_start() always
+        // opens the exact session file the cookie points to (or creates an empty one
+        // with the same ID if the file was GC'd). This avoids strict_mode silently
+        // generating a new random ID and creating orphaned sessions.
+        ini_set('session.use_strict_mode', 0);
+
+        $superLogin = 0;
+        $adminLogin = 0;
+
         session_name('vehiscan_superadmin');
-        @session_start();
+        session_id($_COOKIE['vehiscan_superadmin']);
+        session_start();
         if (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin') {
+            $superLogin = $_SESSION['created'] ?? $_SESSION['last_activity'] ?? 0;
+        }
+        session_write_close();
+
+        session_name('vehiscan_admin');
+        session_id($_COOKIE['vehiscan_admin']);
+        session_start();
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+            $adminLogin = $_SESSION['created'] ?? $_SESSION['last_activity'] ?? 0;
+        }
+        session_write_close();
+
+        // Pick the session with the most recent LOGIN (not activity)
+        if ($superLogin > 0 && $superLogin >= $adminLogin) {
+            // Super admin session is more recent — destroy the stale admin session
+            session_name('vehiscan_admin');
+            session_id($_COOKIE['vehiscan_admin']);
+            session_start();
+            $_SESSION = [];
+            session_destroy();
+            setcookie('vehiscan_admin', '', time() - 3600, '/');
+            unset($_COOKIE['vehiscan_admin']);
+
+            session_name('vehiscan_superadmin');
+            session_id($_COOKIE['vehiscan_superadmin']);
+            session_start();
+            $sessionStarted = true;
+        } elseif ($adminLogin > 0) {
+            // Admin session is more recent — destroy the stale super_admin session
+            session_name('vehiscan_superadmin');
+            session_id($_COOKIE['vehiscan_superadmin']);
+            session_start();
+            $_SESSION = [];
+            session_destroy();
+            setcookie('vehiscan_superadmin', '', time() - 3600, '/');
+            unset($_COOKIE['vehiscan_superadmin']);
+
+            session_name('vehiscan_admin');
+            session_id($_COOKIE['vehiscan_admin']);
+            session_start();
             $sessionStarted = true;
         } else {
-            session_write_close();
-            // Try regular admin
-            session_name('vehiscan_admin');
-            @session_start();
-            if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-                $sessionStarted = true;
-            } else {
-                session_write_close();
-                // Last resort: start default admin session (empty state)
-                session_name('vehiscan_admin');
-                @session_start();
+            // Neither session is valid — clean up both
+            foreach (['vehiscan_superadmin', 'vehiscan_admin'] as $sName) {
+                if (isset($_COOKIE[$sName])) {
+                    session_name($sName);
+                    session_id($_COOKIE[$sName]);
+                    session_start();
+                    $_SESSION = [];
+                    session_destroy();
+                    setcookie($sName, '', time() - 3600, '/');
+                    unset($_COOKIE[$sName]);
+                }
             }
         }
+
+        // Re-enable strict mode for all subsequent session operations
+        ini_set('session.use_strict_mode', 1);
+    }
+
+    // CASE 3: No cookies at all — start a fresh empty admin session (will fail auth check downstream)
+    if (!$sessionStarted) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        session_name('vehiscan_admin');
+        session_start();
     }
 }
 
 // Session timeout check (30 minutes = 1800 seconds)
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+    // Expire the session cookie BEFORE destroying the session.
+    // Without this, the stale cookie persists in the browser after timeout,
+    // and if the user logs in as a different role, both cookies coexist
+    // causing CASE 2 (role confusion) on the next request.
+    $expiredName = session_name();
+    setcookie($expiredName, '', time() - 3600, '/');
+
     session_unset();
     session_destroy();
-    
+
     // Check if it's an AJAX request
-    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') ||
               (isset($_GET['ajax']) && $_GET['ajax'] == '1');
-    
+
     if ($isAjax) {
         http_response_code(403);
         header('Content-Type: application/json');
         exit(json_encode([
-            'error' => 'Session expired', 
+            'error' => 'Session expired',
             'redirect' => '/Vehiscan-RFID/auth/login.php?timeout=1'
         ]));
     }
-    
+
     header("Location: /Vehiscan-RFID/auth/login.php?timeout=1");
     exit;
 }
@@ -88,6 +169,11 @@ $_SESSION['last_activity'] = time();
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+// Expose current CSRF token via response header so JS can auto-refresh
+// after session rebuild (e.g. GC → strict_mode → new session → new token).
+// The fetch interceptor reads this and updates the cached JS variable.
+header('X-CSRF-Token: ' . $_SESSION['csrf_token']);
 
 if (!function_exists('logAudit')) {
     function logAudit($action, $table = null, $record_id = null, $details = null) {

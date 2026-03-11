@@ -4,42 +4,15 @@
  * View and manage all system employees
  */
 require_once __DIR__ . '/../includes/security_headers.php';
+require_once __DIR__ . '/../includes/session_admin_unified.php';
 
-$isSuperAdmin = false;
-$sessionName = session_name();
-
-if ($sessionName === '' || session_status() === PHP_SESSION_NONE) {
-    session_name('vehiscan_superadmin');
-    session_start();
-    if (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin') {
-        $isSuperAdmin = true;
-    } else {
-        session_write_close();
-        session_name('vehiscan_admin');
-        session_start();
-    }
-} else {
-    if ($sessionName === 'vehiscan_superadmin' && isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin') {
-        $isSuperAdmin = true;
-    }
-}
-
-if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
-    session_unset();
-    session_destroy();
-    header('Location: ../auth/login.php?timeout=1');
-    exit();
-}
-$_SESSION['last_activity'] = time();
+$isSuperAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin'])) {
     header('Location: ../auth/login.php');
     exit();
 }
 
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-}
 $csrf = $_SESSION['csrf_token'];
 
 require_once __DIR__ . '/../db.php';
@@ -77,6 +50,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Management — VehiScan</title>
     <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailadmin-components.css'); ?>">
     <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../assets/css/admin/admin.css?v=<?php echo time(); ?>">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -265,6 +239,64 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                 }
             });
         }
+    </script>
+
+    <!-- TailAdmin Action Dropdown Handler -->
+    <script>
+    (function(){
+      function closeDropdown(dd) {
+        dd.classList.remove('open');
+        const menu = dd.querySelector('.ta-action-menu');
+        if (menu) menu.removeAttribute('style');
+      }
+      function closeAllDropdowns(except) {
+        document.querySelectorAll('.ta-action-dropdown.open').forEach(function(d) {
+          if (d !== except) closeDropdown(d);
+        });
+      }
+      function positionDrop(dd) {
+        const menu = dd.querySelector('.ta-action-menu');
+        const trigger = dd.querySelector('.ta-action-btn');
+        if (!menu || !trigger) return;
+        // Measure actual menu width by temporarily showing it off-screen
+        menu.style.cssText = 'position:fixed;visibility:hidden;display:block;right:auto;width:auto;left:-9999px;top:0;';
+        var menuWidth = Math.max(menu.offsetWidth, 160);
+        var rect = trigger.getBoundingClientRect();
+        var spaceBelow = window.innerHeight - rect.bottom;
+        var dropUp = spaceBelow < 180 && rect.top > 180;
+        var leftPos = rect.right - menuWidth;
+        if (leftPos < 4) leftPos = 4;
+        if (leftPos + menuWidth > window.innerWidth - 4) leftPos = window.innerWidth - menuWidth - 4;
+        menu.style.cssText = [
+          'position:fixed', 'z-index:9999', 'width:' + menuWidth + 'px', 'right:auto', 'margin:0',
+          'left:' + leftPos + 'px',
+          dropUp
+            ? 'top:auto;bottom:' + (window.innerHeight - rect.top + 4) + 'px'
+            : 'top:' + (rect.bottom + 4) + 'px;bottom:auto'
+        ].join(';');
+        dd.classList.toggle('drop-up', dropUp);
+      }
+      document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.ta-action-btn');
+        if (btn) {
+          e.stopPropagation();
+          const dd = btn.closest('.ta-action-dropdown');
+          const wasOpen = dd.classList.contains('open');
+          closeAllDropdowns(dd);
+          if (wasOpen) { closeDropdown(dd); } else { dd.classList.add('open'); positionDrop(dd); }
+          return;
+        }
+        const item = e.target.closest('.ta-action-menu-item');
+        if (item) { closeDropdown(item.closest('.ta-action-dropdown')); return; }
+        closeAllDropdowns(null);
+      });
+      ['scroll', 'resize'].forEach(function(ev) {
+        window.addEventListener(ev, function() {
+          const open = document.querySelector('.ta-action-dropdown.open');
+          if (open) positionDrop(open);
+        }, { passive: true });
+      });
+    })();
     </script>
 </body>
 </html>

@@ -1,5 +1,10 @@
 <?php
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+if (!in_array($_SESSION['role'] ?? '', ['super_admin', 'admin'])) {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    exit(json_encode(['success' => false, 'message' => 'Unauthorized']));
+}
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/input_sanitizer.php';
 require_once __DIR__ . '/../../includes/cache_invalidator.php';

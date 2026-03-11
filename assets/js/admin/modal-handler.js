@@ -26,7 +26,7 @@ function bindEditForm() {
   form.addEventListener("submit", e => {
     e.preventDefault();
     const data = new FormData(form);
-    data.set("csrf", CSRF_TOKEN);
+    data.set("csrf_token", window.__ADMIN_CSRF__ || '');
 
     fetch("homeowner_edit.php", { method: "POST", body: data })
       .then(r => r.json())
@@ -42,13 +42,13 @@ function bindEditForm() {
             position: 'top-end'
           });
           closeEditModal();
-          setTimeout(refreshHomeownersTable, 500);
+          if (typeof loadPage === 'function') setTimeout(() => loadPage('manage'), 500);
         } else {
           Swal.fire({
             icon: 'error',
             title: 'Error',
             text: json.message || 'Save failed',
-            confirmButtonColor: '#6b7280'
+            confirmButtonColor: '#ef4444'
           });
         }
       })
@@ -57,7 +57,7 @@ function bindEditForm() {
           icon: 'error',
           title: 'Error',
           text: 'Request failed',
-          confirmButtonColor: '#6b7280'
+          confirmButtonColor: '#ef4444'
         });
       });
   });

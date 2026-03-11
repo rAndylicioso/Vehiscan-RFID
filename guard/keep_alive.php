@@ -1,9 +1,5 @@
 <?php
-// Start session first
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('vehiscan_guard');
-    session_start();
-}
+require_once __DIR__ . '/../includes/session_guard.php';
 
 // Check if session exists and has valid role
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guard') {

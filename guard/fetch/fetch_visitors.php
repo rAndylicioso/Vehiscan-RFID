@@ -44,8 +44,6 @@ try {
     $stmt->execute();
     $passes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    error_log('Visitor passes fetched: ' . count($passes) . ' passes found');
-    
     // Return JSON response
     header('Content-Type: application/json');
     echo json_encode([

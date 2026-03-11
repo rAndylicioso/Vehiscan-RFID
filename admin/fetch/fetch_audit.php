@@ -50,7 +50,7 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
 <!-- Action Bar -->
 <div class="flex items-center gap-3 mb-6 flex-wrap">
   <select id="actionFilter"
-    class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent filter-select dark:bg-slate-700 dark:text-gray-200">
+    class="ta-select filter-select">
     <option value="">All Actions</option>
     <?php foreach ($actions as $action): ?>
       <option value="<?php echo htmlspecialchars($action ?? ''); ?>" <?php echo $action === $filter_action ? 'selected' : ''; ?>>
@@ -60,42 +60,52 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
   </select>
 
   <input type="text" id="userFilter"
-    class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px] dark:bg-slate-700 dark:text-gray-200"
+    class="ta-input min-w-[160px]"
     placeholder="Filter by user..." value="<?php echo htmlspecialchars($filter_user); ?>">
 
-  <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
-  <button id="clearFilters" class="btn btn-secondary">Clear</button>
-  <button id="exportAuditBtn" class="btn btn-add">📥 Export CSV</button>
+  <button id="applyFilters" class="ta-btn ta-btn-primary">Apply Filters</button>
+  <button id="clearFilters" class="ta-btn ta-btn-secondary">Clear</button>
+  <button id="exportAuditBtn" class="ta-btn ta-btn-success">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+    Export CSV
+  </button>
 
   <div class="flex items-center gap-2 ml-auto">
     <input type="text" id="auditSearchInput"
     class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[250px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent search-bar dark:bg-slate-700 dark:text-gray-200"
-      placeholder="🔍 Search logs...">
+      placeholder="Search logs...">
     <span id="auditSearchCount" class="text-gray-600 text-sm font-medium"></span>
   </div>
 </div>
 
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-  <table id="auditTable" class="w-full text-sm">
-    <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+<div class="ta-table-wrapper">
+  <table id="auditTable" class="ta-table">
+    <thead>
       <tr>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Time</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">User</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Action</th>
-        <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Table</th>
+        <th>Time</th>
+        <th>User</th>
+        <th>Action</th>
+        <th>Table</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+    <tbody>
       <?php if (empty($logs)): ?>
         <tr>
-          <td colspan="4" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No audit logs found</td>
+          <td colspan="4">
+            <div class="ta-empty-state">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              <p>No audit logs found</p>
+            </div>
+          </td>
         </tr>
       <?php else: ?>
         <?php foreach ($logs as $log): ?>
           <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50">
             <td class="px-4 py-3 text-slate-700 dark:text-slate-300"><?php echo date('M d, H:i:s', strtotime($log['created_at'])); ?></td>
             <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-200"><?php echo htmlspecialchars($log['username'] ?? ''); ?></td>
-            <td class="px-4 py-3"><span class="action-badge"><?php echo htmlspecialchars($log['action'] ?? ''); ?></span></td>
+            <td class="px-4 py-3"><span class="ta-badge info"><?php echo htmlspecialchars($log['action'] ?? ''); ?></span></td>
             <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo htmlspecialchars($log['table_name'] ?? '-'); ?></td>
           </tr>
         <?php endforeach; ?>
@@ -104,88 +114,4 @@ $actions = $pdo->query("SELECT DISTINCT action FROM audit_logs ORDER BY action")
   </table>
 </div>
 
-<script>
-  (function () {
-    console.log('[Audit] Inline script loaded');
-
-    // Attach handlers immediately since the fragment is already in DOM
-    const applyBtn = document.getElementById('applyFilters');
-    const clearBtn = document.getElementById('clearFilters');
-    const actionFilter = document.getElementById('actionFilter');
-    const userFilter = document.getElementById('userFilter');
-
-    console.log('[Audit] Elements:', {
-      applyBtn: !!applyBtn,
-      clearBtn: !!clearBtn,
-      actionFilter: !!actionFilter,
-      userFilter: !!userFilter
-    });
-
-    if (applyBtn && actionFilter && userFilter) {
-      applyBtn.addEventListener('click', async function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('[Audit] Apply filters clicked');
-
-        const action = actionFilter.value || '';
-        const user = userFilter.value || '';
-
-        console.log('[Audit] Filter values:', { action, user });
-
-        // Use window.loadPage if available (same pattern as manage page refresh)
-        if (window.loadPage) {
-          let queryString = '';
-          if (action) queryString += `&action=${encodeURIComponent(action)}`;
-          if (user) queryString += `&user=${encodeURIComponent(user)}`;
-
-          const contentArea = document.getElementById('content-area');
-          if (contentArea) {
-            contentArea.innerHTML = "<div class='loading'>Loading...</div>";
-          }
-
-          try {
-            const url = `fetch/fetch_audit.php?_=${Date.now()}${queryString}`;
-            console.log('[Audit] Fetching:', url);
-
-            const res = await fetch(url, {
-              headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const html = await res.text();
-            if (contentArea) {
-              contentArea.innerHTML = html;
-            }
-
-            if (window.showGrowl) window.showGrowl('Filters applied', 'success');
-          } catch (err) {
-            console.error('[Audit] Error:', err);
-            if (contentArea) {
-              contentArea.innerHTML = "<p style='color:red'>Failed to apply filters</p>";
-            }
-            if (window.showGrowl) window.showGrowl('Failed to apply filters', 'error');
-          }
-        }
-      });
-      console.log('[Audit] Apply handler attached');
-    } else {
-      console.error('[Audit] Missing elements for apply button');
-    }
-
-  })();
-</script>
-
-<style>
-  .action-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.625rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border-radius: 0.375rem;
-    line-height: 1;
-    background: #dbeafe;
-    color: #1e40af;
-  }
-</style>
+<!-- Filter handlers are managed by attachAuditControls() in admin_panel.js -->

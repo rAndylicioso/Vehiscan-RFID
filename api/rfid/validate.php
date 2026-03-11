@@ -11,6 +11,18 @@
  */
 
 header('Content-Type: application/json');
+
+// CORS: only allow same-origin and configured trusted origins
+$allowedOrigins = ['http://localhost', 'https://localhost', 'http://127.0.0.1'];
+$wifiIp = getenv('WIFI_IP');
+if ($wifiIp) {
+    $allowedOrigins[] = 'http://' . $wifiIp;
+    $allowedOrigins[] = 'https://' . $wifiIp;
+}
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-API-Key, X-Reader-ID');
 

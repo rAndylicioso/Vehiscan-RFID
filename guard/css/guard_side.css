@@ -187,6 +187,7 @@ body.dark #logsCounter {
   --z-qr-button: 100000;
   --z-floating: 100;
   --z-tooltip: 1000;
+  --z-scan-alert: 9999;
 }
 
 /* Dark mode sidebar colors - Rich navy with depth */
@@ -558,13 +559,13 @@ body.dark .menu-item.active {
   box-shadow: 0 0 0 2px rgba(75, 85, 99, 0.08);
 }
 
-body.dark-mode .search-input {
+body.dark .search-input {
   background: var(--pepper-slate);
   border-color: var(--accent-dark);
   color: var(--salt-gray);
 }
 
-body.dark-mode .search-input:focus {
+body.dark .search-input:focus {
   border-color: var(--accent-dark);
   box-shadow: 0 0 0 2px rgba(75, 85, 99, 0.2);
 }
@@ -624,12 +625,12 @@ body.dark-mode .search-input:focus {
   box-shadow: var(--shadow-lg);
 }
 
-body.dark-mode .btn-action-primary {
+body.dark .btn-action-primary {
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   border-color: var(--accent-dark);
 }
 
-body.dark-mode .btn-action-primary:hover {
+body.dark .btn-action-primary:hover {
   background: linear-gradient(135deg, var(--accent-dark), var(--pepper-slate));
   box-shadow: var(--shadow-lg);
 }
@@ -647,13 +648,13 @@ body.dark-mode .btn-action-primary:hover {
   box-shadow: var(--shadow-lg);
 }
 
-body.dark-mode .btn-action-secondary {
+body.dark .btn-action-secondary {
   background: var(--pepper-slate);
   color: var(--warn);
   border-color: var(--warn);
 }
 
-body.dark-mode .btn-action-secondary:hover {
+body.dark .btn-action-secondary:hover {
   background: var(--warn);
   color: var(--sidebar-primary-foreground);
   box-shadow: var(--shadow-lg);
@@ -704,7 +705,7 @@ body.dark-mode .btn-action-secondary:hover {
   box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.08);
 }
 
-body.dark-mode .search-input-small {
+body.dark .search-input-small {
   background: var(--pepper-slate);
   border-color: var(--accent-dark);
 }
@@ -733,13 +734,13 @@ body.dark-mode .search-input-small {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-body.dark-mode .btn-filter {
+body.dark .btn-filter {
   background: #374151;
   color: #e5e7eb;
   border-color: #4b5563;
 }
 
-body.dark-mode .btn-filter:hover {
+body.dark .btn-filter:hover {
   background: #4b5563;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -750,7 +751,7 @@ body.dark-mode .btn-filter:hover {
   border-color: #2980b9;
 }
 
-body.dark-mode .btn-filter.active {
+body.dark .btn-filter.active {
   background: linear-gradient(135deg, #60a5fa, #3b82f6);
   border-color: #3b82f6;
   color: white;
@@ -766,13 +767,13 @@ body.dark-mode .btn-filter.active {
   color: white;
 }
 
-body.dark-mode .btn-filter-clear {
+body.dark .btn-filter-clear {
   background: #374151;
   border-color: #ef4444;
   color: #ef4444;
 }
 
-body.dark-mode .btn-filter-clear:hover {
+body.dark .btn-filter-clear:hover {
   background: #ef4444;
   color: white;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
@@ -788,12 +789,12 @@ body.dark-mode .btn-filter-clear:hover {
   background: linear-gradient(135deg, #229954, #1e8449);
 }
 
-body.dark-mode .btn-export {
+body.dark .btn-export {
   background: linear-gradient(135deg, #10b981, #059669);
   border-color: #059669;
 }
 
-body.dark-mode .btn-export:hover {
+body.dark .btn-export:hover {
   background: linear-gradient(135deg, #059669, #047857);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
 }
@@ -808,12 +809,12 @@ body.dark-mode .btn-export:hover {
   background: linear-gradient(135deg, #c0392b, #a93226);
 }
 
-body.dark-mode .btn-clear-all {
+body.dark .btn-clear-all {
   background: linear-gradient(135deg, #ef4444, #dc2626);
   border-color: #dc2626;
 }
 
-body.dark-mode .btn-clear-all:hover {
+body.dark .btn-clear-all:hover {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
 }
@@ -839,7 +840,7 @@ body.dark-mode .btn-clear-all:hover {
   border-radius: 6px;
 }
 
-body.dark-mode .logs-counter {
+body.dark .logs-counter {
   background: #374151;
   color: #d1d5db;
 }
@@ -1251,7 +1252,7 @@ body.dark .visitor-row {
   min-width: 80px;
 }
 
-body.dark-mode .btn-carousel {
+body.dark .btn-carousel {
   background: linear-gradient(135deg, #60a5fa, #3b82f6);
   border-color: #3b82f6;
 }
@@ -1268,7 +1269,7 @@ body.dark-mode .btn-carousel {
   border: 2px solid #e0e0e0;
 }
 
-body.dark-mode #ownerCounter {
+body.dark #ownerCounter {
   background: #374151;
   color: #e5e7eb;
   border-color: #4b5563;
@@ -1280,7 +1281,7 @@ body.dark-mode #ownerCounter {
   box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
-body.dark-mode .btn-carousel:hover {
+body.dark .btn-carousel:hover {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
 }
@@ -1300,7 +1301,7 @@ body.dark-mode .btn-carousel:hover {
   box-shadow: none;
 }
 
-body.dark-mode .btn-carousel:disabled {
+body.dark .btn-carousel:disabled {
   background: linear-gradient(135deg, #4b5563, #374151);
   border-color: #4b5563;
 }
@@ -1545,13 +1546,13 @@ body.dark-mode .btn-carousel:disabled {
   box-shadow: var(--shadow-lg);
 }
 
-body.dark-mode .btn-action-secondary {
+body.dark .btn-action-secondary {
   background: var(--pepper-slate);
   color: var(--guard-warn);
   border-color: var(--guard-warn);
 }
 
-body.dark-mode .btn-action-secondary:hover {
+body.dark .btn-action-secondary:hover {
   background: var(--guard-warn);
   color: var(--sidebar-primary-foreground);
   box-shadow: var(--shadow-lg);
@@ -1630,65 +1631,65 @@ body.dark-mode .btn-action-secondary:hover {
 }
 
 /* Dark mode variants */
-body.dark-mode .btn,
-body.dark-mode .camera-btn {
+body.dark .btn,
+body.dark .camera-btn {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-body.dark-mode .btn-primary,
-body.dark-mode .camera-btn-primary {
+body.dark .btn-primary,
+body.dark .camera-btn-primary {
   background: linear-gradient(90deg, var(--guard-accent-2, var(--accent-2, #60a5fa)), var(--guard-accent, var(--accent, #3b82f6)));
 }
 
-body.dark-mode .btn-primary:hover,
-body.dark-mode .camera-btn-primary:hover {
+body.dark .btn-primary:hover,
+body.dark .camera-btn-primary:hover {
   background: linear-gradient(90deg, var(--guard-accent, var(--accent, #3b82f6)), var(--guard-accent-dark, var(--accent-dark, #2563eb)));
 }
 
-body.dark-mode .btn-secondary {
+body.dark .btn-secondary {
   background: #1e293b;
   color: #e2e8f0;
   border: 1px solid #334155;
 }
 
-body.dark-mode .btn-secondary:hover {
+body.dark .btn-secondary:hover {
   background: #334155;
 }
 
-body.dark-mode .btn-success,
-body.dark-mode .btn-add {
+body.dark .btn-success,
+body.dark .btn-add {
   background: linear-gradient(90deg, #4ade80, #22d3ee);
 }
 
-body.dark-mode .btn-success:hover,
-body.dark-mode .btn-add:hover {
+body.dark .btn-success:hover,
+body.dark .btn-add:hover {
   background: linear-gradient(90deg, #22d3ee, #4ade80);
 }
 
-body.dark-mode .btn-warning {
+body.dark .btn-warning {
   background: linear-gradient(90deg, #fde68a, #fbbf24);
   color: #7c4700;
 }
 
-body.dark-mode .btn-warning:hover {
+body.dark .btn-warning:hover {
   background: linear-gradient(90deg, #fbbf24, #fde68a);
 }
 
-body.dark-mode .btn-danger,
-body.dark-mode .btn.warn {
+body.dark .btn-danger,
+body.dark .btn.warn {
   background: linear-gradient(90deg, #f87171, #ef4444);
 }
 
-body.dark-mode .btn-danger:hover,
-body.dark-mode .btn.warn:hover {
+body.dark .btn-danger:hover,
+body.dark .btn.warn:hover {
   background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
-body.dark-mode .btn-edit {
+body.dark .btn-edit {
   background: linear-gradient(90deg, #60a5fa, #3b82f6);
 }
 
-body.dark-mode .btn-edit:hover {
+body.dark .btn-edit:hover {
   background: linear-gradient(90deg, #3b82f6, #2563eb);
 }
 
@@ -1729,23 +1730,23 @@ body.dark-mode .btn-edit:hover {
 }
 
 .swal2-confirm {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: var(--swal2-confirm-button-background-color, #3b82f6) !important;
   color: #fff !important;
 }
 
 .swal2-confirm:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+  filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
 }
 
 .swal2-cancel {
-  background: #7f8c8d !important;
+  background: var(--ta-swal-cancel, #6b7280) !important;
   color: #fff !important;
 }
 
 .swal2-cancel:hover {
-  background: #6c757d !important;
+  filter: brightness(0.9);
 }
 
 /* SweetAlert Modern Theme */
@@ -1764,14 +1765,14 @@ body.dark-mode .btn-edit:hover {
   border-radius: 6px !important;
   padding: 10px 18px !important;
   font-weight: 600 !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: #ef4444 !important;
 }
 
 .swal2-cancel.modern-cancel {
   border-radius: 6px !important;
   padding: 10px 18px !important;
   font-weight: 600 !important;
-  background: #6c757d !important;
+  background: #6b7280 !important;
 }
 
 /* Prevent sidebar shift when SweetAlert opens */
@@ -1865,8 +1866,8 @@ html {
   border-radius: 3px;
 }
 
-body.dark-mode #filterDropdownContent::-webkit-scrollbar-thumb,
-body.dark-mode #actionsDropdownContent::-webkit-scrollbar-thumb {
+body.dark #filterDropdownContent::-webkit-scrollbar-thumb,
+body.dark #actionsDropdownContent::-webkit-scrollbar-thumb {
   background: #475569;
 }
 
@@ -2618,4 +2619,163 @@ body.dark .pagination-ellipsis {
 #mobile-overlay.active {
   opacity: 1;
   visibility: visible;
+}
+
+/* ================================================================
+   Component: RFID Scan Alert Overlay
+   Fullscreen overlay that shows homeowner info when an RFID tag is
+   scanned at the gate. Auto-dismisses after 12 seconds.
+   ================================================================ */
+.rfid-scan-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scan-alert, 9999);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.rfid-scan-overlay.rfid-scan-visible { opacity: 1; }
+
+.rfid-scan-card {
+  position: relative;
+  width: 92%;
+  max-width: 620px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,.35);
+  overflow: hidden;
+  animation: rfidSlideUp 0.35s ease-out;
+}
+
+@keyframes rfidSlideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.rfid-scan-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 2;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.rfid-scan-close:hover { color: #fff; }
+
+/* Banner — coloured strip at top */
+.rfid-scan-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  color: #fff;
+}
+.rfid-scan-banner.rfid-scan-in  { background: linear-gradient(135deg, #16a34a, #15803d); }
+.rfid-scan-banner.rfid-scan-out { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+
+.rfid-scan-direction-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem; height: 3rem;
+  background: rgba(255,255,255,0.2);
+  border-radius: 0.75rem;
+  flex-shrink: 0;
+}
+.rfid-scan-direction-icon svg { width: 1.75rem; height: 1.75rem; }
+
+.rfid-scan-status-text {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.rfid-scan-time {
+  display: block;
+  font-size: 0.8125rem;
+  opacity: 0.85;
+  margin-top: 0.125rem;
+}
+
+/* Body grid — two columns */
+.rfid-scan-body { padding: 1.25rem; }
+
+.rfid-scan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.rfid-scan-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rfid-scan-img-wrap {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #f3f4f6;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.rfid-scan-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rfid-scan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.rfid-scan-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  margin: 0;
+}
+.rfid-scan-value-lg {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.rfid-scan-value-sm {
+  font-size: 0.8125rem;
+  color: #4b5563;
+  margin: 0;
+}
+
+/* Dark mode */
+body.dark .rfid-scan-card,
+.dark .rfid-scan-card {
+  background: #1e293b;
+}
+body.dark .rfid-scan-img-wrap,
+.dark .rfid-scan-img-wrap { background: #334155; }
+body.dark .rfid-scan-label,
+.dark .rfid-scan-label { color: #94a3b8; }
+body.dark .rfid-scan-value-lg,
+.dark .rfid-scan-value-lg { color: #f1f5f9; }
+body.dark .rfid-scan-value-sm,
+.dark .rfid-scan-value-sm { color: #cbd5e1; }
+
+/* Responsive — stack on small screens */
+@media (max-width: 480px) {
+  .rfid-scan-grid { grid-template-columns: 1fr; }
+  .rfid-scan-card { max-width: 95%; }
 }

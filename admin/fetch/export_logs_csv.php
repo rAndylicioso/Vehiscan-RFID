@@ -19,6 +19,14 @@ header('Content-Disposition: attachment; filename="access_logs_export.csv"');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
+// Sanitize CSV values to prevent formula injection
+function sanitizeCsvValue($value) {
+    if (is_string($value) && isset($value[0]) && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+        return "'" . $value;
+    }
+    return $value;
+}
+
 // Open output stream
 $out = fopen('php://output', 'w');
 if ($out === false) {
@@ -36,22 +44,23 @@ try {
         FROM recent_logs r
         LEFT JOIN homeowners h ON r.plate_number = h.plate_number
         ORDER BY r.created_at DESC, r.log_id DESC
+        LIMIT 50000
     ");
     
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $line = [
+        $line = array_map('sanitizeCsvValue', [
             $row['log_id'] ?? '',
             $row['created_at'] ?? '',
             $row['plate_number'] ?? '',
             $row['status'] ?? '',
             $row['name'] ?? 'Unknown',
             $row['vehicle_type'] ?? '-'
-        ];
+        ]);
         fputcsv($out, $line);
     }
 } catch (Exception $e) {
-    // write error row
-    fputcsv($out, ['error', $e->getMessage()]);
+    error_log('[EXPORT_LOGS_CSV] Error: ' . $e->getMessage());
+    fputcsv($out, ['error', 'Export failed']);
 }
 
 fclose($out);

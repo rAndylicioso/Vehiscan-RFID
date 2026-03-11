@@ -39,8 +39,6 @@ $page = 'dashboard';
 
   <!-- External Libraries - CDN (Must load before custom scripts) -->
   <script src="../assets/js/libs/jquery-3.7.1.min.js"></script>
-  <link rel="stylesheet" href="../assets/css/libs/jquery.dataTables.min.css">
-  <script src="../assets/js/libs/jquery.dataTables.min.js"></script>
   <script src="../assets/js/libs/sweetalert2.all.min.js"></script>
   <script src="../assets/js/libs/chart.umd.min.js"></script>
   <script defer src="../assets/js/libs/alpine.min.js"></script>
@@ -161,6 +159,7 @@ $page = 'dashboard';
                 </path>
               </svg>
               <span class="sidebar-text">Visitor Passes</span>
+              <span class="ta-sidebar-badge blue sidebar-text ml-auto" id="pendingPassesBadge" style="display:none;">0</span>
             </a>
 
             <a href="#"
@@ -193,6 +192,7 @@ $page = 'dashboard';
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span class="sidebar-text">Account Approvals</span>
+                <span class="ta-sidebar-badge amber sidebar-text ml-auto" id="pendingApprovalsBadge" style="display:none;">0</span>
               </a>
             <?php endif; ?>
 
@@ -292,6 +292,28 @@ $page = 'dashboard';
         </button>
         <h1 id="page-title" class="text-lg font-semibold text-gray-900 dark:text-white">Dashboard</h1>
         <div class="ml-auto flex items-center gap-4">
+          <!-- Notification Bell -->
+          <div class="ta-notification-bell relative" id="notificationBellWrapper">
+            <button id="notificationBellBtn" class="relative flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" aria-label="Notifications">
+              <svg class="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span class="ta-notification-dot hidden" id="notifDot"></span>
+            </button>
+            <div class="ta-notification-panel hidden" id="notificationPanel">
+              <div class="ta-notification-header">
+                <span class="font-semibold text-sm">Notifications</span>
+                <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline" id="markAllReadBtn">Mark all read</button>
+              </div>
+              <div class="ta-notification-list" id="notificationList">
+                <div class="text-center py-6 text-gray-400 dark:text-gray-500 text-sm">No new notifications</div>
+              </div>
+              <div class="ta-notification-footer">
+                <a href="#" class="text-xs text-blue-600 dark:text-blue-400 hover:underline" onclick="loadPage('logs'); document.getElementById('notificationPanel').classList.add('hidden'); return false;">View all activity</a>
+              </div>
+            </div>
+          </div>
+
           <!-- Dark Mode Toggle -->
           <button id="darkModeToggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
             <svg class="theme-icon sun-icon h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,7 +333,7 @@ $page = 'dashboard';
       <!-- Content Area -->
       <div class="flex-1 overflow-y-auto p-6" id="content-area" role="region" aria-live="polite"
         aria-label="Main content"
-        style="transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; transform: translateY(0);">
+        style="transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1;">
         <div class="text-center py-8 text-gray-500 loading">Loading...</div>
       </div>
     </main>
@@ -338,8 +360,46 @@ $page = 'dashboard';
   <!-- Global Variables -->
   <script>window.__ADMIN_CSRF__ = <?php echo json_encode($csrf); ?>;</script>
 
+  <script>
+  // Notification bell toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    const bellBtn = document.getElementById('notificationBellBtn');
+    const panel = document.getElementById('notificationPanel');
+    if (bellBtn && panel) {
+      bellBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target) && !bellBtn.contains(e.target)) {
+          panel.classList.add('hidden');
+        }
+      });
+    }
+
+    // Sidebar badge polling for pending approvals
+    function updateSidebarBadges() {
+      fetch('api/check_pending_approvals.php')
+        .then(r => r.json())
+        .then(data => {
+          const approvalBadge = document.getElementById('pendingApprovalsBadge');
+          if (approvalBadge && typeof data.pending_count !== 'undefined') {
+            if (data.pending_count > 0) {
+              approvalBadge.textContent = data.pending_count;
+              approvalBadge.style.display = '';
+            } else {
+              approvalBadge.style.display = 'none';
+            }
+          }
+        }).catch(() => {});
+    }
+    // Initial check + poll every 30s
+    updateSidebarBadges();
+    setInterval(updateSidebarBadges, 30000);
+  });
+  </script>
+
   <!-- Main Application Scripts - Load in order: core -> handlers -> features -->
-  <script src="../assets/js/admin/datatables-init.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/datatables-init.js'); ?>"></script>
   <script src="../assets/js/admin/realtime-updates.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/realtime-updates.js'); ?>"></script>
   <script src="../assets/js/admin/admin_panel.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/admin_panel.js'); ?>"></script>
   <script src="../assets/js/admin/modal-handler.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/admin/modal-handler.js'); ?>"></script>
@@ -347,5 +407,78 @@ $page = 'dashboard';
   <script src="../assets/js/keyboard-shortcuts.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/keyboard-shortcuts.js'); ?>"></script>
   <script src="../assets/js/mobile-gestures.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/mobile-gestures.js'); ?>"></script>
   <script src="js/admin-dark-mode.js?v=<?php echo @filemtime(__DIR__ . '/js/admin-dark-mode.js') ?: time(); ?>"></script>
+
+  <!-- TailAdmin Action Dropdown Handler -->
+  <script>
+  (function(){
+    function closeDropdown(dd) {
+      dd.classList.remove('open');
+      const menu = dd.querySelector('.ta-action-menu');
+      if (menu) menu.removeAttribute('style');
+    }
+    function closeAllDropdowns(except) {
+      document.querySelectorAll('.ta-action-dropdown.open').forEach(function(d) {
+        if (d !== except) closeDropdown(d);
+      });
+    }
+    function positionDrop(dd) {
+      const menu = dd.querySelector('.ta-action-menu');
+      const trigger = dd.querySelector('.ta-action-btn');
+      if (!menu || !trigger) return;
+      // Measure actual menu width by temporarily showing it off-screen
+      menu.style.cssText = 'position:fixed;visibility:hidden;display:block;right:auto;width:auto;left:-9999px;top:0;';
+      var menuWidth = Math.max(menu.offsetWidth, 160);
+      var rect = trigger.getBoundingClientRect();
+      var spaceBelow = window.innerHeight - rect.bottom;
+      var dropUp = spaceBelow < 180 && rect.top > 180;
+      var leftPos = rect.right - menuWidth;
+      if (leftPos < 4) leftPos = 4;
+      if (leftPos + menuWidth > window.innerWidth - 4) leftPos = window.innerWidth - menuWidth - 4;
+      menu.style.cssText = [
+        'position:fixed',
+        'z-index:9999',
+        'width:' + menuWidth + 'px',
+        'right:auto',
+        'margin:0',
+        'left:' + leftPos + 'px',
+        dropUp
+          ? 'top:auto;bottom:' + (window.innerHeight - rect.top + 4) + 'px'
+          : 'top:' + (rect.bottom + 4) + 'px;bottom:auto'
+      ].join(';');
+      dd.classList.toggle('drop-up', dropUp);
+    }
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.ta-action-btn');
+      if (btn) {
+        e.stopPropagation();
+        var dd = btn.closest('.ta-action-dropdown');
+        var wasOpen = dd.classList.contains('open');
+        closeAllDropdowns(dd);
+        if (wasOpen) { closeDropdown(dd); } else { dd.classList.add('open'); positionDrop(dd); }
+        return;
+      }
+      var item = e.target.closest('.ta-action-menu-item');
+      if (item) {
+        closeDropdown(item.closest('.ta-action-dropdown'));
+        return;
+      }
+      closeAllDropdowns(null);
+    });
+    // Reposition on scroll/resize so fixed menu tracks the trigger
+    ['scroll', 'resize'].forEach(function(ev) {
+      window.addEventListener(ev, function() {
+        var open = document.querySelector('.ta-action-dropdown.open');
+        if (open) positionDrop(open);
+      }, { passive: true });
+    });
+    // Close dropdowns when content-area scrolls (fixed menu won't track)
+    var contentArea = document.getElementById('content-area');
+    if (contentArea) {
+      contentArea.addEventListener('scroll', function() {
+        closeAllDropdowns(null);
+      }, { passive: true });
+    }
+  })();
+  </script>
 </body>
 </html>

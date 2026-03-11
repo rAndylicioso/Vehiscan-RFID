@@ -50,12 +50,12 @@ function initializeValidation() {
       if (this.value.length >= 3) {
         this.classList.add('valid');
         this.classList.remove('invalid');
-        hint.textContent = '✓ Name looks good';
+        hint.textContent = 'Name looks good';
         hint.style.color = '#10b981';
       } else if (this.value.length > 0) {
         this.classList.add('invalid');
         this.classList.remove('valid');
-        hint.textContent = '✗ Name too short (min 3 characters)';
+        hint.textContent = 'Name too short (min 3 characters)';
         hint.style.color = '#ef4444';
       } else {
         this.classList.remove('valid', 'invalid');
@@ -83,12 +83,12 @@ function initializeValidation() {
       if (value.length === 11) {
         this.classList.add('valid');
         this.classList.remove('invalid');
-        hint.textContent = '✓ Valid contact number';
+        hint.textContent = 'Valid contact number';
         hint.style.color = '#10b981';
       } else if (value.length > 0) {
         this.classList.add('invalid');
         this.classList.remove('valid');
-        hint.textContent = `✗ ${11 - value.length} more digit${11 - value.length !== 1 ? 's' : ''} needed`;
+        hint.textContent = `${11 - value.length} more digit${11 - value.length !== 1 ? 's' : ''} needed`;
         hint.style.color = '#ef4444';
       } else {
         this.classList.remove('valid', 'invalid');
@@ -105,12 +105,12 @@ function initializeValidation() {
       if (value.length >= 3) {
         this.classList.add('valid');
         this.classList.remove('invalid');
-        hint.textContent = '✓ Plate number accepted';
+        hint.textContent = 'Plate number accepted';
         hint.style.color = '#10b981';
       } else if (value.length > 0) {
         this.classList.add('invalid');
         this.classList.remove('valid');
-        hint.textContent = '✗ Too short (min 3 characters)';
+        hint.textContent = 'Too short (min 3 characters)';
         hint.style.color = '#ef4444';
       } else {
         this.classList.remove('valid', 'invalid');
@@ -127,12 +127,12 @@ function initializeValidation() {
       if (this.value.length >= 10) {
         this.classList.add('valid');
         this.classList.remove('invalid');
-        hint.textContent = `✓ ${remaining} characters remaining`;
+        hint.textContent = `${remaining} characters remaining`;
         hint.style.color = '#10b981';
       } else if (this.value.length > 0) {
         this.classList.add('invalid');
         this.classList.remove('valid');
-        hint.textContent = '✗ Address too short';
+        hint.textContent = 'Address too short';
         hint.style.color = '#ef4444';
       } else {
         this.classList.remove('valid', 'invalid');
@@ -352,7 +352,7 @@ function initializeFileInputLabels() {
             if (label) {
               const sizeKB = (file.size / 1024).toFixed(0);
               const dimensions = `${img.width}x${img.height}`;
-              label.innerHTML = `<span style="color: #10b981;">✓</span> ${file.name} <span style="color: #6b7280;">(${sizeKB}KB • ${dimensions}px)</span>`;
+              label.innerHTML = `<svg style="width:0.85em;height:0.85em;vertical-align:-0.1em;display:inline;color:#10b981" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> ${file.name} <span style="color: #6b7280;">(${sizeKB}KB &bull; ${dimensions}px)</span>`;
             }
           };
           
@@ -666,7 +666,7 @@ function initializeFormSubmission() {
               <p><b>Plate:</b> ${plateNum}</p>
               <hr style="margin:15px 0;">
               <p style="background:#fef3c7;padding:12px;border-radius:4px;border-left:4px solid #f59e0b;">
-                <strong style="color:#92400e;">⏳ Pending Admin Approval</strong><br>
+                <strong style="color:#92400e;">Pending Admin Approval</strong><br>
                 <span style="color:#78350f;font-size:13px;">Your account will be reviewed. You'll receive an email once approved.</span>
               </p>
               <p style="text-align:center;margin-top:10px;">
@@ -675,7 +675,7 @@ function initializeFormSubmission() {
             </div>
           `,
           confirmButtonText: 'OK',
-          confirmButtonColor: '#2563eb'
+          confirmButtonColor: '#3b82f6'
         });
         e.target.reset();
         
@@ -728,7 +728,7 @@ function initializeAutoFocus() {
 
 // Initialize all functionality when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 Registration page initialized');
+  console.log('Registration page initialized');
   initializeKeyboardShortcuts();
   initializeValidation();
   initializePlateInput();

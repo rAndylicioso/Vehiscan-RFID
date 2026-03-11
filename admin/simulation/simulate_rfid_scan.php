@@ -14,16 +14,13 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_a
 
 require_once __DIR__ . '/../../db.php';
 
-error_log('[RFID_SIM] Request received - Method: ' . $_SERVER['REQUEST_METHOD']);
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    error_log('[RFID_SIM] Invalid method');
     exit(json_encode(['success' => false, 'message' => 'Invalid request method']));
 }
 
 // Validate CSRF token
 $csrf = $_SESSION['csrf_token'] ?? '';
-$posted = $_POST['csrf'] ?? '';
+$posted = $_POST['csrf_token'] ?? '';
 if (!hash_equals($csrf, (string)$posted)) {
     error_log('[RFID_SIM] Invalid CSRF token');
     http_response_code(403);
@@ -33,8 +30,6 @@ if (!hash_equals($csrf, (string)$posted)) {
 $plate = $_POST['plate_number'] ?? '';
 $rfidUid = trim($_POST['rfid_uid'] ?? '');
 $scanMode = $_POST['scan_mode'] ?? 'plate'; // 'plate' or 'rfid'
-
-error_log("[RFID_SIM] Scan mode: $scanMode, Plate: $plate, RFID UID: $rfidUid");
 
 // RFID UID Scan Mode - route through the RFID scan API
 if ($scanMode === 'rfid' && !empty($rfidUid)) {
@@ -153,7 +148,6 @@ if ($scanMode === 'rfid' && !empty($rfidUid)) {
 
 // Legacy Plate-based scan mode
 if (empty($plate)) {
-    error_log('[RFID_SIM] Empty plate number');
     exit(json_encode(['success' => false, 'message' => 'Plate number required']));
 }
 
@@ -164,14 +158,11 @@ try {
     $homeowner = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$homeowner) {
-        error_log('[RFID_SIM] Vehicle not found: ' . $plate);
         exit(json_encode([
             'success' => false, 
             'message' => 'Vehicle not registered in system'
         ]));
     }
-    
-    error_log('[RFID_SIM] Homeowner found: ' . $homeowner['name']);
     
     // Check the last scan status for this plate to toggle IN/OUT
     $stmt = $pdo->prepare(
@@ -184,9 +175,6 @@ try {
     $newStatus = 'IN'; // Default for first scan
     if ($lastLog) {
         $newStatus = ($lastLog['status'] === 'IN') ? 'OUT' : 'IN';
-        error_log('[RFID_SIM] Last status was ' . $lastLog['status'] . ', toggling to ' . $newStatus);
-    } else {
-        error_log('[RFID_SIM] No previous scan found, setting status to IN');
     }
     
     // Insert into recent_logs table (this is what the guard panel reads)
@@ -205,13 +193,12 @@ try {
             ]));
         }
 
-        error_log('[RFID_SIM] Inserted into recent_logs successfully with status=' . $newStatus);
     } catch (PDOException $e) {
-        // If an unexpected schema or DB error occurs, surface it for debugging
+        // If an unexpected schema or DB error occurs, log it securely
         error_log('[RFID_SIM] Database insert error: ' . $e->getMessage());
         exit(json_encode([
             'success' => false,
-            'message' => 'Database error: ' . $e->getMessage()
+            'message' => 'Failed to create log entry. Please check server logs.'
         ]));
     }
     
@@ -222,14 +209,10 @@ try {
             VALUES (?, NOW())
         ");
         $stmt->execute([$plate]);
-        error_log('[RFID_SIM] Inserted into rfid_simulator table');
     } catch (PDOException $e) {
         // Non-critical error - simulator table might not exist
         error_log('[RFID_SIM] Warning: Could not insert into rfid_simulator: ' . $e->getMessage());
     }
-    
-    // Return success
-    error_log('[RFID_SIM] Simulation complete - Success');
     
     $statusMessage = $newStatus === 'IN' ? 'Entry Logged' : 'Exit Logged';
     
@@ -246,6 +229,6 @@ try {
     error_log('[RFID_SIM] Database error: ' . $e->getMessage());
     exit(json_encode([
         'success' => false, 
-        'message' => 'Database error: ' . $e->getMessage()
+        'message' => 'A database error occurred. Please check server logs.'
     ]));
 }

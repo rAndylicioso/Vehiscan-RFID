@@ -3,10 +3,17 @@
  * Homeowner Session Management
  */
 
-// Configure session
+// Configure session — isolate from other XAMPP apps
+$appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
+if (!is_dir($appSavePath)) {
+    mkdir($appSavePath, 0700, true);
+}
+ini_set('session.save_path', $appSavePath);
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.use_strict_mode', 1);
+ini_set('session.gc_maxlifetime', 3600); // Prevent GC from deleting other sessions in shared save_path
 
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
            (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
@@ -33,7 +40,7 @@ if (!isset($_SESSION['homeowner_id']) || $_SESSION['role'] !== 'homeowner') {
     }
     
     // For regular requests, redirect to login
-    header("Location: ../auth/login.php");
+    header("Location: /Vehiscan-RFID/auth/login.php");
     exit();
 }
 
@@ -50,7 +57,7 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
         exit();
     }
     
-    header('Location: ../auth/login.php?timeout=1');
+    header('Location: /Vehiscan-RFID/auth/login.php?timeout=1');
     exit();
 }
 

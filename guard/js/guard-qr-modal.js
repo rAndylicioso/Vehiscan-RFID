@@ -22,7 +22,10 @@
     modal.innerHTML = `
       <div class="qr-modal-content">
         <button class="qr-modal-close" onclick="closeQRZoom()" aria-label="Close">&times;</button>
-        <img id="qrZoomImage" class="qr-modal-image" src="" alt="QR Code">
+        <div class="qr-modal-image-wrapper">
+          <img id="qrZoomImage" class="qr-modal-image" src="" alt="QR Code">
+          <img class="qr-modal-logo" src="../../assets/images/ville_de_palme.png" alt="Logo">
+        </div>
         <div class="qr-modal-info">
           <p>Click outside or press ESC to close</p>
         </div>

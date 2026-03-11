@@ -147,7 +147,13 @@ body {
 }
 
 .status-pending::before {
-    content: '⏳';
+    content: '';
+    width: 0.85em;
+    height: 0.85em;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%23000'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16.5 12'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%23000'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16.5 12'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .status-approved {
@@ -157,7 +163,13 @@ body {
 }
 
 .status-approved::before {
-    content: '✓';
+    content: '';
+    width: 0.85em;
+    height: 0.85em;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .status-active {
@@ -167,7 +179,13 @@ body {
 }
 
 .status-active::before {
-    content: '✓';
+    content: '';
+    width: 0.85em;
+    height: 0.85em;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .status-rejected {
@@ -177,7 +195,13 @@ body {
 }
 
 .status-rejected::before {
-    content: '✗';
+    content: '';
+    width: 0.85em;
+    height: 0.85em;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .status-expired {
@@ -187,7 +211,13 @@ body {
 }
 
 .status-expired::before {
-    content: '⊗';
+    content: '';
+    width: 0.85em;
+    height: 0.85em;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .status-cancelled {
@@ -197,7 +227,13 @@ body {
 }
 
 .status-cancelled::before {
-    content: '⊘';
+    content: '';
+    width: 0.85em;
+    height: 0.85em;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m4.93 4.93 14.14 14.14'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23000'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m4.93 4.93 14.14 14.14'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 /* Visitor Pass Cards */

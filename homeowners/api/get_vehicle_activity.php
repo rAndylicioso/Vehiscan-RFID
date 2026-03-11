@@ -21,18 +21,18 @@ try {
     switch ($period) {
         case 'day':
             $dateFrom = date('Y-m-d 00:00:00');
-            $groupBy = "DATE_FORMAT(al.timestamp, '%H:00')";
+            $groupBy = "DATE_FORMAT(al.created_at, '%H:00')";
             $dateFormat = '%H:00';
             break;
         case 'month':
             $dateFrom = date('Y-m-d 00:00:00', strtotime('-30 days'));
-            $groupBy = "DATE(al.timestamp)";
+            $groupBy = "DATE(al.created_at)";
             $dateFormat = '%Y-%m-%d';
             break;
         case 'week':
         default:
             $dateFrom = date('Y-m-d 00:00:00', strtotime('-7 days'));
-            $groupBy = "DATE(al.timestamp)";
+            $groupBy = "DATE(al.created_at)";
             $dateFormat = '%Y-%m-%d';
             break;
     }
@@ -64,15 +64,15 @@ try {
     // Get activity data grouped by time period
     $query = "
         SELECT 
-            DATE_FORMAT(al.timestamp, '$dateFormat') as period,
+            DATE_FORMAT(al.created_at, '$dateFormat') as period,
             SUM(CASE WHEN al.status = 'IN' THEN 1 ELSE 0 END) as entries,
             SUM(CASE WHEN al.status = 'OUT' THEN 1 ELSE 0 END) as exits,
             COUNT(*) as total
-        FROM access_logs al
+        FROM recent_logs al
         WHERE al.plate_number IN ($placeholders)
-          AND al.timestamp >= ?
+          AND al.created_at >= ?
         GROUP BY $groupBy
-        ORDER BY al.timestamp ASC
+        ORDER BY al.created_at ASC
     ";
     
     $params = array_merge($plateNumbers, [$dateFrom]);
@@ -86,9 +86,9 @@ try {
             SUM(CASE WHEN status = 'IN' THEN 1 ELSE 0 END) as total_entries,
             SUM(CASE WHEN status = 'OUT' THEN 1 ELSE 0 END) as total_exits,
             COUNT(*) as total_logs
-        FROM access_logs
+        FROM recent_logs
         WHERE plate_number IN ($placeholders)
-          AND timestamp >= ?
+          AND created_at >= ?
     ";
     
     $stmt = $pdo->prepare($summaryQuery);

@@ -9,6 +9,12 @@ require_once __DIR__ . '/../../includes/input_sanitizer.php';
 
 header('Content-Type: application/json');
 
+// Authorization check
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
+    http_response_code(403);
+    exit(json_encode(['error' => 'Unauthorized']));
+}
+
 try {
     // Query homeowners table with auth information
     $stmt = $pdo->query("
@@ -30,6 +36,7 @@ try {
         LEFT JOIN homeowner_auth ha ON h.id = ha.homeowner_id
         WHERE h.account_status = 'pending'
         ORDER BY h.created_at DESC
+        LIMIT 200
     ");
     
     $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);

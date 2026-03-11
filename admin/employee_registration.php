@@ -3,20 +3,7 @@
  * Employee Registration
  * Super Admin can create new employees and assign roles
  */
-
-// Check Super Admin or Admin session
-session_name('vehiscan_superadmin');
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
-    session_write_close();
-    session_name('vehiscan_admin');
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-}
+require_once __DIR__ . '/../includes/session_admin_unified.php';
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     header("Location: ../auth/login.php");
@@ -46,7 +33,7 @@ $error = '';
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate CSRF token using InputSanitizer
-    $posted_csrf = InputSanitizer::post('csrf', 'string');
+    $posted_csrf = InputSanitizer::post('csrf_token', 'string');
     if (!InputSanitizer::validateCsrf($posted_csrf)) {
         $error = 'Invalid security token. Please refresh and try again.';
     } else {
@@ -115,6 +102,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../assets/css/system.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
@@ -144,7 +132,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
             <!-- Registration Form -->
             <div class="bg-white rounded-2xl shadow-lg p-8">
                 <form method="POST" id="employeeForm">
-                    <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                     <!-- Username -->
                     <div class="mb-6">
                         <label for="username" class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
@@ -214,7 +202,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                 icon: 'error',
                 title: 'Error',
                 text: '<?= $error ?>',
-                confirmButtonColor: '#3b82f6'
+                confirmButtonColor: '#ef4444'
             });
         <?php endif; ?>
 
@@ -229,7 +217,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                     icon: 'error',
                     title: 'Error',
                     text: 'Passwords do not match!',
-                    confirmButtonColor: '#3b82f6'
+                    confirmButtonColor: '#ef4444'
                 });
             }
         });

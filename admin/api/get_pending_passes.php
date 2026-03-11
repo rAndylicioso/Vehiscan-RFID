@@ -18,11 +18,13 @@ try {
         JOIN homeowners h ON vp.homeowner_id = h.id
         WHERE vp.status = 'pending'
         ORDER BY vp.created_at DESC
+        LIMIT 200
     ");
     
     echo json_encode($stmt->fetchAll());
     
 } catch (PDOException $e) {
     error_log("Get pending passes error: " . $e->getMessage());
-    echo json_encode([]);
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Failed to load pending passes']);
 }

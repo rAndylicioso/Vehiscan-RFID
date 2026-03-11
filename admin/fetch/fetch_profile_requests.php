@@ -135,55 +135,58 @@ function getStatusBadge($status) {
 </div>
 
 <?php if ($dbError): ?>
-    <div class="rounded-lg border border-red-200 bg-red-50 p-4 mb-4">
-        <div class="flex items-center gap-2 text-red-800">
-            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-            </svg>
-            <span class="font-medium">Database error occurred while loading requests.</span>
-        </div>
+    <div class="ta-alert ta-alert-danger mb-4">
+        <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        <span class="font-medium">Database error occurred while loading requests.</span>
     </div>
 <?php elseif (!$tableExists): ?>
-    <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 mb-4">
-        <div class="flex items-center gap-2 text-yellow-800">
-            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span class="font-medium">The profile_update_requests table has not been created yet. Run migrations first.</span>
-        </div>
+    <div class="ta-alert ta-alert-warning mb-4">
+        <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="font-medium">The profile_update_requests table has not been created yet. Run migrations first.</span>
     </div>
 <?php else: ?>
 
     <!-- Stat Cards Row -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === '' ? 'ring-2 ring-blue-500' : ''; ?>"
+        <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === '' ? 'ring-2 ring-blue-500' : ''; ?>"
             data-status="">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white"><?php echo $pendingCount + $acknowledgedCount + $completedCount + $rejectedCount; ?></p>
+            <div class="ta-stat-content">
+                <p class="ta-stat-label">Total</p>
+                <p class="ta-stat-value"><?php echo $pendingCount + $acknowledgedCount + $completedCount + $rejectedCount; ?></p>
+            </div>
         </button>
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''; ?>"
+        <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''; ?>"
             data-status="pending">
-            <p class="text-xs font-medium text-yellow-600 uppercase tracking-wider mb-1">Pending</p>
-            <p class="text-2xl font-bold text-yellow-700"><?php echo $pendingCount; ?></p>
+            <div class="ta-stat-content">
+                <p class="ta-stat-label" style="color: #d97706;">Pending</p>
+                <p class="ta-stat-value" style="color: #b45309;"><?php echo $pendingCount; ?></p>
+            </div>
         </button>
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'acknowledged' ? 'ring-2 ring-blue-500' : ''; ?>"
+        <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'acknowledged' ? 'ring-2 ring-blue-500' : ''; ?>"
             data-status="acknowledged">
-            <p class="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">Acknowledged</p>
-            <p class="text-2xl font-bold text-blue-700"><?php echo $acknowledgedCount; ?></p>
+            <div class="ta-stat-content">
+                <p class="ta-stat-label" style="color: #2563eb;">Acknowledged</p>
+                <p class="ta-stat-value" style="color: #1d4ed8;"><?php echo $acknowledgedCount; ?></p>
+            </div>
         </button>
-        <button type="button" class="stat-filter-btn relative rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all text-left cursor-pointer <?php echo $statusFilter === 'completed' ? 'ring-2 ring-green-500' : ''; ?>"
+        <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'completed' ? 'ring-2 ring-green-500' : ''; ?>"
             data-status="completed">
-            <p class="text-xs font-medium text-green-600 uppercase tracking-wider mb-1">Completed</p>
-            <p class="text-2xl font-bold text-green-700"><?php echo $completedCount; ?></p>
+            <div class="ta-stat-content">
+                <p class="ta-stat-label" style="color: #059669;">Completed</p>
+                <p class="ta-stat-value" style="color: #047857;"><?php echo $completedCount; ?></p>
+            </div>
         </button>
     </div>
 
     <!-- Action Bar -->
     <div class="flex items-center gap-2 mb-4 flex-wrap">
-        <button id="refreshProfileReqs"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
+        <button id="refreshProfileReqs" class="ta-btn ta-btn-secondary">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -204,30 +207,29 @@ function getStatusBadge($status) {
     </div>
 
     <!-- Requests Table -->
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+    <div class="ta-table-wrapper" style="overflow-x: auto;">
+        <table class="ta-table">
+            <thead>
                 <tr>
-                    <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Homeowner</th>
-                    <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Request</th>
-                    <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Status</th>
-                    <th class="text-left font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Date</th>
-                    <th class="text-center font-semibold text-slate-900 dark:text-slate-200 px-4 py-3 uppercase tracking-wider text-xs">Actions</th>
+                    <th>Homeowner</th>
+                    <th>Request</th>
+                    <th class="text-center">Status</th>
+                    <th>Date</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+            <tbody>
                 <?php if (empty($requests)): ?>
                     <tr>
-                        <td colspan="5" class="px-4 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center">
-                                <svg class="h-12 w-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <td colspan="5">
+                            <div class="ta-empty-state">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
-                                <p class="text-gray-500 font-medium">
+                                <p>
                                     <?php echo $search ? 'No matching requests found' : ($statusFilter ? 'No ' . $statusFilter . ' requests' : 'No profile update requests yet'); ?>
                                 </p>
-                                <p class="text-gray-400 text-xs mt-1">Requests from homeowners will appear here</p>
                             </div>
                         </td>
                     </tr>
@@ -280,38 +282,50 @@ function getStatusBadge($status) {
                                 <?php echo date('M j, Y g:i A', strtotime($r['created_at'])); ?>
                             </td>
                             <!-- Actions -->
-                            <td class="px-4 py-3">
-                                <div class="flex items-center justify-center gap-1.5 relative">
-                                    <?php if ($r['status'] === 'pending'): ?>
-                                        <button class="action-btn inline-flex items-center px-2.5 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
-                                            data-id="<?php echo $r['id']; ?>" data-action="acknowledged" title="Acknowledge">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="action-btn inline-flex items-center px-2.5 py-1.5 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 transition-colors"
-                                            data-id="<?php echo $r['id']; ?>" data-action="rejected" title="Reject">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
+                            <td class="px-4 py-3 text-center">
+                                <?php if ($r['status'] === 'pending'): ?>
+                                        <div class="ta-action-dropdown">
+                                            <button type="button" class="ta-action-btn">
+                                                Actions
+                                                <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                                            </button>
+                                            <div class="ta-action-menu">
+                                                <button type="button" class="ta-action-menu-item blue action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="acknowledged" title="Acknowledge">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    Acknowledge
+                                                </button>
+                                                <div class="ta-action-divider"></div>
+                                                <button type="button" class="ta-action-menu-item red action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="rejected" title="Reject">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </div>
                                     <?php elseif ($r['status'] === 'acknowledged'): ?>
-                                        <button class="action-btn inline-flex items-center px-2.5 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors"
-                                            data-id="<?php echo $r['id']; ?>" data-action="completed" title="Mark Complete">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="action-btn inline-flex items-center px-2.5 py-1.5 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 transition-colors"
-                                            data-id="<?php echo $r['id']; ?>" data-action="rejected" title="Reject">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
+                                        <div class="ta-action-dropdown">
+                                            <button type="button" class="ta-action-btn">
+                                                Actions
+                                                <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                                            </button>
+                                            <div class="ta-action-menu">
+                                                <button type="button" class="ta-action-menu-item green action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="completed" title="Mark Complete">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    Mark Complete
+                                                </button>
+                                                <div class="ta-action-divider"></div>
+                                                <button type="button" class="ta-action-menu-item red action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="rejected" title="Reject">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </div>
                                     <?php else: ?>
                                         <span class="text-xs text-gray-400">—</span>
                                     <?php endif; ?>
-                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

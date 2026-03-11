@@ -33,7 +33,7 @@ class RateLimiter {
             $stmt = $this->pdo->prepare("
                 SELECT COUNT(*) as attempt_count 
                 FROM rate_limits 
-                WHERE identifier = ? 
+                WHERE ip_address = ? 
                 AND action = ? 
                 AND created_at >= ?
             ");
@@ -51,9 +51,9 @@ class RateLimiter {
                 'attempts' => $attemptCount
             ];
         } catch (PDOException $e) {
-            // If table doesn't exist or error, allow the action
+            // Fail closed — deny action on DB error to prevent brute force bypass
             error_log("Rate limiter error: " . $e->getMessage());
-            return ['allowed' => true, 'remaining' => $maxAttempts, 'reset_time' => null, 'attempts' => 0];
+            return ['allowed' => false, 'remaining' => 0, 'reset_time' => null, 'attempts' => $maxAttempts];
         }
     }
     
@@ -66,16 +66,14 @@ class RateLimiter {
     public function recordAttempt($identifier, $action = 'default', $metadata = []) {
         try {
             $stmt = $this->pdo->prepare("
-                INSERT INTO rate_limits (identifier, action, ip_address, user_agent, metadata, created_at) 
-                VALUES (?, ?, ?, ?, ?, NOW())
+                INSERT INTO rate_limits (ip_address, action, user_agent, created_at) 
+                VALUES (?, ?, ?, NOW())
             ");
             
             $stmt->execute([
                 $identifier,
                 $action,
-                $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-                $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-                json_encode($metadata)
+                $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
             ]);
         } catch (PDOException $e) {
             // Silently fail if table doesn't exist
@@ -92,7 +90,7 @@ class RateLimiter {
         try {
             $stmt = $this->pdo->prepare("
                 DELETE FROM rate_limits 
-                WHERE identifier = ? AND action = ?
+                WHERE ip_address = ? AND action = ?
             ");
             $stmt->execute([$identifier, $action]);
         } catch (PDOException $e) {

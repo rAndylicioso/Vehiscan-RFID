@@ -5,6 +5,13 @@ require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/input_sanitizer.php';
 require_once __DIR__ . '/qr_helper.php';
 
+// Authorization check
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    exit(json_encode(['success' => false, 'message' => 'Unauthorized']));
+}
+
 // Ensure CSRF token
 if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = InputSanitizer::generateCsrf();
 $csrf = $_SESSION['csrf_token'];
@@ -12,7 +19,7 @@ $csrf = $_SESSION['csrf_token'];
 // POST create/edit (AJAX)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
-    $posted = InputSanitizer::post('csrf', 'string');
+    $posted = InputSanitizer::post('csrf_token', 'string');
     if (!InputSanitizer::validateCsrf($posted)) {
         echo json_encode(['success'=>false,'message'=>'Invalid CSRF token']); exit;
     }
@@ -25,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $valid_from = InputSanitizer::post('valid_from', 'string');
     $valid_until = InputSanitizer::post('valid_until', 'string');
     $is_recurring = isset($_POST['is_recurring']) ? 1 : 0;
-    $status = InputSanitizer::post('status', 'string', 'active');
+    $status = InputSanitizer::post('status', 'string', 'pending');
 
     if (!$visitor_name || !$visitor_plate || !$purpose || !$valid_from || !$valid_until) {
         echo json_encode(['success'=>false,'message'=>'All required fields must be filled']); exit;
@@ -66,9 +73,9 @@ $defaultFrom = date('Y-m-d\TH:i');
 $defaultUntil = date('Y-m-d\TH:i', strtotime('+2 hours'));
 ?>
 <form id="visitorPassForm" class="space-y-6 modern-form compact-form" action="api/visitor_pass_form.php" method="post">
-  <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
+  <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf); ?>">
   <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b border-gray-200 flex items-center gap-2 form-title">
-    <span class="text-3xl">🎫</span>
+    <span class="text-3xl"><svg style="width:1em;height:1em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.5a1.5 1.5 0 1 0 0 3V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1.5a1.5 1.5 0 1 0 0-3V9z"/></svg></span>
     <span>Create Visitor Pass</span>
   </h3>
   
@@ -136,7 +143,7 @@ $defaultUntil = date('Y-m-d\TH:i', strtotime('+2 hours'));
   
   <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 form-actions">
     <button type="button" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-colors btn warn cancel-btn">Cancel</button>
-    <button type="submit" class="px-6 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg btn btn-success">✓ Create Pass</button>
+    <button type="submit" class="px-6 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg btn btn-success">Create Pass</button>
   </div>
 </form>
 

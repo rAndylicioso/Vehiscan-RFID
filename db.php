@@ -33,10 +33,12 @@ try {
     error_log("Database connection failed: " . $e->getMessage());
     
     // Show different messages based on environment
+    http_response_code(503);
     if (APP_DEBUG) {
-        die("Database connection error: " . $e->getMessage());
+        echo "Database connection error: " . htmlspecialchars($e->getMessage());
     } else {
-        die("Database connection error. Please contact the system administrator.");
+        echo "Database connection error. Please contact the system administrator.";
     }
+    exit;
 }
 ?>

@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalEl = document.getElementById("editModal");
   const modalBody = document.getElementById("modal-body");
   const pageTitle = document.getElementById("page-title");
-  const csrf = window.__ADMIN_CSRF__;
+  let csrf = window.__ADMIN_CSRF__; // let — updated from X-CSRF-Token response header
   let currentPage = "dashboard"; // Track current page for reload after form submit
 
   console.log('[ADMIN] Elements found:', {
@@ -220,6 +220,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const originalFetch = window.fetch;
     window.fetch = async function (...args) {
       const response = await originalFetch.apply(this, args);
+
+    // Auto-refresh CSRF token from response header.
+    // After session rebuild (GC, timeout, CASE 2 resolution),
+    // the server generates a new CSRF token and sends it via header.
+    // Without this, the JS-cached token becomes permanently stale.
+    const newCsrf = response.headers.get('X-CSRF-Token');
+    if (newCsrf && newCsrf !== csrf) {
+      console.log('[SESSION] CSRF token refreshed from server');
+      csrf = newCsrf;
+      window.__ADMIN_CSRF__ = newCsrf;
+    }
 
     // Check for session expiration on any AJAX request
     if (response.status === 403) {
@@ -407,7 +418,8 @@ document.addEventListener("DOMContentLoaded", () => {
       showCancelButton: true,
       confirmButtonText: "Yes, Logout",
       cancelButtonText: "Cancel",
-      confirmButtonColor: "#3498db",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
       heightAuto: false,
     });
 
@@ -457,25 +469,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    contentArea.innerHTML = `
-      <div class="p-6 space-y-6 animate-pulse">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="h-32 bg-gray-200 dark:bg-slate-700 rounded-xl"></div>
-          <div class="h-32 bg-gray-200 dark:bg-slate-700 rounded-xl"></div>
-          <div class="h-32 bg-gray-200 dark:bg-slate-700 rounded-xl"></div>
-        </div>
-        <div class="h-64 bg-gray-200 dark:bg-slate-700 rounded-xl"></div>
-        <div class="space-y-4">
-          <div class="h-12 bg-gray-200 dark:bg-slate-700 rounded-lg"></div>
-          <div class="h-12 bg-gray-200 dark:bg-slate-700 rounded-lg"></div>
-          <div class="h-12 bg-gray-200 dark:bg-slate-700 rounded-lg"></div>
-        </div>
-      </div>
-    `;
+    // Page-specific skeleton loaders using .ta-skeleton design tokens
+    const skeletons = {
+      dashboard: `
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="ta-skeleton ta-skeleton-card"></div>
+            <div class="ta-skeleton ta-skeleton-card"></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="ta-skeleton" style="height:5rem;"></div>
+            <div class="ta-skeleton" style="height:5rem;"></div>
+            <div class="ta-skeleton" style="height:5rem;"></div>
+            <div class="ta-skeleton" style="height:5rem;"></div>
+          </div>
+          <div class="ta-skeleton" style="height:18rem;"></div>
+        </div>`,
+      _table: `
+        <div class="p-6 space-y-4">
+          <div class="flex gap-3 flex-wrap">
+            <div class="ta-skeleton" style="width:8rem;height:2.5rem;"></div>
+            <div class="ta-skeleton" style="width:8rem;height:2.5rem;"></div>
+            <div class="ta-skeleton" style="width:14rem;height:2.5rem;margin-left:auto;"></div>
+          </div>
+          <div class="ta-skeleton" style="height:2.75rem;"></div>
+          <div class="ta-skeleton ta-skeleton-row"></div>
+          <div class="ta-skeleton ta-skeleton-row"></div>
+          <div class="ta-skeleton ta-skeleton-row"></div>
+          <div class="ta-skeleton ta-skeleton-row"></div>
+          <div class="ta-skeleton ta-skeleton-row"></div>
+          <div class="ta-skeleton ta-skeleton-row"></div>
+        </div>`
+    };
+    contentArea.innerHTML = skeletons[page] || skeletons._table;
 
     // Fade in loading state
     contentArea.style.opacity = '1';
-    contentArea.style.transform = 'translateY(0)';
+    contentArea.style.transform = 'none';
 
     try {
       const res = await fetch(`fetch/fetch_${page}.php`, {
@@ -529,6 +559,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Fade in new content
       contentArea.style.opacity = '1';
+      // Clear transform after transition so it doesn't create a containing block
+      // that breaks position:fixed action dropdowns
+      setTimeout(function() { contentArea.style.transform = 'none'; }, 350);
 
       console.log(`[Page Load] ${page} loaded successfully`);
 
@@ -606,7 +639,7 @@ document.addEventListener("DOMContentLoaded", () => {
           icon: 'info',
           showCancelButton: true,
           confirmButtonText: 'Start Binding',
-          confirmButtonColor: '#2563EB',
+          confirmButtonColor: '#3b82f6',
           cancelButtonText: 'Cancel',
           width: '420px'
         });
@@ -669,7 +702,7 @@ document.addEventListener("DOMContentLoaded", () => {
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Unbind',
-          confirmButtonColor: '#EF4444',
+          confirmButtonColor: '#ef4444',
           cancelButtonText: 'Keep',
           width: '420px'
         });
@@ -765,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
               title: 'RFID Bound!',
               html: `<p>RFID tag <strong class="font-mono">${json.data.scanned_uid}</strong> has been bound to <strong>${json.data.plate_number}</strong></p>`,
               icon: 'success',
-              confirmButtonColor: '#2563EB'
+              confirmButtonColor: '#3b82f6'
             });
           } else if (json.data.status === 'timeout') {
             showGrowl('Binding session timed out', 'warning');
@@ -850,18 +883,18 @@ document.addEventListener("DOMContentLoaded", () => {
             showGrowl('Enter a valid RFID UID (at least 4 hex characters)', 'error');
             return;
           }
-          bodyStr = 'scan_mode=rfid&rfid_uid=' + encodeURIComponent(rfidUid) + '&csrf=' + encodeURIComponent(csrf);
+          bodyStr = 'scan_mode=rfid&rfid_uid=' + encodeURIComponent(rfidUid) + '&csrf_token=' + encodeURIComponent(csrf);
         } else {
           plate = vehicleSelect.value;
           if (!plate) {
             showGrowl('Please select a vehicle first', 'error');
             return;
           }
-          bodyStr = 'scan_mode=plate&plate_number=' + encodeURIComponent(plate) + '&csrf=' + encodeURIComponent(csrf);
+          bodyStr = 'scan_mode=plate&plate_number=' + encodeURIComponent(plate) + '&csrf_token=' + encodeURIComponent(csrf);
         }
 
         scanBtn.disabled = true;
-        scanBtn.innerHTML = '<span class="scan-icon scanning">🔄</span> Scanning...';
+        scanBtn.innerHTML = '<span class="scan-icon scanning"><svg style="width:1em;height:1em;vertical-align:-0.15em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span> Scanning...';
 
         await new Promise((r) => setTimeout(r, 700 + Math.random() * 900));
 
@@ -907,7 +940,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (scanResult) {
               const direction = json.direction || 'IN';
               const isEntry = direction === 'IN';
-              const icon = isEntry ? '🟢' : '🔴';
+              const icon = isEntry ? '<svg style="width:1em;height:1em;vertical-align:-0.15em" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#22c55e"/></svg>' : '<svg style="width:1em;height:1em;vertical-align:-0.15em" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ef4444"/></svg>';
               const statusText = isEntry ? 'ENTRY LOGGED' : 'EXIT LOGGED';
               const statusColor = isEntry ? '#16a34a' : '#dc2626';
 
@@ -926,19 +959,19 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             // Check for special scan results (binding, unknown UID)
             const scanResult2 = json.scan_result || '';
-            let icon = '❌';
+            let icon = '<svg style="width:1.5em;height:1.5em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>';
             let resultClass = 'scan-result error';
             if (scanResult2 === 'uid_bound') {
-              icon = '🔗';
+              icon = '<svg style="width:1.5em;height:1.5em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.828 10.172a4 4 0 0 0-5.656 0l-4 4a4 4 0 1 0 5.656 5.656l1.1-1.1"/><path d="M10.172 13.828a4 4 0 0 0 5.656 0l4-4a4 4 0 0 0-5.656-5.656l-1.1 1.1"/></svg>';
               resultClass = 'scan-result success';
               showGrowl(json.message || 'RFID tag bound!', 'success');
               setTimeout(() => refreshRecentScans(), 500);
             } else if (scanResult2 === 'unknown_uid') {
-              icon = '❓';
+              icon = '<svg style="width:1.5em;height:1.5em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
             }
             if (scanResult) {
               scanResult.className = resultClass;
-              scanResult.querySelector('.result-icon').textContent = icon;
+              scanResult.querySelector('.result-icon').innerHTML = icon;
               scanResult.querySelector('.result-text').innerHTML = `<strong>${scanResult2 === 'uid_bound' ? 'Binding Complete' : 'Scan Failed'}</strong><br>${json.message || json.error || 'Unknown error'}`;
             }
             if (scanResult2 !== 'uid_bound') {
@@ -950,13 +983,13 @@ document.addEventListener("DOMContentLoaded", () => {
           if (scanResult) {
             scanResult.style.display = 'block';
             scanResult.className = 'scan-result error';
-            scanResult.querySelector('.result-icon').textContent = '❌';
+            scanResult.querySelector('.result-icon').innerHTML = '<svg style="width:1.5em;height:1.5em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>';
             scanResult.querySelector('.result-text').textContent = err.message || 'Connection error';
           }
           showGrowl('Connection error', 'error');
         } finally {
           scanBtn.disabled = false;
-          scanBtn.innerHTML = '<span class="scan-icon">📡</span> Simulate Scan';
+          scanBtn.innerHTML = '<span class="scan-icon"><svg style="width:1em;height:1em;vertical-align:-0.15em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span> Simulate Scan';
         }
       });
 
@@ -973,7 +1006,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (json.scans.length > 0) {
               recentScans.innerHTML = json.scans.map(s => {
                 const statusClass = s.status === 'IN' ? 'status-in' : 'status-out';
-                const statusIcon = s.status === 'IN' ? '🟢 IN' : '🔴 OUT';
+                const statusIcon = s.status === 'IN' ? '<svg style="width:0.85em;height:0.85em;vertical-align:-0.1em" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#22c55e"/></svg> IN' : '<svg style="width:0.85em;height:0.85em;vertical-align:-0.1em" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ef4444"/></svg> OUT';
                 return `<tr>
                   <td>${s.time || '-'}</td>
                   <td>${s.plate_number || '-'}</td>
@@ -1016,7 +1049,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: '✓ Approve',
+        confirmButtonText: 'Approve',
         confirmButtonColor: '#10b981',
         cancelButtonText: 'Cancel',
         cancelButtonColor: '#6b7280'
@@ -1070,7 +1103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         input: 'textarea',
         inputPlaceholder: 'e.g., Invalid documentation, security concerns, etc.',
         showCancelButton: true,
-        confirmButtonText: '✗ Reject',
+        confirmButtonText: 'Reject',
         confirmButtonColor: '#ef4444',
         cancelButtonText: 'Cancel',
         cancelButtonColor: '#6b7280',
@@ -1155,7 +1188,7 @@ document.addEventListener("DOMContentLoaded", () => {
           inputPlaceholder: "Type CANCEL to confirm",
           showCancelButton: true,
           confirmButtonText: "Cancel Pass",
-          confirmButtonColor: "#e74c3c",
+          confirmButtonColor: "#ef4444",
           preConfirm: (v) => {
             if (v !== "CANCEL")
               Swal.showValidationError("You must type CANCEL to confirm");
@@ -1169,7 +1202,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typed === "CANCEL") {
           try {
             const form = new FormData();
-            form.append("csrf", csrf);
+            form.append("csrf_token", csrf);
             form.append("id", id);
             const res = await fetch("api/cancel_visitor_pass.php", {
               method: "POST",
@@ -1210,6 +1243,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     });
+
+    // Visitor Passes Search
+    initializeTableSearch('visitorsSearchInput', 'visitorsSearchCount', 'passesTable');
   }
 
   /* ---------- Employee Management Controls ---------- */
@@ -1286,7 +1322,7 @@ document.addEventListener("DOMContentLoaded", () => {
             inputPlaceholder: "Type DELETE to confirm",
             showCancelButton: true,
             confirmButtonText: "Delete",
-            confirmButtonColor: "#e74c3c",
+            confirmButtonColor: "#ef4444",
             cancelButtonText: "Cancel",
             preConfirm: (v) => {
               if (v !== "DELETE")
@@ -1301,7 +1337,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (typed === "DELETE") {
             try {
               const form = new FormData();
-              form.append("csrf", csrf);
+              form.append("csrf_token", csrf);
               form.append("id", id);
               const res = await fetch("api/employee_delete.php", {
                 method: "POST",
@@ -1332,8 +1368,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function filterEmployeesTable() {
-    const searchTerm = document.getElementById('employeeSearchInput')?.value.toLowerCase() || '';
-    const roleFilter = document.getElementById('employeeRoleFilter')?.value || '';
+    const searchTerm = (document.getElementById('employeeSearchInput')?.value || '').toLowerCase();
+    const roleFilter = (document.getElementById('employeeRoleFilter')?.value || '').toLowerCase();
     const table = document.getElementById('employeeTable');
 
     if (!table) return;
@@ -1341,11 +1377,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
       const cells = Array.from(row.querySelectorAll('td'));
-      const username = cells[1]?.textContent.toLowerCase() || '';
-      const role = cells[2]?.textContent.toLowerCase() || '';
+      const username = cells[0]?.textContent.toLowerCase() || '';
+      const role = cells[1]?.textContent.toLowerCase() || '';
 
       const matchesSearch = searchTerm === '' || username.includes(searchTerm);
-      const matchesRole = roleFilter === '' || role.includes(roleFilter.toLowerCase());
+      const matchesRole = roleFilter === '' || role.includes(roleFilter);
 
       row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
     });
@@ -1421,12 +1457,15 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log('[Audit] Apply filters clicked');
 
         const actionFilter = document.getElementById('actionFilter');
+        const userFilter = document.getElementById('userFilter');
         const action = actionFilter?.value || '';
+        const user = userFilter?.value?.trim() || '';
 
-        console.log('[Audit] Filter values:', { action });
+        console.log('[Audit] Filter values:', { action, user });
 
         let queryString = '';
         if (action) queryString += `&action=${encodeURIComponent(action)}`;
+        if (user) queryString += `&user=${encodeURIComponent(user)}`;
 
         contentArea.innerHTML = `
           <div class="flex items-center justify-center min-h-[400px]">
@@ -1683,7 +1722,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
       const data = new FormData(form);
-      if (!data.get("csrf")) data.append("csrf", csrf);
+      if (!data.get("csrf_token")) data.append("csrf_token", csrf);
 
       // Password validation for employee forms
       const password = data.get('password');
@@ -1733,24 +1772,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ---------- Search Functionality ---------- */
-  function initializeSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchCount = document.getElementById('searchCount');
-    const table = document.getElementById('homeownersTable');
+  /* ---------- Shared Table Search Utility ---------- */
+  function initializeTableSearch(inputId, countId, tableId) {
+    const searchInput = document.getElementById(inputId);
+    const searchCount = document.getElementById(countId);
+    const table = document.getElementById(tableId);
 
-    console.log('[SEARCH] Initializing search...', { searchInput, searchCount, table });
-
-    if (!searchInput || !table) {
-      console.error('[SEARCH] Search elements not found');
-      return;
-    }
+    if (!searchInput || !table) return;
 
     const totalRows = table.querySelectorAll('tbody tr').length;
-    console.log('[SEARCH] Total rows:', totalRows);
 
-    searchInput.addEventListener('input', function (e) {
-      console.log('[SEARCH] Search triggered:', e.target.value);
+    searchInput.addEventListener('input', function () {
       const searchTerm = this.value.toLowerCase().trim();
       const rows = table.querySelectorAll('tbody tr');
       let visibleCount = 0;
@@ -1763,24 +1795,27 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isVisible) visibleCount++;
       });
 
-      if (searchTerm) {
-        searchCount.textContent = `${visibleCount} of ${totalRows} records`;
-        searchCount.style.color = visibleCount > 0 ? '#16a34a' : '#dc2626';
-      } else {
-        searchCount.textContent = '';
+      if (searchCount) {
+        if (searchTerm) {
+          searchCount.textContent = `${visibleCount} of ${totalRows} records`;
+          searchCount.style.color = visibleCount > 0 ? '#16a34a' : '#dc2626';
+        } else {
+          searchCount.textContent = '';
+        }
       }
-      console.log('[SEARCH] Visible count:', visibleCount);
     });
 
-    // ESC key clears search
     searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         this.value = '';
         this.dispatchEvent(new Event('input'));
       }
     });
+  }
 
-    console.log('[SEARCH] Search initialized successfully');
+  /* ---------- Search Functionality ---------- */
+  function initializeSearch() {
+    initializeTableSearch('searchInput', 'searchCount', 'homeownersTable');
   }
 
   /* ---------- CSV Export Functionality ---------- */
@@ -1880,6 +1915,12 @@ document.addEventListener("DOMContentLoaded", () => {
       exportTableToCSV('homeownersTable', 'homeowners_export.csv');
     });
 
+    // QR Registration button — opens print-ready page
+    document.getElementById("qrRegistrationBtn")?.addEventListener("click", () => {
+      const base = window.location.pathname.replace(/\/admin\/.*$/, '');
+      window.open(base + '/homeowners/qr_registration.php', '_blank');
+    });
+
     document.querySelectorAll(".btn-edit").forEach((btn) => {
       btn.addEventListener("click", () =>
         openModal(`homeowners/homeowner_edit.php?id=${btn.dataset.id}`)
@@ -1896,7 +1937,7 @@ document.addEventListener("DOMContentLoaded", () => {
           inputPlaceholder: "Type DELETE to confirm",
           showCancelButton: true,
           confirmButtonText: "Delete",
-          confirmButtonColor: "#e74c3c",
+          confirmButtonColor: "#ef4444",
           preConfirm: (v) => {
             if (v !== "DELETE")
               Swal.showValidationMessage("You must type DELETE to confirm");
@@ -1910,7 +1951,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typed === "DELETE") {
           try {
             const form = new FormData();
-            form.append("csrf", csrf);
+            form.append("csrf_token", csrf);
             form.append("id", id);
             const res = await fetch("homeowners/homeowner_delete.php", {
               method: "POST",
@@ -1945,7 +1986,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const plate = this.dataset.plate;
         const owner = this.dataset.owner;
 
-        const result = await Swal.fire({
+        const confirm = await Swal.fire({
           title: 'Bind RFID Tag',
           html: `<div class="text-left">
             <p class="mb-3">Start binding an RFID tag to:</p>
@@ -1953,17 +1994,17 @@ document.addEventListener("DOMContentLoaded", () => {
               <p class="font-bold text-gray-800">${plate}</p>
               <p class="text-sm text-gray-600">${owner}</p>
             </div>
-            <p class="text-sm text-gray-500">You'll be redirected to <strong>RFID Management</strong> to complete the binding. Scan a tag within 5 minutes.</p>
+            <p class="text-sm text-gray-500">Have a tag ready to scan. The session will stay open for 5 minutes.</p>
           </div>`,
           icon: 'info',
           showCancelButton: true,
           confirmButtonText: 'Start Binding',
-          confirmButtonColor: '#2563EB',
+          confirmButtonColor: '#3b82f6',
           cancelButtonText: 'Cancel',
           width: '420px'
         });
 
-        if (!result.isConfirmed) return;
+        if (!confirm.isConfirmed) return;
 
         try {
           const form = new FormData();
@@ -1974,13 +2015,90 @@ document.addEventListener("DOMContentLoaded", () => {
           const res = await fetch('../api/rfid/bind.php', { method: 'POST', body: form });
           const json = await res.json();
 
-          if (json.success) {
-            showGrowl('Binding session started! Redirecting to RFID Management...', 'success');
-            // Navigate to RFID Management page where binding banner + polling are active
-            setTimeout(() => loadPage('rfid'), 500);
-          } else {
+          if (!json.success) {
             showGrowl(json.message || 'Failed to start binding', 'error');
+            return;
           }
+
+          // Session started — show an inline polling dialog (no redirect)
+          const sessionId = json.data.session_id;
+          let pollTimer = null;
+          let bindCompleted = false;
+          let bindResult = null;
+
+          await Swal.fire({
+            title: 'Waiting for RFID Scan...',
+            html: `
+              <div class="text-center space-y-2">
+                <div class="flex items-center justify-center my-3">
+                  <div class="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center">
+                    <svg class="h-7 w-7 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+                    </svg>
+                  </div>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">Binding to: <strong>${plate}</strong></p>
+                <p class="text-xs text-gray-500">${owner}</p>
+                <p class="text-xs text-gray-400 mt-2">Time remaining: <span id="manageBindTimer" class="font-mono font-bold text-blue-600">05:00</span></p>
+              </div>`,
+            icon: false,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancel Binding',
+            cancelButtonColor: '#6b7280',
+            allowOutsideClick: false,
+            willOpen: () => {
+              pollTimer = setInterval(async () => {
+                try {
+                  const pr = await fetch(`../api/rfid/bind.php?action=status&session_id=${sessionId}`);
+                  const pd = await pr.json();
+
+                  const timerEl = document.getElementById('manageBindTimer');
+                  if (timerEl && pd.data?.remaining_seconds !== undefined) {
+                    const s = pd.data.remaining_seconds;
+                    timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+                  }
+
+                  if (!pd.active || pd.data?.status !== 'pending') {
+                    clearInterval(pollTimer);
+                    pollTimer = null;
+                    bindCompleted = true;
+                    bindResult = pd.data?.status;
+                    Swal.close();
+                  }
+                } catch (e) { console.error('[MANAGE] Bind poll error:', e); }
+              }, 2000);
+            },
+            willClose: () => {
+              if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+            }
+          }).then(async (result) => {
+            if (result.dismiss === Swal.DismissReason.cancel && !bindCompleted) {
+              // User manually cancelled — cancel the binding session
+              try {
+                const cf = new FormData();
+                cf.append('action', 'cancel');
+                cf.append('session_id', sessionId);
+                cf.append('csrf_token', csrf);
+                await fetch('../api/rfid/bind.php', { method: 'POST', body: cf });
+                showGrowl('Binding session cancelled', 'info');
+              } catch (e) { /* silent */ }
+              return;
+            }
+
+            if (bindResult === 'completed') {
+              await Swal.fire({
+                icon: 'success',
+                title: 'RFID Bound!',
+                text: `Tag successfully bound to ${plate}.`,
+                confirmButtonColor: '#3b82f6'
+              });
+              loadPage('manage'); // Refresh the manage records table
+            } else if (bindResult === 'timeout') {
+              showGrowl('Binding session timed out — no tag was scanned', 'warning');
+            }
+          });
+
         } catch (err) {
           console.error('[MANAGE] RFID bind error:', err);
           showGrowl('Failed to start binding session', 'error');
@@ -2145,7 +2263,7 @@ document.addEventListener("DOMContentLoaded", () => {
           inputPlaceholder: "Type DELETE to confirm",
           showCancelButton: true,
           confirmButtonText: "Delete",
-          confirmButtonColor: "#e74c3c",
+          confirmButtonColor: "#ef4444",
           preConfirm: (v) => {
             if (v !== "DELETE")
               Swal.showValidationMessage("You must type DELETE to confirm");
@@ -2159,7 +2277,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typed === "DELETE") {
           try {
             const form = new FormData();
-            form.append("csrf", csrf);
+            form.append("csrf_token", csrf);
             form.append("log_id", log_id);
             const res = await fetch("fetch/delete_access_log.php", {
               method: "POST",
@@ -2207,7 +2325,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const response = await fetch('utilities/backup_database.php', {
-          method: 'POST'
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ csrf_token: window.__ADMIN_CSRF__ })
         });
 
         if (!response.ok) {
@@ -2228,7 +2348,7 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             `,
             confirmButtonText: 'OK',
-            confirmButtonColor: '#4b5563'
+            confirmButtonColor: '#3b82f6'
           });
         } else {
           throw new Error(result.message || 'Backup failed');

@@ -6,9 +6,15 @@ ob_start();
 // Database connection - use centralized config
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+require_once __DIR__ . '/../includes/security_headers.php';
 
 // Start session with default name first
 if (session_status() === PHP_SESSION_NONE) {
+    // Isolate from other XAMPP apps to prevent cross-app GC
+    $appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
+    if (!is_dir($appSavePath)) { mkdir($appSavePath, 0700, true); }
+    ini_set('session.save_path', $appSavePath);
+    ini_set('session.gc_maxlifetime', 3600);
     session_start();
 }
 
@@ -78,8 +84,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $redirectUrl = '../admin/admin_panel.php';
                 } elseif ($result['role'] === 'guard') {
                     $redirectUrl = '../guard/pages/guard_side.php';
-                } elseif ($result['role'] === 'homeowner') {
+                } elseif ($result['role'] === 'owner' || $result['role'] === 'homeowner') {
                     $redirectUrl = '../homeowners/portal.php';
+                    $userRole = 'homeowner'; // Normalize to homeowner for session name
                 }
             }
         }
@@ -121,6 +128,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // Destroy current session
         session_destroy();
         
+        // Clear ALL role-specific session cookies to prevent session collision
+        // This is critical: stale cookies from a previous role login will cause
+        // session_admin_unified.php to pick up the wrong session
+        $allSessionNames = ['vehiscan_superadmin', 'vehiscan_admin', 'vehiscan_guard', 'vehiscan_homeowner', 'vehiscan_session'];
+        foreach ($allSessionNames as $sName) {
+            if (isset($_COOKIE[$sName])) {
+                // Destroy the session data on disk
+                session_name($sName);
+                session_id($_COOKIE[$sName]);
+                session_start();
+                $_SESSION = [];
+                session_destroy();
+                // Expire the cookie
+                setcookie($sName, '', time() - 3600, '/');
+                unset($_COOKIE[$sName]);
+            }
+        }
+        
         // Start new session with role-specific name
         $sessionName = 'vehiscan_session'; // Default
         if ($userRole === 'super_admin') {
@@ -133,9 +158,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $sessionName = 'vehiscan_homeowner';
         }
         
-        // Start new session with correct name
+        // Start new session with correct name and secure cookie params
         session_name($sessionName);
+        ini_set('session.cookie_httponly', 1);
+        ini_set('session.cookie_samesite', 'Lax');
+        ini_set('session.use_strict_mode', 1);
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+                   (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        ini_set('session.cookie_secure', $isHttps ? 1 : 0);
         session_start();
+        session_regenerate_id(true); // Prevent session fixation
         
         // Set session variables
         $_SESSION['user_id'] = $userId;
@@ -216,7 +248,7 @@ ob_end_flush();
                 <div class="input-icon-wrapper">
                     <input id="username" name="username" type="text" placeholder="Enter your username" required
                         aria-label="Username" autofocus autocomplete="username">
-                    <span class="input-icon">👤</span>
+                    <span class="input-icon"><svg style="width:1em;height:1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
                 </div>
             </div>
 
@@ -226,10 +258,10 @@ ob_end_flush();
                     <div class="input-icon-wrapper">
                         <input id="password" name="password" type="password" placeholder="••••••••••••••" required
                             aria-label="Password" autocomplete="current-password">
-                        <span class="input-icon">🔒</span>
+                        <span class="input-icon"><svg style="width:1em;height:1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
                     </div>
                     <button type="button" id="togglePassword" aria-label="Toggle password visibility"
-                        tabindex="-1">👁</button>
+                        tabindex="-1"><svg style="width:1em;height:1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
             </div>
 
@@ -254,7 +286,7 @@ ob_end_flush();
 
     <!-- Keyboard Hint -->
     <div class="keyboard-hint">
-        <span>💡 Press</span>
+        <span><svg style="width:1em;height:1em;vertical-align:-0.15em;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21h6M12 3a6 6 0 0 0-4 10.5V17h8v-3.5A6 6 0 0 0 12 3z"/></svg> Press</span>
         <kbd>Enter</kbd>
         <span>to sign in</span>
     </div>
@@ -280,7 +312,7 @@ ob_end_flush();
                 Swal.fire({
                     icon: 'error',
                     title: 'Login Failed',
-                    text: '<?= addslashes($error) ?>',
+                    text: <?= json_encode($error) ?>,
                     confirmButtonText: 'Try Again',
                     confirmButtonColor: '#ef4444'
                 });
@@ -292,9 +324,9 @@ ob_end_flush();
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    text: '<?= addslashes($success) ?>',
+                    text: <?= json_encode($success) ?>,
                     confirmButtonText: 'OK',
-                    confirmButtonColor: '#ef4444'
+                    confirmButtonColor: '#3b82f6'
                 });
             });
         <?php endif; ?>

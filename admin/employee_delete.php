@@ -3,20 +3,7 @@
  * Employee Delete
  * Delete employee endpoint (AJAX)
  */
-
-// Check Super Admin or Admin session
-session_name('vehiscan_superadmin');
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
-    session_write_close();
-    session_name('vehiscan_admin');
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-}
+require_once __DIR__ . '/../includes/session_admin_unified.php';
 
 header('Content-Type: application/json');
 
@@ -37,6 +24,15 @@ try {
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
+
+// CSRF validation
+$csrf = $_SESSION['csrf_token'] ?? '';
+$postedCsrf = $input['csrf_token'] ?? '';
+if (!$csrf || !hash_equals($csrf, (string)$postedCsrf)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+    exit();
+}
+
 $employeeId = $input['id'] ?? null;
 
 if (!$employeeId) {
@@ -46,7 +42,7 @@ if (!$employeeId) {
 
 try {
     // Fetch employee data before deletion
-    $stmt = $pdo->prepare("SELECT username, email, full_name, role FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT username, email, CONCAT_WS(' ', first_name, last_name) as full_name, role FROM users WHERE id = ?");
     $stmt->execute([$employeeId]);
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -74,5 +70,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'Failed to delete employee']);
     }
 } catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    error_log('[EMPLOYEE_DELETE] DB error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'A database error occurred. Please try again.']);
 }

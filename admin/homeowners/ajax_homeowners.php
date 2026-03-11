@@ -1,4 +1,11 @@
 <?php
+require_once __DIR__ . '/../../includes/session_admin_unified.php';
+
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
+    http_response_code(403);
+    exit('<tr><td colspan="9">Unauthorized</td></tr>');
+}
+
 require_once __DIR__ . '/../../db.php';
 
 // Retrieve filters (sanitize input)
@@ -33,7 +40,7 @@ if ($address !== '') {
     $params[] = "%$address%";
 }
 
-$sql .= " ORDER BY id DESC";
+$sql .= " ORDER BY id DESC LIMIT 500";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -65,7 +72,7 @@ foreach ($rows as $row) {
     echo "<tr>
         <td>{$row['id']}</td>
         <td>" . htmlspecialchars($row['name'] ?? '') . "</td>
-        <td>" . htmlspecialchars($row['contact'] ?? '') . "</td>
+        <td>" . htmlspecialchars($row['contact_number'] ?? '') . "</td>
         <td>" . htmlspecialchars($row['address'] ?? '') . "</td>
         <td>" . htmlspecialchars($row['vehicle_type'] ?? '') . "</td>
         <td>" . htmlspecialchars($row['color'] ?? '') . "</td>

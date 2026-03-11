@@ -80,6 +80,12 @@ define('DB_CHARSET', config('DB_CHARSET', 'utf8mb4'));
 define('APP_ENV', config('APP_ENV', 'development'));
 define('APP_DEBUG', config('APP_DEBUG', 'false') === 'true');
 
+// Enforce safe display_errors in production
+if (APP_ENV === 'production') {
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+}
+
 // Session settings
 define('SESSION_LIFETIME', (int) config('SESSION_LIFETIME', 3600));
 define('SESSION_SECURE', config('SESSION_SECURE', 'false') === 'true');

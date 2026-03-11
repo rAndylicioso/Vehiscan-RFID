@@ -8,11 +8,7 @@
 ob_start();
 header('Content-Type: application/json');
 
-// Start session without redirects
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('vehiscan_admin');
-    @session_start();
-}
+require_once __DIR__ . '/../../includes/session_admin_unified.php';
 
 // Check authentication
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
@@ -30,8 +26,6 @@ try {
     // Check which timestamp column exists
     $columns = $pdo->query("SHOW COLUMNS FROM recent_logs")->fetchAll(PDO::FETCH_COLUMN);
     $timeCol = in_array('created_at', $columns) ? 'created_at' : 'log_time';
-    
-    error_log("[Weekly Stats] Using column: $timeCol");
     
     // Get last 7 days of data - use prepared statement to avoid SQL injection
     if ($timeCol === 'created_at') {
@@ -82,10 +76,6 @@ try {
             $values[] = 0;
         }
     }
-    
-    error_log("[Weekly Stats] Returning " . count($labels) . " data points");
-    error_log("[Weekly Stats] Labels: " . json_encode($labels));
-    error_log("[Weekly Stats] Values: " . json_encode($values));
     
     echo json_encode([
         'success' => true,

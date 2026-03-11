@@ -30,6 +30,23 @@ $stmt = $pdo->prepare("
 $stmt->execute([$_SESSION['homeowner_id']]);
 $stats = $stmt->fetch();
 
+// Fetch homeowner's recent profile update requests
+$profileRequests = [];
+try {
+    $stmt = $pdo->prepare("
+        SELECT id, request_text, status, admin_notes, created_at
+        FROM profile_update_requests
+        WHERE homeowner_id = ?
+        ORDER BY created_at DESC
+        LIMIT 5
+    ");
+    $stmt->execute([$_SESSION['homeowner_id']]);
+    $profileRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    // Table may not exist yet — degrade silently
+    $profileRequests = [];
+}
+
 // Only generate CSRF token if not already set (prevents multi-tab breakage)
 if (empty($_SESSION['csrf_token'])) {
     $csrf_token = bin2hex(random_bytes(32));
@@ -43,7 +60,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="<?php echo $csrf_token; ?>">
     <title>Homeowner Portal — VehiScan</title>
     <link rel="stylesheet" href="../assets/css/tailwind.css">
@@ -318,12 +335,12 @@ if (empty($_SESSION['csrf_token'])) {
                         </div>
 
                         <!-- Time Period Selector -->
-                        <div class="gap-2 bg-white dark:bg-slate-800 p-1 rounded-lg border border-gray-200 dark:border-slate-700 inline-flex">
-                            <button class="period-btn active px-4 py-2 rounded-md text-sm font-medium"
+                        <div class="ta-pill-tabs inline-flex">
+                            <button class="ta-pill-tab active px-4 py-2 rounded-md text-sm font-medium"
                                 data-period="day">Today</button>
-                            <button class="period-btn px-4 py-2 rounded-md text-sm font-medium" data-period="week">This
+                            <button class="ta-pill-tab px-4 py-2 rounded-md text-sm font-medium" data-period="week">This
                                 Week</button>
-                            <button class="period-btn px-4 py-2 rounded-md text-sm font-medium" data-period="month">This
+                            <button class="ta-pill-tab px-4 py-2 rounded-md text-sm font-medium" data-period="month">This
                                 Month</button>
                         </div>
 
@@ -578,6 +595,113 @@ if (empty($_SESSION['csrf_token'])) {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Request Profile Changes -->
+                        <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 transition-colors duration-300">
+                            <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center gap-2">
+                                <svg class="h-5 w-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Request Profile Changes</h3>
+                            </div>
+
+                            <div class="p-6 space-y-4">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    Need to correct information on your profile — such as your name, address, plate number, or
+                                    other details that were entered incorrectly during registration? Submit a request below and
+                                    an administrator will review it.
+                                </p>
+
+                                <?php
+                                $openRequest = null;
+                                foreach ($profileRequests as $req) {
+                                    if (in_array($req['status'], ['pending', 'acknowledged'])) {
+                                        $openRequest = $req;
+                                        break;
+                                    }
+                                }
+                                $statusColors = [
+                                    'pending'      => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+                                    'acknowledged' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+                                    'completed'    => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+                                    'rejected'     => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+                                ];
+                                ?>
+
+                                <?php if ($openRequest): ?>
+                                <!-- Open request notice -->
+                                <div class="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-4">
+                                    <div class="flex items-start gap-3">
+                                        <svg class="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">You have an open request</p>
+                                            <p class="text-xs text-amber-700 dark:text-amber-400 mt-0.5 break-words"><?= htmlspecialchars(mb_strimwidth($openRequest['request_text'], 0, 120, '...')) ?></p>
+                                            <div class="flex items-center gap-2 mt-2">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <?= $statusColors[$openRequest['status']] ?? '' ?>">
+                                                    <?= ucfirst($openRequest['status']) ?>
+                                                </span>
+                                                <span class="text-xs text-gray-500"><?= date('M j, Y', strtotime($openRequest['created_at'])) ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php else: ?>
+                                <!-- Submit form -->
+                                <form id="profileRequestForm" class="space-y-3">
+                                    <div>
+                                        <label for="profileRequestText" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Describe what needs to be changed
+                                        </label>
+                                        <textarea
+                                            id="profileRequestText"
+                                            name="request_text"
+                                            rows="4"
+                                            maxlength="2000"
+                                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+                                            placeholder="e.g. My plate number was entered incorrectly — it should be ABC-1234 instead of ABD-1234. Please also correct my middle name..."
+                                        ></textarea>
+                                        <p class="text-xs text-gray-400 mt-1 text-right"><span id="profileReqCharCount">0</span> / 2000</p>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="submit" id="submitProfileReqBtn" class="ta-btn ta-btn-primary">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                            </svg>
+                                            Submit Request
+                                        </button>
+                                    </div>
+                                </form>
+                                <?php endif; ?>
+
+                                <?php if (!empty($profileRequests)): ?>
+                                <!-- Request history -->
+                                <div class="mt-2">
+                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Recent Requests</h4>
+                                    <div class="space-y-2">
+                                        <?php foreach ($profileRequests as $req): ?>
+                                        <div class="flex items-start gap-3 py-2 border-b border-gray-100 dark:border-slate-700 last:border-0">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-xs text-gray-700 dark:text-gray-300 break-words"><?= htmlspecialchars(mb_strimwidth($req['request_text'], 0, 100, '...')) ?></p>
+                                                <?php if ($req['admin_notes']): ?>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><span class="font-medium">Admin note:</span> <?= htmlspecialchars(mb_strimwidth($req['admin_notes'], 0, 100, '...')) ?></p>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="flex-shrink-0 flex flex-col items-end gap-1">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <?= $statusColors[$req['status']] ?? '' ?>">
+                                                    <?= ucfirst($req['status']) ?>
+                                                </span>
+                                                <span class="text-xs text-gray-400"><?= date('M j', strtotime($req['created_at'])) ?></span>
+                                            </div>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -589,6 +713,64 @@ if (empty($_SESSION['csrf_token'])) {
     <script src="../assets/js/mobile-gestures.js?v=<?php echo time(); ?>"></script>
     <script src="js/homeowner-dark-mode.js?v=<?php echo time(); ?>"></script>
     <script src="js/vehicle-management.js?v=<?php echo time(); ?>"></script>
+
+    <script>
+    (function () {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+        // Profile request form: character counter
+        const textarea = document.getElementById('profileRequestText');
+        const charCount = document.getElementById('profileReqCharCount');
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function () {
+                charCount.textContent = this.value.length;
+            });
+        }
+
+        // Profile request form: submit handler
+        const form = document.getElementById('profileRequestForm');
+        if (form) {
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const text = textarea?.value.trim() || '';
+                if (!text) {
+                    Swal.fire({ icon: 'warning', title: 'Empty request', text: 'Please describe the changes you need.', confirmButtonColor: '#3b82f6' });
+                    return;
+                }
+
+                const btn = document.getElementById('submitProfileReqBtn');
+                if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+
+                try {
+                    const fd = new FormData();
+                    fd.append('request_text', text);
+                    fd.append('csrf_token', csrf);
+
+                    const res = await fetch('api/submit_profile_request.php', { method: 'POST', body: fd });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Request Submitted',
+                            text: data.message,
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        // Reload the portal to show the "open request" notice
+                        window.location.reload();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Could not submit', text: data.message, confirmButtonColor: '#ef4444' });
+                        if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit Request'; }
+                    }
+                } catch (err) {
+                    console.error('[ProfileRequest] submit error:', err);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong. Please try again.', confirmButtonColor: '#ef4444' });
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Submit Request'; }
+                }
+            });
+        }
+    })();
+    </script>
 </body>
 
 </html>

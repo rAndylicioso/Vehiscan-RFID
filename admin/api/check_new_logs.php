@@ -34,7 +34,6 @@ try {
         $newCount = 0;
     }
     
-    header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
         'latest_log_id' => $latestId,

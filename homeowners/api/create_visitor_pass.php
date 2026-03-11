@@ -26,8 +26,8 @@ if (!$rateCheck['allowed']) {
 // Get POST data
 $data = json_decode(file_get_contents('php://input'), true);
 
-// Validate CSRF token
-if (!isset($data['csrf_token']) || $data['csrf_token'] !== $_SESSION['csrf_token']) {
+// Validate CSRF token (timing-safe comparison)
+if (!isset($data['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $data['csrf_token'])) {
     $rateLimiter->recordAttempt("homeowner_$homeownerId", 'visitor_pass', ['error' => 'csrf_token']);
     echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
     exit();

@@ -25,7 +25,7 @@ $isEdit = !empty($employee);
 
     <form id="employeeForm" class="space-y-6" action="api/employee_save.php" method="POST">
         <input type="hidden" name="id" value="<?= $employee['id'] ?? '' ?>">
-        <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
         
         <!-- Username -->
         <div>
