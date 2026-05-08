@@ -136,7 +136,7 @@ Vehiscan-RFID/
 - [ ] Guard panel toggle visible (header right side)
 - [ ] Guard toggle switches smoothly
 - [ ] Both panels can have different settings
-- [ ] Owner role badge readable in dark mode
+- [ ] Homeowner role badge readable in dark mode
 
 ### QR Codes:
 - [ ] QR codes appear in visitor passes table
@@ -241,6 +241,6 @@ These files still have inline styles but are less critical:
 **Lines Removed**: 192 lines of inline code
 **Lines Added**: 540+ lines in organized files
 **Features Added**: QR zoom modal, independent dark modes
-**Bugs Fixed**: Owner role badge, dark mode visibility
+**Bugs Fixed**: Homeowner role badge, dark mode visibility
 
 **Result**: Cleaner, more maintainable, better organized codebase! 

@@ -4,8 +4,11 @@
  * Returns 7-day activity data for dashboard chart
  */
 
+require_once __DIR__ . '/../includes/security_headers.php';
+
 // Security: Role-based access control
 require_once __DIR__ . '/../includes/session_admin_unified.php';
+require_once __DIR__ . '/../includes/request_method_helper.php';
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     http_response_code(403);
     header('Content-Type: application/json');
@@ -15,6 +18,8 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'a
 require_once __DIR__ . '/../db.php';
 
 header('Content-Type: application/json');
+
+requireRequestMethod('GET');
 
 try {
     // Get last 7 days of data in a single query

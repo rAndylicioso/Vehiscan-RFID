@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../includes/password_reset.php';
 require_once __DIR__ . '/../includes/security_headers.php';
+require_once __DIR__ . '/../includes/input_sanitizer.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     $appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
@@ -47,14 +48,14 @@ if ($token) {
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tokenValid) {
     $submittedToken = $_POST['csrf_token'] ?? '';
-    if (!hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken)) {
+    if (!InputSanitizer::validateCsrf((string)$submittedToken)) {
         $message = 'Invalid form submission. Please try again.';
         $messageType = 'error';
     } else {
         $newPassword = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        $minLen = defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8;
+        $minLen = defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12;
         if (strlen($newPassword) < $minLen) {
             $message = "Password must be at least $minLen characters long.";
             $messageType = 'error';
@@ -81,9 +82,9 @@ ob_end_flush();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Password — VehiScan</title>
-    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailwind.css'); ?>">
     <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailadmin-components.css'); ?>">
-    <link rel="stylesheet" href="../assets/css/system.css">
+    <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/system.css'); ?>">
     <script src="../assets/js/libs/sweetalert2.all.min.js"></script>
     <style>
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -122,7 +123,7 @@ ob_end_flush();
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                         </span>
                         <input id="password" name="password" type="password" class="ta-input" placeholder="Enter new password" required
-                            minlength="<?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8 ?>" autocomplete="new-password"
+                            minlength="<?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12 ?>" autocomplete="new-password"
                             style="background: var(--auth-input-bg); border-color: var(--auth-input-border); color: var(--auth-text); padding-left: 2.5rem;">
                     </div>
                     <div class="ta-password-meter mt-2" id="pwMeter" data-strength="">
@@ -140,12 +141,12 @@ ob_end_flush();
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </span>
                         <input id="confirm_password" name="confirm_password" type="password" class="ta-input" placeholder="Confirm new password" required
-                            minlength="<?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8 ?>" autocomplete="new-password"
+                            minlength="<?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12 ?>" autocomplete="new-password"
                             style="background: var(--auth-input-bg); border-color: var(--auth-input-border); color: var(--auth-text); padding-left: 2.5rem;">
                     </div>
                 </div>
 
-                <p class="text-xs" style="color: var(--auth-text-secondary);">Password must be at least <?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8 ?> characters.</p>
+                <p class="text-xs" style="color: var(--auth-text-secondary);">Password must be at least <?= defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12 ?> characters.</p>
 
                 <button type="submit" id="submitBtn"
                     class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm text-white transition-all hover:opacity-90"
@@ -172,6 +173,7 @@ ob_end_flush();
 
     <script>
     // Password strength meter
+    const minPasswordLength = <?= (int) (defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12) ?>;
     const pwInput = document.getElementById('password');
     if (pwInput) {
         pwInput.addEventListener('input', function() {
@@ -180,8 +182,8 @@ ob_end_flush();
             const label = document.getElementById('pwLabel');
             let strength = '';
             if (val.length === 0) { strength = ''; label.textContent = ''; }
-            else if (val.length < 8) { strength = 'weak'; label.textContent = 'Weak'; label.className = 'ta-password-label weak'; }
-            else if (val.length < 12 || !/[A-Z]/.test(val) || !/[0-9]/.test(val)) { strength = 'fair'; label.textContent = 'Fair'; label.className = 'ta-password-label fair'; }
+            else if (val.length < minPasswordLength) { strength = 'weak'; label.textContent = 'Weak'; label.className = 'ta-password-label weak'; }
+            else if (!/[A-Z]/.test(val) || !/[0-9]/.test(val)) { strength = 'fair'; label.textContent = 'Fair'; label.className = 'ta-password-label fair'; }
             else { strength = 'strong'; label.textContent = 'Strong'; label.className = 'ta-password-label strong'; }
             meter.dataset.strength = strength;
         });

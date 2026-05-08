@@ -3,8 +3,12 @@
  * Check for new access logs
  * Returns latest log ID and count of new logs
  */
+require_once __DIR__ . '/../../includes/security_headers.php';
 header('Content-Type: application/json');
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+
+requireRequestMethod('GET');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     http_response_code(403);

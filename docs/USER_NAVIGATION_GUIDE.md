@@ -243,7 +243,7 @@ VehiScan RFID is a comprehensive vehicle and visitor management system designed 
 4. Select role:
    - **Admin:** Full access to admin panel
    - **Guard:** Access to guard panel only
-   - **Owner:** Homeowner-level access
+   - **Homeowner:** Homeowner-level access
 5. Click "Create Employee"
 
 **Editing Employee Roles:**
@@ -689,7 +689,7 @@ Before going live, ensure:
 | Super Admin | `super_admin` | All features | Admins, Guards, Homeowners |
 | Admin | `admin` | Admin panel | Guards, Homeowners |
 | Guard | `guard` | Guard panel only | Nothing |
-| Homeowner | `owner` | Homeowner portal | Visitor passes |
+| Homeowner | `homeowner` | Homeowner portal | Visitor passes |
 
 ### Status Codes:
 

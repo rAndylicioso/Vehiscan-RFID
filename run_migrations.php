@@ -142,6 +142,24 @@ try {
     } else {
         echo "<span class='warning'><svg style='width:1em;height:1em;vertical-align:-0.15em;display:inline' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 9v4m0 4h.01M10.29 3.86l-8.6 14.86A1 1 0 0 0 2.56 20h18.88a1 1 0 0 0 .87-1.28l-8.6-14.86a1 1 0 0 0-1.72 0z'/></svg> users table not found!</span>\n";
     }
+
+    echo "\n<span class='info'>[7/5] Checking shared vehicle access table...</span>\n";
+    $pdo->exec("\
+        CREATE TABLE IF NOT EXISTS vehicle_shared_access (\
+            id INT AUTO_INCREMENT PRIMARY KEY,\
+            vehicle_id INT NOT NULL,\
+            homeowner_id INT NOT NULL,\
+            is_active TINYINT(1) NOT NULL DEFAULT 1,\
+            created_by INT NULL,\
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\
+            UNIQUE KEY uniq_vehicle_homeowner (vehicle_id, homeowner_id),\
+            INDEX idx_vehicle_active (vehicle_id, is_active),\
+            INDEX idx_homeowner_active (homeowner_id, is_active),\
+            CONSTRAINT fk_vehicle_shared_access_vehicle FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,\
+            CONSTRAINT fk_vehicle_shared_access_homeowner FOREIGN KEY (homeowner_id) REFERENCES homeowners(id) ON DELETE CASCADE\
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4\
+    ");
+    echo "<span class='success'><svg style='width:1em;height:1em;vertical-align:-0.15em;display:inline' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3'><path d='M20 6 9 17l-5-5'/></svg> vehicle_shared_access table ready</span>\n";
     
     echo "\n<span class='success'>========================================</span>\n";
     echo "<span class='success'><svg style='width:1em;height:1em;vertical-align:-0.15em;display:inline' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3'><path d='M20 6 9 17l-5-5'/></svg> DATABASE SETUP COMPLETE!</span>\n";

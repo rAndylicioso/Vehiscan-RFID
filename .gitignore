@@ -42,6 +42,9 @@ tmpclaude-*
 # Archive (dead code / diagnostic scripts - not for public repo)
 _archive/
 
+# Scratch / local diagnostic scripts
+scratch/
+
 # Backup Files
 *.backup
 *.bak
@@ -52,8 +55,7 @@ _archive/
 *.sql.gz
 *.sql.zip
 database_backups/
-admin/backups_db/*.sql
-admin/backups_db/archive/*.sql
+admin/backups_db/
 backups/*.json
 
 # Node Modules (if any)
@@ -73,3 +75,6 @@ system_diagnostic.php
 phpinfo.php
 test*.php
 debug*.php
+
+# Temporary PowerShell / shell scripts
+*.ps1

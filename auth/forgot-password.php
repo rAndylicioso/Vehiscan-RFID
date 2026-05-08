@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../includes/password_reset.php';
 require_once __DIR__ . '/../includes/security_headers.php';
+require_once __DIR__ . '/../includes/input_sanitizer.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     $appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
@@ -29,21 +30,23 @@ $messageType = ''; // 'success' or 'error'
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate CSRF token
     $submittedToken = $_POST['csrf_token'] ?? '';
-    if (!hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken)) {
+    if (!InputSanitizer::validateCsrf((string)$submittedToken)) {
         $message = 'Invalid form submission. Please try again.';
         $messageType = 'error';
     } else {
         $email = trim($_POST['email'] ?? '');
 
         // Rate limit (IP-based, on top of the token-based limit in the handler)
-        require_once __DIR__ . '/../includes/rate_limit.php';
-        $rateCheck = checkRateLimit('password_reset_page', 5, 15);
+        require_once __DIR__ . '/../includes/rate_limiter.php';
+        $rateLimiter = new RateLimiter($pdo);
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rateCheck = $rateLimiter->check($ip, 'password_reset_page', 5, 15);
 
         if (!$rateCheck['allowed']) {
             $message = 'Too many attempts. Please try again in a few minutes.';
             $messageType = 'error';
         } else {
-            logRateLimit('password_reset_page', false); // count every attempt
+            $rateLimiter->recordAttempt($ip, 'password_reset_page'); // count every attempt
 
             $handler = new PasswordResetHandler($pdo);
             $result = $handler->requestReset($email);
@@ -62,9 +65,9 @@ ob_end_flush();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password — VehiScan</title>
-    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailwind.css'); ?>">
     <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailadmin-components.css'); ?>">
-    <link rel="stylesheet" href="../assets/css/system.css">
+    <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/system.css'); ?>">
     <script src="../assets/js/libs/sweetalert2.all.min.js"></script>
     <style>
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }

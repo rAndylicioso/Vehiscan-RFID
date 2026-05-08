@@ -1,7 +1,40 @@
 <?php
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
-if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) exit('Unauthorized');
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+
+requireRequestMethod('GET');
+
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'], true)) {
+  http_response_code(403);
+  exit('Unauthorized');
+}
 require_once __DIR__ . '/../../db.php';
+
+$page = max(1, (int)($_GET['page'] ?? 1));
+$page = min($page, 10000);
+$search = trim((string)($_GET['search'] ?? ''));
+$allowedPerPage = [10, 25, 50, 100];
+$perPage = (int)($_GET['per_page'] ?? 25);
+if (!in_array($perPage, $allowedPerPage, true)) {
+  $perPage = 25;
+}
+$offset = ($page - 1) * $perPage;
+
+$scanLogsExistsStmt = $pdo->query("SHOW TABLES LIKE 'visitor_pass_scan_logs'");
+$hasScanLogs = (bool)$scanLogsExistsStmt->fetchColumn();
+
+$scanJoin = '';
+$usedWhenClause = '';
+if ($hasScanLogs) {
+  $scanJoin = "
+    LEFT JOIN (
+      SELECT visitor_pass_id, COUNT(*) AS scan_count
+      FROM visitor_pass_scan_logs
+      GROUP BY visitor_pass_id
+    ) vpsl ON vpsl.visitor_pass_id = vp.id
+  ";
+  $usedWhenClause = "WHEN vp.status IN ('active','approved') AND COALESCE(vpsl.scan_count, 0) > 0 THEN 'used'";
+}
 
 // Get all homeowners for dropdown
 $homeowners = $pdo->query("SELECT id, name FROM homeowners ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -10,23 +43,64 @@ $homeowners = $pdo->query("SELECT id, name FROM homeowners ORDER BY name ASC")->
 $pendingPasses = $pdo->query("
     SELECT vp.*, h.name as homeowner_name
     FROM visitor_passes vp
-    LEFT JOIN homeowners h ON vp.homeowner_id = h.id
-    WHERE vp.status = 'pending'
+    INNER JOIN homeowners h ON vp.homeowner_id = h.id
+    WHERE vp.status = 'pending' AND h.account_status = 'approved'
     ORDER BY vp.created_at DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// Get all visitor passes (with computed display_status for expired/upcoming)
-$passes = $pdo->query("
-    SELECT vp.*, h.name as homeowner_name,
-        CASE
-            WHEN vp.status IN ('active','approved') AND NOW() > vp.valid_until THEN 'expired'
-            WHEN vp.status IN ('active','approved') AND NOW() < vp.valid_from THEN 'upcoming'
-            ELSE vp.status
-        END AS display_status
-    FROM visitor_passes vp
-    LEFT JOIN homeowners h ON vp.homeowner_id = h.id
-    ORDER BY vp.created_at DESC
-")->fetchAll(PDO::FETCH_ASSOC);
+// Get paginated visitor passes (with computed display_status for expired/upcoming)
+$where = "";
+$params = [];
+if ($search !== '') {
+  $where = "WHERE vp.visitor_name LIKE :search_visitor_name OR vp.visitor_plate LIKE :search_visitor_plate OR h.name LIKE :search_homeowner OR vp.status LIKE :search_status";
+  $searchLike = "%{$search}%";
+  $params = [
+    ':search_visitor_name' => $searchLike,
+    ':search_visitor_plate' => $searchLike,
+    ':search_homeowner' => $searchLike,
+    ':search_status' => $searchLike,
+  ];
+}
+
+$countSql = "
+  SELECT COUNT(*)
+  FROM visitor_passes vp
+  LEFT JOIN homeowners h ON vp.homeowner_id = h.id
+  {$scanJoin}
+  {$where}
+";
+$countStmt = $pdo->prepare($countSql);
+$countStmt->execute($params);
+$totalRows = (int)$countStmt->fetchColumn();
+$totalPages = max(1, (int)ceil($totalRows / $perPage));
+if ($page > $totalPages) {
+  $page = $totalPages;
+  $offset = ($page - 1) * $perPage;
+}
+
+$sql = "
+  SELECT vp.*, h.name as homeowner_name,
+    CASE
+      {$usedWhenClause}
+      WHEN vp.status IN ('active','approved') AND NOW() > vp.valid_until THEN 'expired'
+      WHEN vp.status IN ('active','approved') AND NOW() < vp.valid_from THEN 'upcoming'
+      ELSE vp.status
+    END AS display_status
+  FROM visitor_passes vp
+  LEFT JOIN homeowners h ON vp.homeowner_id = h.id
+  {$scanJoin}
+  {$where}
+  ORDER BY vp.created_at DESC
+  LIMIT :limit OFFSET :offset
+";
+$stmt = $pdo->prepare($sql);
+foreach ($params as $key => $param) {
+  $stmt->bindValue($key, $param, PDO::PARAM_STR);
+}
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$passes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <style>
@@ -81,8 +155,14 @@ $passes = $pdo->query("
       </svg>
       <input type="text" id="visitorsSearchInput"
         class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
+        value="<?php echo htmlspecialchars($search); ?>"
         placeholder="Search visitor passes...">
     </div>
+    <select id="visitorsPerPage" class="ta-select" title="Rows per page">
+      <?php foreach ($allowedPerPage as $opt): ?>
+        <option value="<?php echo $opt; ?>" <?php echo $perPage === $opt ? 'selected' : ''; ?>><?php echo $opt; ?> / page</option>
+      <?php endforeach; ?>
+    </select>
     <span id="visitorsSearchCount" class="text-sm text-gray-600 font-medium whitespace-nowrap"></span>
   </div>
 </div>
@@ -126,8 +206,8 @@ $passes = $pdo->query("
                 <span class="text-slate-400 text-xs">No QR</span>
               <?php endif; ?>
             </td>
-            <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo date('M d, Y H:i', strtotime($p['valid_from'])); ?></td>
-            <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo date('M d, Y H:i', strtotime($p['valid_until'])); ?></td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo date('M d, Y h:i A', strtotime($p['valid_from'])); ?></td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-400"><?php echo date('M d, Y h:i A', strtotime($p['valid_until'])); ?></td>
             <td class="px-4 py-3">
               <?php
                 $displayStatus = $p['display_status'] ?? $p['status'];
@@ -141,17 +221,22 @@ $passes = $pdo->query("
             <td class="px-4 py-3 text-center">
               <?php if ($p['status'] === 'pending'): ?>
                 <div class="ta-action-dropdown">
-                  <button type="button" class="ta-action-btn">
+                  <button type="button" class="ta-action-btn" aria-haspopup="menu" aria-expanded="false">
                     Actions
                     <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                   </button>
-                  <div class="ta-action-menu">
-                    <button type="button" class="ta-action-menu-item green" onclick="window.approveVisitorPass(<?php echo $p['id']; ?>)">
+                  <div class="ta-action-menu" role="menu" aria-hidden="true">
+                    <button type="button" role="menuitem" class="ta-action-menu-item blue editPassBtn" data-id="<?php echo $p['id']; ?>">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4h2m5.5 0a2.121 2.121 0 013 3L9 19.5 4 21l1.5-5L18.5 4z"/></svg>
+                      Edit
+                    </button>
+                    <div class="ta-action-divider"></div>
+                    <button type="button" role="menuitem" class="ta-action-menu-item green" onclick="window.approveVisitorPass(<?php echo $p['id']; ?>)">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                       Approve
                     </button>
                     <div class="ta-action-divider"></div>
-                    <button type="button" class="ta-action-menu-item red" onclick="window.rejectVisitorPass(<?php echo $p['id']; ?>)">
+                    <button type="button" role="menuitem" class="ta-action-menu-item red" onclick="window.rejectVisitorPass(<?php echo $p['id']; ?>)">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                       Reject
                     </button>
@@ -159,12 +244,17 @@ $passes = $pdo->query("
                 </div>
               <?php elseif (($p['status'] === 'approved' || $p['status'] === 'active') && $displayStatus !== 'expired'): ?>
                 <div class="ta-action-dropdown">
-                  <button type="button" class="ta-action-btn">
+                  <button type="button" class="ta-action-btn" aria-haspopup="menu" aria-expanded="false">
                     Actions
                     <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                   </button>
-                  <div class="ta-action-menu">
-                    <button type="button" class="ta-action-menu-item red cancelPassBtn" data-id="<?php echo $p['id']; ?>">
+                  <div class="ta-action-menu" role="menu" aria-hidden="true">
+                    <button type="button" role="menuitem" class="ta-action-menu-item blue editPassBtn" data-id="<?php echo $p['id']; ?>">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4h2m5.5 0a2.121 2.121 0 013 3L9 19.5 4 21l1.5-5L18.5 4z"/></svg>
+                      Edit
+                    </button>
+                    <div class="ta-action-divider"></div>
+                    <button type="button" role="menuitem" class="ta-action-menu-item red cancelPassBtn" data-id="<?php echo $p['id']; ?>">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                       Cancel Pass
                     </button>
@@ -177,4 +267,25 @@ $passes = $pdo->query("
       <?php endif; ?>
     </tbody>
   </table>
+</div>
+
+<div class="flex flex-col gap-2 mt-4 md:flex-row md:items-center md:justify-between">
+  <p class="text-sm text-slate-600 dark:text-slate-400">
+    Showing <?php echo $totalRows > 0 ? ($offset + 1) : 0; ?>-<?php echo min($offset + $perPage, $totalRows); ?> of <?php echo $totalRows; ?> passes
+  </p>
+  <div class="flex items-center gap-1">
+    <?php if ($page > 1): ?>
+      <button type="button" class="visitors-page-btn ta-btn ta-btn-outline-secondary ta-btn-sm" data-page="<?php echo $page - 1; ?>">Previous</button>
+    <?php endif; ?>
+    <?php
+      $startPage = max(1, $page - 2);
+      $endPage = min($totalPages, $page + 2);
+      for ($i = $startPage; $i <= $endPage; $i++):
+    ?>
+      <button type="button" class="visitors-page-btn ta-btn ta-btn-sm <?php echo $i === $page ? 'ta-btn-primary' : 'ta-btn-outline-secondary'; ?>" data-page="<?php echo $i; ?>"><?php echo $i; ?></button>
+    <?php endfor; ?>
+    <?php if ($page < $totalPages): ?>
+      <button type="button" class="visitors-page-btn ta-btn ta-btn-outline-secondary ta-btn-sm" data-page="<?php echo $page + 1; ?>">Next</button>
+    <?php endif; ?>
+  </div>
 </div>

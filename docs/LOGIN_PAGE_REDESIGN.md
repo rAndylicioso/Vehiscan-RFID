@@ -76,7 +76,7 @@ The PHP authentication system remains fully functional:
    ```php
    super_admin / admin → ../admin/admin_panel.php
    guard → ../guard/pages/guard_side.php
-   owner → ../homeowners/homeowner_registration.php
+   homeowner → ../homeowners/portal.php
    ```
 
 4. **Error Handling**

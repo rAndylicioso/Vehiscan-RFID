@@ -13,7 +13,7 @@ $badges = [
   'admin' => 'bg-purple-100 text-purple-800',
   'guard' => 'bg-blue-100 text-blue-800',
   'super_admin' => 'bg-orange-100 text-orange-800',
-  'owner' => 'bg-emerald-100 text-emerald-800'
+  'homeowner' => 'bg-emerald-100 text-emerald-800'
 ];
 ```
 

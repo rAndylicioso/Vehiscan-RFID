@@ -148,7 +148,7 @@ if ($format === 'excel') {
     <div class="report-header">
         <h1><?= htmlspecialchars($title ?? '') ?></h1>
         <div class="report-meta">
-            Generated: <?= date('F d, Y H:i:s') ?><br>
+            Generated: <?= date('F d, Y g:i:s A') ?><br>
             By: <?= htmlspecialchars($_SESSION['username'] ?? '') ?><br>
             Total Records: <?= count($data) ?>
         </div>

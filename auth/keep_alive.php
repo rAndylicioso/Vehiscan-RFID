@@ -15,23 +15,14 @@ if ($hasAdminCookie) {
 } elseif (isset($_COOKIE['vehiscan_homeowner'])) {
     require_once __DIR__ . '/../includes/session_homeowner.php';
 } else {
-    // Fallback: try Referer as last resort
-    $origin = $_SERVER['HTTP_REFERER'] ?? '';
-    if (strpos($origin, '/guard/') !== false) {
-        require_once __DIR__ . '/../includes/session_guard.php';
-    } elseif (strpos($origin, '/admin/') !== false) {
-        require_once __DIR__ . '/../includes/session_admin_unified.php';
-    } elseif (strpos($origin, '/homeowners/') !== false) {
-        require_once __DIR__ . '/../includes/session_homeowner.php';
-    } else {
-        if (session_status() === PHP_SESSION_NONE) {
-            $appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
-            if (!is_dir($appSavePath)) { mkdir($appSavePath, 0700, true); }
-            ini_set('session.save_path', $appSavePath);
-            ini_set('session.gc_maxlifetime', 3600);
-            session_start();
-        }
-    }
+    // No recognized role cookie, fail closed.
+    header('Content-Type: application/json');
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'message' => 'No active session'
+    ]);
+    exit;
 }
 
 header('Content-Type: application/json');

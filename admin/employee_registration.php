@@ -41,18 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = InputSanitizer::post('username', 'string');
     $password = InputSanitizer::post('password', 'string');
     $confirm_password = InputSanitizer::post('confirm_password', 'string');
-    $role = InputSanitizer::post('role', 'string');
+    $roleRaw = InputSanitizer::post('role', 'string');
+    $role = $roleRaw === 'owner' ? 'homeowner' : $roleRaw;
     
     // Validation
     if (empty($username) || empty($password) || empty($role)) {
         $error = "All fields are required.";
     } elseif (strlen($username) < 3) {
         $error = "Username must be at least 3 characters.";
-    } elseif (strlen($password) < 8) {
-        $error = "Password must be at least 8 characters.";
+    } elseif (strlen($password) < 12) {
+        $error = "Password must be at least 12 characters.";
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
-    } elseif (!in_array($role, ['admin', 'guard', 'owner'])) {
+    } elseif (!in_array($role, ['admin', 'guard', 'homeowner'])) {
         $error = "Invalid role selected.";
     } else {
         // Check if username already exists
@@ -102,7 +103,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="../assets/css/system.css">
+    <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/system.css'); ?>">
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
@@ -148,7 +149,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                             <option value="">Select role...</option>
                             <option value="admin" <?= ($role ?? '') === 'admin' ? 'selected' : '' ?>>Admin</option>
                             <option value="guard" <?= ($role ?? '') === 'guard' ? 'selected' : '' ?>>Guard</option>
-                            <option value="owner" <?= ($role ?? '') === 'owner' ? 'selected' : '' ?>>Homeowner</option>
+                            <option value="homeowner" <?= in_array(($role ?? ''), ['homeowner', 'owner'], true) ? 'selected' : '' ?>>Homeowner</option>
                         </select>
                         <p class="text-sm text-gray-500 mt-2">
                             <strong>Admin:</strong> Full access to system settings<br>
@@ -162,7 +163,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                         <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
                         <input type="password" id="password" name="password" 
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               placeholder="Enter password (min 8 characters)" required>
+                               placeholder="Enter password (min 12 characters)" required minlength="12">
                     </div>
 
                     <!-- Confirm Password -->
@@ -170,7 +171,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                         <label for="confirm_password" class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
                         <input type="password" id="confirm_password" name="confirm_password" 
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               placeholder="Confirm password" required>
+                               placeholder="Confirm password" required minlength="12">
                     </div>
 
                     <!-- Submit Button -->

@@ -218,7 +218,7 @@ class TableEnhancer {
   }
   
   updateSearchCount() {
-    const countEl = document.querySelector('.search-count');
+    const countEl = this.table.parentNode?.querySelector('.search-count');
     if (countEl) {
       const total = this.allRows.length;
       const filtered = this.filteredRows.length;
@@ -452,6 +452,80 @@ class TableEnhancer {
     if (this.options.paginate) {
       this.renderPagination();
     }
+  }
+}
+
+function syncResponsiveTable(table) {
+  if (!table || table.dataset.responsiveCards === 'true') return;
+
+  const headerCells = Array.from(table.querySelectorAll('thead th'));
+  const bodyRows = Array.from(table.querySelectorAll('tbody tr'));
+
+  if (headerCells.length === 0 || bodyRows.length === 0) return;
+
+  table.dataset.responsiveCards = 'true';
+
+  bodyRows.forEach((row) => {
+    const cells = Array.from(row.querySelectorAll('td'));
+    if (cells.length === 0) return;
+
+    const firstCell = cells[0];
+    const isEmptyRow = cells.length === 1 && firstCell && Number(firstCell.getAttribute('colspan') || '0') >= headerCells.length;
+
+    if (isEmptyRow) {
+      row.dataset.taEmptyRow = 'true';
+      return;
+    }
+
+    row.dataset.taEmptyRow = 'false';
+
+    cells.forEach((cell, index) => {
+      const header = headerCells[index];
+      const label = header ? header.textContent.replace(/\s+/g, ' ').trim() : '';
+      if (label) {
+        cell.dataset.label = label;
+      }
+    });
+  });
+}
+
+function syncResponsiveTables(root = document) {
+  if (!root || typeof root.querySelectorAll !== 'function') return;
+  root.querySelectorAll('table').forEach((table) => {
+    if (table.querySelector('thead th') && table.querySelector('tbody tr')) {
+      syncResponsiveTable(table);
+    }
+  });
+}
+
+if (typeof window !== 'undefined') {
+  window.VehiScanTableEnhancer = {
+    syncResponsiveTable,
+    syncResponsiveTables
+  };
+
+  const scheduleSync = () => {
+    if (scheduleSync.pending) return;
+    scheduleSync.pending = window.requestAnimationFrame(() => {
+      scheduleSync.pending = null;
+      syncResponsiveTables(document);
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleSync, { once: true });
+  } else {
+    scheduleSync();
+  }
+
+  if (typeof MutationObserver !== 'undefined' && document.body) {
+    const observer = new MutationObserver(scheduleSync);
+    observer.observe(document.body, { childList: true, subtree: true });
+  } else if (typeof MutationObserver !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new MutationObserver(scheduleSync);
+      observer.observe(document.body, { childList: true, subtree: true });
+    }, { once: true });
   }
 }
 

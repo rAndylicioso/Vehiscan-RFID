@@ -7,6 +7,9 @@
 
 (function() {
     'use strict';
+
+    const DEBUG = !!(window.vehiscanConfig && window.vehiscanConfig.debug);
+    const debugLog = (...args) => { if (DEBUG) console.log(...args); };
     
     // Configuration
     const CONFIG = {
@@ -33,7 +36,7 @@
         // Start monitoring
         setInterval(checkSession, CONFIG.checkInterval);
         
-        console.log('[Session Monitor] Initialized - Session timeout: ' + (CONFIG.sessionLifetime / 60) + ' minutes');
+        debugLog('[Session Monitor] Initialized - Session timeout: ' + (CONFIG.sessionLifetime / 60) + ' minutes');
     }
     
     /**
@@ -191,7 +194,7 @@
             window.toast.success('Session extended');
         }
         
-        console.log('[Session Monitor] Session extended');
+        debugLog('[Session Monitor] Session extended');
     }
     
     /**

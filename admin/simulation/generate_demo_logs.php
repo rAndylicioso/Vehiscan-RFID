@@ -1,24 +1,28 @@
 <?php
+require_once __DIR__ . '/../../includes/security_headers.php';
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+require_once __DIR__ . '/../../includes/input_sanitizer.php';
 require_once __DIR__ . '/../../db.php';
+
+header('Content-Type: application/json');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin'])) {
     http_response_code(403);
-    exit('Unauthorized');
+    exit(json_encode(['success' => false, 'message' => 'Unauthorized']));
 }
 
 // CSRF validation
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    $csrf = $data['csrf_token'] ?? ($_POST['csrf_token'] ?? '');
-    if (empty($csrf) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
-        http_response_code(403);
-        header('Content-Type: application/json');
-        exit(json_encode(['success' => false, 'message' => 'Invalid CSRF token']));
-    }
+requireRequestMethod('POST');
+$data = json_decode(file_get_contents('php://input'), true);
+if (!is_array($data)) {
+    $data = [];
 }
-
-header('Content-Type: application/json');
+$csrf = $data['csrf_token'] ?? ($_POST['csrf_token'] ?? '');
+if (!InputSanitizer::validateCsrf((string)$csrf)) {
+    http_response_code(403);
+    exit(json_encode(['success' => false, 'message' => 'Invalid CSRF token']));
+}
 
 try {
     // Get random homeowners
@@ -26,6 +30,7 @@ try {
     $plates = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
     if (empty($plates)) {
+        http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'No homeowners found']);
         exit;
     }
@@ -48,5 +53,6 @@ try {
     ]);
 } catch (Exception $e) {
     error_log('Demo logs error: ' . $e->getMessage());
+    http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to generate logs']);
 }

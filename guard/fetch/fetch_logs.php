@@ -1,23 +1,111 @@
 <?php
 // Guard fetch logs with server-side pagination (matching admin panel architecture)
+require_once __DIR__ . '/../../includes/security_headers.php';
 require_once __DIR__ . '/../../includes/session_guard.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+require_once __DIR__ . '/../../includes/pagination_helper.php';
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guard') {
     http_response_code(403);
     header('Content-Type: application/json');
     exit(json_encode(['error' => 'Unauthorized access']));
 }
 
+requireRequestMethod('GET');
+
 require_once __DIR__ . '/../../db.php';
 
+$hasGuardLogFlagsTable = false;
+try {
+  $flagTableStmt = $pdo->query("SHOW TABLES LIKE 'guard_log_flags'");
+  $hasGuardLogFlagsTable = (bool)$flagTableStmt->fetchColumn();
+} catch (Throwable $e) {
+  $hasGuardLogFlagsTable = false;
+}
+
 // Pagination parameters
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$per_page = 20;
-$offset = ($page - 1) * $per_page;
+$allowedPerPage = [10, 20, 25, 50, 100];
+$pagination = normalizePagination($_GET['page'] ?? 1, $_GET['per_page'] ?? 10, $allowedPerPage, 10, 10000);
+$page = $pagination['page'];
+$per_page = $pagination['per_page'];
+$offset = $pagination['offset'];
+
+// Filter parameters
+$filter = strtolower(trim($_GET['filter'] ?? ''));
+$search = trim($_GET['search'] ?? '');
+$plateFilter = trim($_GET['plate'] ?? '');
+
+$where = [];
+$params = [];
+
+if ($filter === 'in') {
+  $where[] = "al.status = ?";
+  $params[] = 'IN';
+} elseif ($filter === 'out') {
+  $where[] = "al.status = ?";
+  $params[] = 'OUT';
+} elseif ($filter === 'today') {
+  $where[] = "DATE(al.created_at) = CURDATE()";
+}
+
+if ($plateFilter !== '') {
+  $normalizedPlate = strtoupper(preg_replace('/[^A-Z0-9]/i', '', $plateFilter));
+  if ($normalizedPlate !== '') {
+    $where[] = "REPLACE(REPLACE(UPPER(al.plate_number), '-', ''), ' ', '') = ?";
+    $params[] = $normalizedPlate;
+  }
+}
+
+if ($search !== '') {
+  $searchLike = '%' . $search . '%';
+  $where[] = "(
+    COALESCE(h.name, h2.name, '') LIKE ? OR
+    al.plate_number LIKE ? OR
+    COALESCE(v.vehicle_type, h.vehicle_type, '') LIKE ? OR
+    COALESCE(v.color, h.color, '') LIKE ? OR
+    al.status LIKE ? OR
+    COALESCE(al.rfid_uid, '') LIKE ? OR
+    COALESCE(vp.visitor_name, '') LIKE ?
+  )";
+  $params[] = $searchLike;
+  $params[] = $searchLike;
+  $params[] = $searchLike;
+  $params[] = $searchLike;
+  $params[] = $searchLike;
+  $params[] = $searchLike;
+  $params[] = $searchLike;
+}
+
+$flagJoinSql = $hasGuardLogFlagsTable
+  ? "LEFT JOIN guard_log_flags glf ON glf.log_id = al.log_id AND glf.status = 'open'"
+  : '';
+
+$flagSelectSql = $hasGuardLogFlagsTable
+  ? "glf.id AS flag_id, glf.reason AS flag_reason, glf.created_at AS flag_created_at,"
+  : "NULL AS flag_id, NULL AS flag_reason, NULL AS flag_created_at,";
+
+$fromSql = "
+  FROM recent_logs al
+  LEFT JOIN homeowners h ON al.plate_number = h.plate_number
+  LEFT JOIN vehicles v ON al.plate_number = v.plate_number AND v.is_active = 1
+  LEFT JOIN homeowners h2 ON v.homeowner_id = h2.id
+  LEFT JOIN visitor_passes vp ON al.plate_number = vp.visitor_plate AND vp.status = 'active'
+  {$flagJoinSql}
+";
+
+$whereSql = '';
+if (!empty($where)) {
+  $whereSql = ' WHERE ' . implode(' AND ', $where);
+}
 
 try {
-    // Get total count
-    $total = $pdo->query("SELECT COUNT(*) FROM recent_logs")->fetchColumn();
-    $total_pages = ceil($total / $per_page);
+    // Get filtered total count
+  $countStmt = $pdo->prepare("SELECT COUNT(*)" . $fromSql . $whereSql);
+  $countStmt->execute($params);
+  $total = (int)$countStmt->fetchColumn();
+  $clamped = clampPaginationPage($page, $total, $per_page);
+  $page = $clamped['page'];
+  $total_pages = $clamped['total_pages'];
+  $offset = $clamped['offset'];
     
     // Get paginated logs with homeowner info AND visitor pass info
     $stmt = $pdo->prepare("
@@ -28,13 +116,17 @@ try {
             al.status,
             al.created_at,
             DATE_FORMAT(al.created_at, '%h:%i %p') as time,
+          COALESCE(h.id, h2.id) AS homeowner_id,
             COALESCE(h.name, h2.name) AS name,
+            COALESCE(h.owner_img, h2.owner_img) AS owner_img,
+            COALESCE(h.car_img, h2.car_img) AS car_img,
             COALESCE(v.vehicle_type, h.vehicle_type) AS vehicle_type,
             COALESCE(v.color, h.color) AS color,
             vp.id AS visitor_pass_id,
             vp.visitor_name,
             vp.purpose AS visitor_purpose,
             vp.status AS visitor_status,
+            {$flagSelectSql}
             CASE
                 WHEN al.status = 'IN' THEN (
                     SELECT next_out.created_at
@@ -56,18 +148,17 @@ try {
                 )
                 ELSE NULL
             END AS paired_at
-        FROM recent_logs al
-        LEFT JOIN homeowners h ON al.plate_number = h.plate_number
-        LEFT JOIN vehicles v ON al.plate_number = v.plate_number AND v.is_active = 1
-        LEFT JOIN homeowners h2 ON v.homeowner_id = h2.id
-        LEFT JOIN visitor_passes vp ON al.plate_number = vp.visitor_plate 
-            AND vp.status = 'active'
+          " . $fromSql . $whereSql . "
         ORDER BY al.created_at DESC, al.log_id DESC
-        LIMIT :limit OFFSET :offset
+          LIMIT ? OFFSET ?
     ");
-    
-    $stmt->bindValue(':limit', $per_page, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+        $paramIndex = 1;
+        foreach ($params as $paramValue) {
+          $stmt->bindValue($paramIndex++, $paramValue);
+        }
+        $stmt->bindValue($paramIndex++, $per_page, PDO::PARAM_INT);
+        $stmt->bindValue($paramIndex++, $offset, PDO::PARAM_INT);
     $stmt->execute();
     $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -75,12 +166,41 @@ try {
     error_log("[GUARD_FETCH_LOGS] Error: " . $e->getMessage());
     $logs = [];
     $total = 0;
-    $total_pages = 0;
+    $total_pages = 1;
+    $page = 1;
+    $offset = 0;
+}
+
+// Calculate Live Stats for Today
+$stats = [
+    'entries_today' => 0,
+    'exits_today' => 0,
+    'active_visitors' => 0
+];
+
+try {
+    $statsStmt = $pdo->query("SELECT 
+        SUM(CASE WHEN status = 'IN' AND DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as entries,
+        SUM(CASE WHEN status = 'OUT' AND DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as exits
+        FROM recent_logs");
+    $res = $statsStmt->fetch(PDO::FETCH_ASSOC);
+    $stats['entries_today'] = (int)($res['entries'] ?? 0);
+    $stats['exits_today'] = (int)($res['exits'] ?? 0);
+
+    $visitorStmt = $pdo->query("SELECT COUNT(*) FROM visitor_passes WHERE status = 'active' AND CURDATE() BETWEEN DATE(start_date) AND DATE(end_date)");
+    $stats['active_visitors'] = (int)$visitorStmt->fetchColumn();
+} catch (Exception $e) {
+    error_log("[GUARD_STATS] Error: " . $e->getMessage());
 }
 
 // Get last seen log ID from localStorage for "new" badge detection
 $lastSeenLogId = 0; // Client will handle this via JavaScript
 ?>
+
+<!-- Live Stats Data (Consumed by JS) -->
+<script id="guardLiveStatsData" type="application/json">
+<?php echo json_encode($stats); ?>
+</script>
 
 <!-- Logs Counter -->
 <div class="logs-counter-container">
@@ -111,9 +231,6 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
       <thead>
         <tr>
           <th>Homeowner</th>
-          <th>Plate Number</th>
-          <th>Vehicle</th>
-          <th>Color</th>
           <th>Status</th>
           <th>Time</th>
           <th>Duration</th>
@@ -128,7 +245,6 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
         $statusText = $log['status'];
         
         $userName = $log['name'] ?? 'Unknown';
-        $initial = strtoupper(substr($userName, 0, 1));
         
         // Calculate duration based on IN/OUT pairing
         $durationText = '-';
@@ -178,18 +294,24 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
             }
         }
       ?>
-      <tr class="log-row<?php echo !empty($log['visitor_pass_id']) ? ' has-visitor-pass' : ''; ?>" 
+        <tr class="log-row<?php echo !empty($log['visitor_pass_id']) ? ' has-visitor-pass' : ''; ?><?php echo !empty($log['flag_id']) ? ' log-row-flagged' : ''; ?>" 
           data-log-id="<?php echo $log['log_id']; ?>" 
           data-log-date="<?php echo $log['created_at']; ?>"
+          data-homeowner-id="<?php echo (int)($log['homeowner_id'] ?? 0); ?>"
           data-plate="<?php echo htmlspecialchars($log['plate_number'] ?? ''); ?>"
           data-name="<?php echo htmlspecialchars($userName ?? ''); ?>"
+          data-vehicle="<?php echo htmlspecialchars($log['vehicle_type'] ?? 'N/A'); ?>"
+          data-color="<?php echo htmlspecialchars($log['color'] ?? 'N/A'); ?>"
+          data-time="<?php echo htmlspecialchars($log['time'] ?? '-'); ?>"
+          data-duration="<?php echo htmlspecialchars($durationText ?? '-'); ?>"
+          data-owner-img="<?php echo htmlspecialchars($log['owner_img'] ?? ''); ?>"
+          data-car-img="<?php echo htmlspecialchars($log['car_img'] ?? ''); ?>"
           data-status="<?php echo $log['status']; ?>"
+          data-flag-id="<?php echo (int)($log['flag_id'] ?? 0); ?>"
+          data-flag-reason="<?php echo htmlspecialchars($log['flag_reason'] ?? ''); ?>"
           data-visitor="<?php echo !empty($log['visitor_pass_id']) ? '1' : '0'; ?>">
         <td>
           <div class="user-cell">
-            <div class="user-avatar">
-              <?php echo $initial; ?>
-            </div>
             <div class="user-info">
               <div class="user-name">
                 <?php echo htmlspecialchars($userName ?? ''); ?>
@@ -203,9 +325,6 @@ $lastSeenLogId = 0; // Client will handle this via JavaScript
             </div>
           </div>
         </td>
-        <td><span class="plate-number"><?php echo htmlspecialchars($log['plate_number'] ?? 'N/A'); ?></span></td>
-        <td><?php echo htmlspecialchars($log['vehicle_type'] ?? 'N/A'); ?></td>
-        <td><?php echo htmlspecialchars($log['color'] ?? 'N/A'); ?></td>
         <td>
           <span class="status-badge <?php echo $statusClass; ?>">
             <span class="status-icon"><?php echo $statusIcon; ?></span>

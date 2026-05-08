@@ -1,6 +1,10 @@
 <?php
 // Security: Role-based access control
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+
+requireRequestMethod('GET');
+
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     http_response_code(403);
     header('Content-Type: application/json');
@@ -162,6 +166,9 @@ try {
                             }
                         ?></span>
                     </p>
+                    <!-- Hidden input for USB HID RFID scanners -->
+                    <input type="hidden" id="csrfTokenInput" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>" />
+                    <input type="text" id="rfidHidInput" autocomplete="off" style="position:absolute;left:-9999px;top:-9999px;" tabindex="-1" />
                 </div>
             </div>
             <button id="cancelBindingBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
@@ -336,3 +343,7 @@ try {
     animation: rfidPulse 2s ease-in-out infinite;
 }
 </style>
+<?php
+// ... end of file remains as is but without the trailing script block.
+?>
+

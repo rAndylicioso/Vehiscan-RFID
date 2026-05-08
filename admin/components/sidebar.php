@@ -32,7 +32,7 @@
   <div class="flex-1 overflow-y-auto py-2">
     <div class="mb-4 px-3">
       <div id="main-label" class="sidebar-text mb-2 px-2 text-xs font-semibold text-gray-600 dark:text-gray-400">
-        MAIN MENU
+        Main menu
       </div>
       <div class="space-y-1">
         <a href="../admin_panel.php" class="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
@@ -103,8 +103,12 @@
         <?php echo strtoupper(substr($_SESSION['username'] ?? 'A', 0, 1)); ?>
       </div>
       <div class="sidebar-text flex-1 min-w-0">
+        <?php
+          $sessionRole = (string)($_SESSION['role'] ?? 'Role');
+          $roleDisplay = $sessionRole === 'owner' ? 'homeowner' : $sessionRole;
+        ?>
         <div class="text-sm font-medium text-gray-900 dark:text-white truncate"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></div>
-        <div class="text-xs text-gray-600 dark:text-gray-400 truncate"><?php echo ucfirst(htmlspecialchars($_SESSION['role'] ?? 'Role')); ?></div>
+        <div class="text-xs text-gray-600 dark:text-gray-400 truncate"><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $roleDisplay))); ?></div>
       </div>
       <a href="../../auth/logout.php" class="sidebar-text flex-shrink-0">
         <svg class="h-5 w-5 text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

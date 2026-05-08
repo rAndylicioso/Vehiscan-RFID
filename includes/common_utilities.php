@@ -55,6 +55,26 @@ function formatFileSize($bytes) {
 }
 
 /**
+ * Format a datetime value for display
+ * @param string|null $value
+ * @param bool $includeTime
+ * @return string
+ */
+function formatDisplayDateTime($value, $includeTime = true) {
+    if (empty($value)) {
+        return '-';
+    }
+
+    try {
+        $dateTime = new DateTime((string)$value);
+    } catch (Exception $e) {
+        return (string)$value;
+    }
+
+    return $includeTime ? $dateTime->format('M j, Y g:i A') : $dateTime->format('M j, Y');
+}
+
+/**
  * Check if user is logged in
  * @return bool
  */

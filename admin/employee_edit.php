@@ -55,7 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Invalid security token. Please refresh and try again.';
     } else {
     // Sanitize inputs
-    $role = InputSanitizer::post('role', 'string');
+    $roleRaw = InputSanitizer::post('role', 'string');
+    $role = $roleRaw === 'owner' ? 'homeowner' : $roleRaw;
     $new_password = InputSanitizer::post('new_password', 'string');
     $reset_password = isset($_POST['reset_password']);
     
@@ -67,10 +68,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation
     if (empty($role)) {
         $error = "Role is required.";
-    } elseif (!in_array($role, ['admin', 'guard', 'owner'])) {
+    } elseif (!in_array($role, ['admin', 'guard', 'homeowner'])) {
         $error = "Invalid role selected.";
-    } elseif ($reset_password && strlen($new_password) < 8) {
-        $error = "Password must be at least 8 characters.";
+    } elseif ($reset_password && strlen($new_password) < 12) {
+        $error = "Password must be at least 12 characters.";
     } else {
         // Update employee
         if ($reset_password && $new_password) {
@@ -122,7 +123,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="../assets/css/system.css">
+    <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/system.css'); ?>">
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
@@ -168,7 +169,7 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                         <select id="role" name="role" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                             <option value="admin" <?= $employee['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
                             <option value="guard" <?= $employee['role'] === 'guard' ? 'selected' : '' ?>>Guard</option>
-                            <option value="owner" <?= $employee['role'] === 'owner' ? 'selected' : '' ?>>Homeowner</option>
+                            <option value="homeowner" <?= in_array(($employee['role'] ?? ''), ['homeowner', 'owner'], true) ? 'selected' : '' ?>>Homeowner</option>
                         </select>
                     </div>
 
@@ -185,7 +186,8 @@ $isSuperAdmin = ($_SESSION['role'] === 'super_admin');
                             <label for="new_password" class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
                             <input type="password" id="new_password" name="new_password" 
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                   placeholder="Enter new password (min 8 characters)">
+                                placeholder="Enter new password (min 12 characters)"
+                                minlength="12">
                         </div>
                     </div>
 

@@ -15,10 +15,18 @@
  */
 
 header('Content-Type: application/json');
+date_default_timezone_set('Asia/Manila');
 
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../../includes/security_headers.php';
 require_once __DIR__ . '/../../includes/input_sanitizer.php';
+
+$method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if (!in_array($method, ['GET', 'POST'], true)) {
+    http_response_code(405);
+    header('Allow: GET, POST');
+    exit(json_encode(['success' => false, 'message' => 'Method not allowed']));
+}
 
 // Multi-role session: use guard session ONLY when no admin/superadmin cookie exists.
 // When admin cookies are present, always use admin_unified so the CSRF token matches.
@@ -95,29 +103,33 @@ function handleInitiate() {
     }
 
     try {
-        // Verify vehicle exists
+        $pdo->beginTransaction();
+
+        // Verify vehicle exists and lock it
         $stmt = $pdo->prepare("
             SELECT v.id, v.plate_number, v.rfid_uid, v.vehicle_type, h.name 
             FROM vehicles v 
             LEFT JOIN homeowners h ON v.homeowner_id = h.id 
-            WHERE v.id = ?
+            WHERE v.id = ? FOR UPDATE
         ");
         $stmt->execute([$vehicleId]);
         $vehicle = $stmt->fetch();
 
         if (!$vehicle) {
+            $pdo->rollBack();
             exit(json_encode(['success' => false, 'message' => 'Vehicle not found']));
         }
 
         // Check if vehicle already has an RFID bound
         if (!empty($vehicle['rfid_uid'])) {
+            $pdo->rollBack();
             exit(json_encode([
                 'success' => false,
                 'message' => "Vehicle {$vehicle['plate_number']} already has RFID tag bound ({$vehicle['rfid_uid']}). Unbind first."
             ]));
         }
 
-        // Cancel any existing pending sessions for this vehicle
+        // Cancel any existing pending sessions for this vehicle (locked by default in UPDATE)
         $pdo->prepare("
             UPDATE rfid_binding_sessions 
             SET status = 'cancelled', completed_at = NOW() 
@@ -147,6 +159,8 @@ function handleInitiate() {
             $_SESSION['role'],
             $expiresAt
         ]);
+
+        $pdo->commit();
 
         $sessionId = $pdo->lastInsertId();
 
@@ -190,6 +204,8 @@ function handleCancel() {
     }
 
     try {
+        $pdo->beginTransaction();
+
         $stmt = $pdo->prepare("
             UPDATE rfid_binding_sessions 
             SET status = 'cancelled', completed_at = NOW() 
@@ -198,14 +214,18 @@ function handleCancel() {
         $stmt->execute([$sessionId]);
 
         if ($stmt->rowCount() === 0) {
+            $pdo->rollBack();
             exit(json_encode(['success' => false, 'message' => 'No active session found to cancel']));
         }
 
         logAudit('RFID binding cancelled', 'rfid_binding_sessions', $sessionId, 'Binding session cancelled by user');
 
+        $pdo->commit();
+
         exit(json_encode(['success' => true, 'message' => 'Binding session cancelled']));
 
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
         error_log('[RFID_BIND] Cancel error: ' . $e->getMessage());
         http_response_code(500);
         exit(json_encode(['success' => false, 'message' => 'Database error']));
@@ -227,16 +247,20 @@ function handleUnbind() {
     }
 
     try {
-        // Get current binding info
-        $stmt = $pdo->prepare("SELECT id, plate_number, rfid_uid FROM vehicles WHERE id = ?");
+        $pdo->beginTransaction();
+
+        // Get current binding info and lock it
+        $stmt = $pdo->prepare("SELECT id, plate_number, rfid_uid FROM vehicles WHERE id = ? FOR UPDATE");
         $stmt->execute([$vehicleId]);
         $vehicle = $stmt->fetch();
 
         if (!$vehicle) {
+            $pdo->rollBack();
             exit(json_encode(['success' => false, 'message' => 'Vehicle not found']));
         }
 
         if (empty($vehicle['rfid_uid'])) {
+            $pdo->rollBack();
             exit(json_encode(['success' => false, 'message' => 'Vehicle has no RFID tag bound']));
         }
 
@@ -249,6 +273,8 @@ function handleUnbind() {
         logAudit('RFID unbound', 'vehicles', $vehicleId, 
             "Removed RFID {$oldUid} from {$vehicle['plate_number']}");
 
+        $pdo->commit();
+
         exit(json_encode([
             'success' => true,
             'message' => "RFID tag removed from {$vehicle['plate_number']}",
@@ -260,6 +286,7 @@ function handleUnbind() {
         ]));
 
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
         error_log('[RFID_BIND] Unbind error: ' . $e->getMessage());
         http_response_code(500);
         exit(json_encode(['success' => false, 'message' => 'Database error']));
@@ -339,6 +366,7 @@ function handleStatus() {
         $session = $stmt->fetch();
 
         if (!$session) {
+            http_response_code(404);
             exit(json_encode(['success' => false, 'message' => 'Session not found']));
         }
 
@@ -369,6 +397,7 @@ function handleStatus() {
 
     } catch (PDOException $e) {
         error_log('[RFID_BIND] Status error: ' . $e->getMessage());
+        http_response_code(500);
         exit(json_encode(['success' => false, 'message' => 'Database error']));
     }
 }

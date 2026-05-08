@@ -79,6 +79,12 @@ define('DB_CHARSET', config('DB_CHARSET', 'utf8mb4'));
 // Application settings
 define('APP_ENV', config('APP_ENV', 'development'));
 define('APP_DEBUG', config('APP_DEBUG', 'false') === 'true');
+define('APP_TIMEZONE', config('APP_TIMEZONE', 'Asia/Manila'));
+
+// Keep timezone consistent across public and authenticated endpoints.
+if (function_exists('date_default_timezone_set')) {
+    @date_default_timezone_set(APP_TIMEZONE);
+}
 
 // Enforce safe display_errors in production
 if (APP_ENV === 'production') {
@@ -144,6 +150,7 @@ function getQrCodeUrl()
 
         // Try to get WiFi IP from config
         $wifiIp = config('WIFI_IP', null);
+        $port = '';
 
         if (!$wifiIp) {
             // Auto-detect: prioritize actual IP over localhost
@@ -151,15 +158,29 @@ function getQrCodeUrl()
 
             if (preg_match('/^\d+\.\d+\.\d+\.\d+/', $httpHost) && !preg_match('/^127\./', $httpHost)) {
                 // HTTP_HOST is a valid LAN IP (not 127.x.x.x)
-                $wifiIp = explode(':', $httpHost)[0]; // Remove port if present
+                // Extract IP and port (if present)
+                $parts = explode(':', $httpHost);
+                $wifiIp = $parts[0];
+                if (isset($parts[1]) && $parts[1] !== '80') {
+                    $port = ':' . $parts[1]; // Preserve non-standard port
+                }
             } elseif ($serverAddr && !preg_match('/^127\./', $serverAddr) && !in_array($serverAddr, $loopbackHosts, true)) {
                 // SERVER_ADDR is available and not loopback
                 $wifiIp = $serverAddr;
+                // Try to get port from SERVER_PORT if not 80
+                $serverPort = $_SERVER['SERVER_PORT'] ?? '80';
+                if ($serverPort !== '80') {
+                    $port = ':' . $serverPort;
+                }
             } else {
                 // Resolve actual LAN IP via hostname (same as registration QR)
                 $lanIp = @gethostbyname(gethostname());
                 if ($lanIp && !in_array($lanIp, $loopbackHosts, true) && filter_var($lanIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                     $wifiIp = $lanIp;
+                    $serverPort = $_SERVER['SERVER_PORT'] ?? '80';
+                    if ($serverPort !== '80') {
+                        $port = ':' . $serverPort;
+                    }
                 } else {
                     // Last resort fallback
                     $wifiIp = $_SERVER['SERVER_ADDR'] ?? $_SERVER['LOCAL_ADDR'] ?? 'localhost';
@@ -172,7 +193,7 @@ function getQrCodeUrl()
         $basePath = preg_replace('#/(admin|guard|visitor|homeowners|auth|api|pages|utilities|includes).*$#', '', $basePath);
         $basePath = rtrim($basePath, '/');
 
-        return "$protocol://$wifiIp$basePath";
+        return "$protocol://$wifiIp$port$basePath";
     }
 
     // Otherwise, use the regular APP_URL (for hosting/internet access)

@@ -1,25 +1,31 @@
 <?php
+require_once __DIR__ . '/session_helpers.php';
 // Unified session handler for both admin and super_admin
 // Resolves the correct session without cross-role collision
 
-if (session_status() === PHP_SESSION_NONE) {
-    // Isolate sessions from other XAMPP apps to prevent cross-app GC.
-    // Other apps (phpMyAdmin, etc.) sharing the default C:\xampp\tmp save_path
-    // may trigger GC with their own (lower) gc_maxlifetime, deleting our session
-    // files prematurely. With use_strict_mode=1 the lost file causes PHP to issue
-    // a brand-new ID → empty session → CSRF mismatch.
-    $appSavePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'vehiscan_sessions';
-    if (!is_dir($appSavePath)) {
-        mkdir($appSavePath, 0700, true);
-    }
-    ini_set('session.save_path', $appSavePath);
+// Removed aggressive cookie cleanup to allow simultaneous multi-role sessions (Guard, Admin, Homeowner).
+// Each role now has its own unique session cookie name.
+/* 
+$isAjaxRequest = (!empty($_SERVER['HTTP_X_REQUEST_WITH']) && strtolower($_SERVER['HTTP_X_REQUEST_WITH']) == 'xmlhttprequest') || 
+                 (isset($_GET['ajax']) && $_GET['ajax'] == '1') ||
+                 (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false);
 
+if (!$isAjaxRequest) {
+    $allSessionNames = ['vehiscan_superadmin', 'vehiscan_admin', 'vehiscan_guard', 'vehiscan_homeowner', 'vehiscan_session'];
+    foreach ($allSessionNames as $sName) {
+        if (($sName === 'vehiscan_admin' || $sName === 'vehiscan_superadmin')) continue;
+        if (isset($_COOKIE[$sName])) {
+            setcookie($sName, '', time() - 3600, '/');
+            unset($_COOKIE[$sName]);
+        }
+    }
+}
+*/
+
+if (session_status() === PHP_SESSION_NONE) {
+    initializeVehiscanSessionPath();
     // Secure session settings
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.cookie_secure', 0); // Allow HTTP for localhost
-    ini_set('session.use_strict_mode', 1); // Reject uninitialized session IDs
     ini_set('session.gc_maxlifetime', 3600); // 1 hour — must exceed the 30-min timeout
 
     $sessionStarted = false;
@@ -146,17 +152,13 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
     session_destroy();
 
     // Check if it's an AJAX request
-    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') ||
-              (isset($_GET['ajax']) && $_GET['ajax'] == '1');
+    $isAjax = vehiscanIsAjaxRequest();
 
     if ($isAjax) {
-        http_response_code(403);
-        header('Content-Type: application/json');
-        exit(json_encode([
+        vehiscanJsonExit(403, [
             'error' => 'Session expired',
             'redirect' => '/Vehiscan-RFID/auth/login.php?timeout=1'
-        ]));
+        ]);
     }
 
     header("Location: /Vehiscan-RFID/auth/login.php?timeout=1");
@@ -166,8 +168,26 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
 // Update last activity timestamp
 $_SESSION['last_activity'] = time();
 
+if (!in_array(($_SESSION['role'] ?? ''), ['admin', 'super_admin'], true)) {
+    session_unset();
+    setcookie(session_name(), '', time() - 3600, '/');
+    session_destroy();
+
+    $isAjax = vehiscanIsAjaxRequest();
+
+    if ($isAjax) {
+        vehiscanJsonExit(403, [
+            'error' => 'Unauthorized',
+            'redirect' => '/Vehiscan-RFID/auth/login.php'
+        ]);
+    }
+
+    header('Location: /Vehiscan-RFID/auth/login.php');
+    exit;
+}
+
 if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = vehiscanGenerateCsrfToken();
 }
 
 // Expose current CSRF token via response header so JS can auto-refresh

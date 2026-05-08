@@ -162,7 +162,7 @@ class PasswordResetHandler
         }
 
         // Validate password strength
-        $minLen = defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8;
+        $minLen = defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 12;
         if (strlen($newPassword) < $minLen) {
             return ['success' => false, 'message' => "Password must be at least $minLen characters long."];
         }

@@ -1,9 +1,9 @@
-<?php
-// admin/simulation/simulate_rfid_scan.php
-// Set JSON header FIRST before anything else
 header('Content-Type: application/json');
+date_default_timezone_set('Asia/Manila');
 
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+require_once __DIR__ . '/../../includes/input_sanitizer.php';
 
 // Security: Only admins and super_admins can simulate scans
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin'])) {
@@ -14,14 +14,12 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_a
 
 require_once __DIR__ . '/../../db.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    exit(json_encode(['success' => false, 'message' => 'Invalid request method']));
-}
+requireRequestMethod('POST');
 
 // Validate CSRF token
 $csrf = $_SESSION['csrf_token'] ?? '';
 $posted = $_POST['csrf_token'] ?? '';
-if (!hash_equals($csrf, (string)$posted)) {
+if (!InputSanitizer::validateCsrf((string)$posted)) {
     error_log('[RFID_SIM] Invalid CSRF token');
     http_response_code(403);
     exit(json_encode(['success' => false, 'message' => 'Invalid security token']));

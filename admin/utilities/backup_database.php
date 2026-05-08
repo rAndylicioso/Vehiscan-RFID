@@ -6,7 +6,11 @@ while (ob_get_level()) {
 ob_start();
 
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+require_once __DIR__ . '/../../includes/input_sanitizer.php';
 require_once __DIR__ . '/../../db.php';
+
+requireRequestMethod('POST');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     ob_end_clean();
@@ -16,10 +20,13 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'a
     exit();
 }
 
-// CSRF validation
+// CSRF validation (accept only JSON body or POST body, never query string)
 $inputData = json_decode(file_get_contents('php://input'), true);
-$csrf = $inputData['csrf_token'] ?? ($_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? ''));
-if (empty($csrf) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrf)) {
+if (!is_array($inputData)) {
+    $inputData = [];
+}
+$csrf = $inputData['csrf_token'] ?? ($_POST['csrf_token'] ?? '');
+if (!InputSanitizer::validateCsrf((string)$csrf)) {
     ob_end_clean();
     header('Content-Type: application/json');
     http_response_code(403);
@@ -40,6 +47,20 @@ try {
         if (!mkdir($backup_dir, 0755, true)) {
             throw new Exception('Failed to create backup directory');
         }
+    }
+
+    // Ensure backup directory is protected from direct web access.
+    $htaccessPath = $backup_dir . '/.htaccess';
+    if (!file_exists($htaccessPath)) {
+        $denyAllRules = "# Deny direct web access to DB backups\n"
+            . "<IfModule mod_authz_core.c>\n"
+            . "    Require all denied\n"
+            . "</IfModule>\n"
+            . "<IfModule !mod_authz_core.c>\n"
+            . "    Order deny,allow\n"
+            . "    Deny from all\n"
+            . "</IfModule>\n";
+        @file_put_contents($htaccessPath, $denyAllRules);
     }
 
     $filename = 'vehiscan_backup_' . date('Y-m-d_His') . '.sql';

@@ -12,30 +12,14 @@
 
 header('Content-Type: application/json');
 
-// CORS: only allow same-origin and configured trusted origins
-$allowedOrigins = ['http://localhost', 'https://localhost', 'http://127.0.0.1'];
-$wifiIp = getenv('WIFI_IP');
-if ($wifiIp) {
-    $allowedOrigins[] = 'http://' . $wifiIp;
-    $allowedOrigins[] = 'https://' . $wifiIp;
-}
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowedOrigins, true)) {
-    header('Access-Control-Allow-Origin: ' . $origin);
-}
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-API-Key, X-Reader-ID');
-
-// Handle CORS preflight
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
+require_once __DIR__ . '/../../includes/cors_helper.php';
+applyTrustedCors(['POST', 'OPTIONS'], ['Content-Type', 'X-API-Key', 'X-Reader-ID']);
+if (handleCorsPreflight()) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    exit(json_encode(['success' => false, 'message' => 'Method not allowed']));
-}
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+requireRequestMethod('POST');
 
 require_once __DIR__ . '/../../db.php';
 

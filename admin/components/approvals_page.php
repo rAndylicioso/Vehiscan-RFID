@@ -9,6 +9,63 @@ require_once __DIR__ . '/../../db.php';
         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Review and approve pending account registrations</p>
     </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="ta-stat-card">
+            <div class="ta-stat-icon blue">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+            </div>
+            <div class="ta-stat-content">
+                <div class="ta-stat-title">Pending Accounts</div>
+                <div class="ta-stat-value" id="pendingAccountsCount">0</div>
+            </div>
+        </div>
+        <div class="ta-stat-card">
+            <div class="ta-stat-icon purple">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+            </div>
+            <div class="ta-stat-content">
+                <div class="ta-stat-title">Profile Requests</div>
+                <div class="ta-stat-value" id="pendingProfileCount">0</div>
+                <button type="button" id="openProfileRequestsBtn" class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer">View Details</button>
+            </div>
+        </div>
+        <div class="ta-stat-card">
+            <div class="ta-stat-icon amber">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ta-stat-content">
+                <div class="ta-stat-title">Total Actions</div>
+                <div class="ta-stat-value" id="pendingTotalCount">0</div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bulk Actions Bar -->
+    <div id="bulkActionsBar" class="hidden mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+        <div class="flex items-center gap-3">
+            <span class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                <span id="selectedCount">0</span> accounts selected
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="window.processBulkAction('approve')" class="ta-btn ta-btn-success ta-btn-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Approve Selected
+            </button>
+            <button type="button" onclick="window.processBulkAction('reject')" class="ta-btn ta-btn-red ta-btn-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                Reject Selected
+            </button>
+        </div>
+    </div>
+
     <!-- Pending Accounts Table -->
     <div class="ta-table-wrapper">
         <div class="px-6 py-4 flex items-center justify-between flex-wrap gap-3" style="border-bottom: 1px solid var(--ta-card-border);">
@@ -30,6 +87,9 @@ require_once __DIR__ . '/../../db.php';
             <table id="approvalsTable" class="ta-table">
                 <thead>
                     <tr>
+                        <th class="w-10">
+                            <input type="checkbox" id="selectAllApprovals" class="rounded border-gray-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500">
+                        </th>
                         <th>Name</th>
                         <th>Username</th>
                         <th>Email</th>
@@ -46,179 +106,7 @@ require_once __DIR__ . '/../../db.php';
     </div>
 </div>
 
-<script>
-(function() {
-  'use strict';
-  
-  console.log('[Approvals] Initializing approval controls...');
-
-// Toggle dropdown visibility with smart positioning (matches sign-out dropdown behavior)
-// Now handled by shared TailAdmin dropdown CSS/JS — .ta-action-dropdown
-
-// Close dropdowns when clicking outside — handled by shared handler in admin_panel.php
-
-// Load pending accounts
-function loadPendingAccounts() {
-    const tbody = document.getElementById('approvalsBody');
-    
-    // Show skeleton loader
-    tbody.innerHTML = `
-        <tr><td colspan="6" class="px-6 py-4">
-            <div class="ta-skeleton ta-skeleton-row"></div>
-            <div class="ta-skeleton ta-skeleton-row"></div>
-            <div class="ta-skeleton ta-skeleton-row"></div>
-        </td></tr>
-    `;
-    
-    fetch('api/get_pending_accounts.php')
-        .then(r => {
-            if (!r.ok) throw new Error('Network response was not ok');
-            return r.json();
-        })
-        .then(data => {
-            const tbody = document.getElementById('approvalsBody');
-            
-            // Handle error response
-            if (data.error) {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading accounts: ${data.error}</td></tr>`;
-                return;
-            }
-            
-            // Handle empty array
-            if (!Array.isArray(data) || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6"><div class="ta-empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><p>No pending accounts</p></div></td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = data.map(acc => {
-                const fullName = [acc.first_name, acc.middle_name, acc.last_name, acc.suffix].filter(Boolean).join(' ') || acc.name || 'Unknown';
-                const date = new Date(acc.created_at).toLocaleDateString();
-                const username = acc.username || 'N/A';
-                const role = acc.role || 'homeowner';
-                
-                return `
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${fullName}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">${username}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">${acc.email || 'N/A'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full ${
-                                role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                                role === 'guard' ? 'bg-blue-100 text-blue-800' :
-                                'bg-green-100 text-green-800'
-                            }">${role}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="ta-action-dropdown">
-                                <button type="button" class="ta-action-btn">
-                                    Actions
-                                    <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
-                                </button>
-                                <div class="ta-action-menu">
-                                    <button type="button" class="ta-action-menu-item green" onclick="window.openActionModal(${acc.id}, 'approve', '${fullName.replace(/'/g, "\\'")}')">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        Approve Account
-                                    </button>
-                                    <div class="ta-action-divider"></div>
-                                    <button type="button" class="ta-action-menu-item red" onclick="window.openActionModal(${acc.id}, 'reject', '${fullName.replace(/'/g, "\\'")}')">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        Reject Account
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        })
-        .catch(err => console.error('Error loading accounts:', err));
-}
-
-// Approve/Reject via SweetAlert2 (replaces custom modal)
-window.openActionModal = async function(userId, action, userName) {
-    const isApprove = action === 'approve';
-    const { value: reason } = await Swal.fire({
-        title: `${isApprove ? 'Approve' : 'Reject'} ${userName}?`,
-        input: 'textarea',
-        inputPlaceholder: 'Enter any notes or reason (optional)...',
-        inputAttributes: { 'aria-label': 'Reason', style: 'min-height: 80px;' },
-        icon: isApprove ? 'question' : 'warning',
-        showCancelButton: true,
-        confirmButtonText: isApprove ? 'Approve' : 'Reject',
-        confirmButtonColor: isApprove ? '#10b981' : '#ef4444',
-        cancelButtonColor: '#6b7280',
-        inputValidator: () => null // allow empty
-    });
-
-    if (reason !== undefined) {
-        try {
-            const formData = new FormData();
-            formData.append('user_id', userId);
-            formData.append('action', action);
-            formData.append('reason', reason || '');
-            formData.append('csrf_token', window.__ADMIN_CSRF__ || '');
-
-            const res = await fetch('api/approve_user_account.php', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                await Swal.fire({ icon: 'success', title: isApprove ? 'Approved!' : 'Rejected', text: data.message, confirmButtonColor: '#3b82f6' });
-                loadPendingAccounts();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: data.message, confirmButtonColor: '#ef4444' });
-            }
-        } catch (err) {
-            console.error('Error:', err);
-            Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred while processing the request', confirmButtonColor: '#ef4444' });
-        }
-    }
-};
-
-// Load on page show
-try {
-    loadPendingAccounts();
-} catch (error) {
-    console.error('[Approvals] Error loading pending accounts:', error);
-}
-
-// Client-side search for approvals table
-(function() {
-    const searchInput = document.getElementById('approvalsSearchInput');
-    const searchCount = document.getElementById('approvalsSearchCount');
-    if (!searchInput) return;
-
-    searchInput.addEventListener('input', function() {
-        const term = this.value.toLowerCase().trim();
-        const rows = document.querySelectorAll('#approvalsBody tr');
-        let visible = 0, total = rows.length;
-
-        rows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td:not(:last-child)'));
-            const text = cells.map(c => c.textContent).join(' ').toLowerCase();
-            const show = !term || text.includes(term);
-            row.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-
-        if (searchCount) {
-            searchCount.textContent = term ? `${visible} of ${total} accounts` : '';
-            searchCount.style.color = visible > 0 ? '#16a34a' : '#dc2626';
-        }
-    });
-
-    searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            this.value = '';
-            this.dispatchEvent(new Event('input'));
-        }
-    });
-})();
-
-console.log('[Approvals] Controls initialized successfully');
-
-})(); // End of IIFE
-</script>
+<script src="../assets/js/admin/approvals-page.js?v=<?php echo filemtime(__DIR__ . '/../../assets/js/admin/approvals-page.js'); ?>"></script>
 
 <style>
 /* Ensure table is not overlapping */

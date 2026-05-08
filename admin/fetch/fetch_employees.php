@@ -1,6 +1,10 @@
 <?php
 // Security: Role-based access control
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+
+requireRequestMethod('GET');
+
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     http_response_code(403);
     header('Content-Type: application/json');
@@ -10,29 +14,62 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'a
 require_once __DIR__ . '/../../db.php';
 
 $search = $_GET['search'] ?? '';
-$role_filter = $_GET['role'] ?? '';
+$role_filter_raw = trim((string)($_GET['role'] ?? ''));
+$role_filter = $role_filter_raw === 'owner' ? 'homeowner' : $role_filter_raw;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$allowedPerPage = [10, 25, 50, 100];
+$perPage = (int)($_GET['per_page'] ?? 25);
+if (!in_array($perPage, $allowedPerPage, true)) {
+  $perPage = 25;
+}
 
-$sql = "SELECT id, username, role, created_at FROM users WHERE 1=1";
+$whereSql = " FROM users WHERE 1=1";
 $params = [];
 
 if ($search) {
-    $sql .= " AND username LIKE ?";
-    $params[] = "%$search%";
+  $whereSql .= " AND username LIKE :search";
+    $params[':search'] = "%$search%";
 }
 
 if ($role_filter) {
-    $sql .= " AND role = ?";
-    $params[] = $role_filter;
+  if ($role_filter === 'homeowner') {
+    $whereSql .= " AND role IN (:role_homeowner, :role_owner)";
+    $params[':role_homeowner'] = 'homeowner';
+    $params[':role_owner'] = 'owner';
+  } else {
+    $whereSql .= " AND role = :role_filter";
+    $params[':role_filter'] = $role_filter;
+  }
 }
 
-$sql .= " ORDER BY created_at DESC LIMIT 500";
+$countSql = "SELECT COUNT(*)" . $whereSql;
+$countStmt = $pdo->prepare($countSql);
+$countStmt->execute($params);
+$totalEmployees = (int)$countStmt->fetchColumn();
+$totalPages = max(1, (int)ceil($totalEmployees / $perPage));
+if ($page > $totalPages) {
+  $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
+$sql = "SELECT id, username, role, account_status, created_at" . $whereSql . " ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute($params);
+foreach ($params as $key => $param) {
+  $stmt->bindValue($key, $param, PDO::PARAM_STR);
+}
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$totalEmployees = count($employees);
-$roleCount = array_count_values(array_column($employees, 'role'));
+$roleSql = "SELECT role, COUNT(*) AS total" . $whereSql . " GROUP BY role";
+$roleStmt = $pdo->prepare($roleSql);
+$roleStmt->execute($params);
+$roleCount = [];
+foreach ($roleStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+  $roleCount[$row['role']] = (int)$row['total'];
+}
 ?>
 
 <!-- Page Header -->
@@ -69,15 +106,42 @@ $roleCount = array_count_values(array_column($employees, 'role'));
       <svg class="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
-      <input type="text" id="employeeSearchInput" class="ta-input pl-10 min-w-[280px]" placeholder="Search employees...">
+      <input type="text" id="employeeSearchInput" class="ta-input pl-10 min-w-[280px]" placeholder="Search employees..." value="<?= htmlspecialchars($search) ?>">
     </div>
     <select id="employeeRoleFilter" class="ta-select">
-      <option value="">All Roles</option>
-      <option value="admin">Admin</option>
-      <option value="guard">Guard</option>
-      <option value="super_admin">Super Admin</option>
+      <option value="" <?= $role_filter === '' ? 'selected' : '' ?>>All Roles</option>
+      <option value="admin" <?= $role_filter === 'admin' ? 'selected' : '' ?>>Admin</option>
+      <option value="guard" <?= $role_filter === 'guard' ? 'selected' : '' ?>>Guard</option>
+      <option value="homeowner" <?= $role_filter === 'homeowner' ? 'selected' : '' ?>>Homeowner</option>
+      <option value="super_admin" <?= $role_filter === 'super_admin' ? 'selected' : '' ?>>Super Admin</option>
+    </select>
+    <select id="employeesPerPage" class="ta-select" title="Rows per page">
+      <?php foreach ($allowedPerPage as $opt): ?>
+        <option value="<?php echo $opt; ?>" <?php echo $perPage === $opt ? 'selected' : ''; ?>><?php echo $opt; ?> / page</option>
+      <?php endforeach; ?>
     </select>
   </div>
+</div>
+
+<!-- Bulk Actions Bar -->
+<div id="bulkActionsBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-6 z-[1000] border border-slate-700 animate-bounce-subtle">
+    <div class="flex items-center gap-3 pr-6 border-r border-slate-700">
+        <span id="selectedCount" class="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+        <span class="text-sm font-medium">Employees Selected</span>
+    </div>
+    <div class="flex items-center gap-3">
+        <button type="button" onclick="processBulkAction('suspend')" class="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 rounded-lg text-sm font-semibold transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            Suspend
+        </button>
+        <button type="button" onclick="processBulkAction('active')" class="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-lg text-sm font-semibold transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Activate
+        </button>
+    </div>
+    <button type="button" onclick="clearSelection()" class="text-slate-400 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
 </div>
 
 <!-- Employee Table -->
@@ -85,15 +149,19 @@ $roleCount = array_count_values(array_column($employees, 'role'));
   <table id="employeeTable" class="ta-table">
     <thead>
       <tr>
+        <th class="w-10">
+            <input type="checkbox" id="selectAllEmployees" onchange="window.toggleAllEmployees(this)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4">
+        </th>
         <th>Username</th>
         <th>Role</th>
+        <th>Status</th>
         <th>Created</th>
         <th class="text-center">Actions</th>
       </tr>
     </thead>
     <tbody>
       <?php if (empty($employees)): ?>
-        <tr><td colspan="4">
+        <tr><td colspan="5">
           <div class="ta-empty-state">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             <p>No employees found</p>
@@ -101,39 +169,56 @@ $roleCount = array_count_values(array_column($employees, 'role'));
         </td></tr>
       <?php else: ?>
         <?php foreach ($employees as $employee): ?>
-          <tr>
+          <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors even:bg-slate-50 dark:even:bg-slate-800/50">
+            <td class="px-4 py-3">
+              <input type="checkbox" class="employee-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4" data-id="<?= $employee['id'] ?>" onchange="window.updateEmployeeBulkBar()">
+            </td>
             <td><?= htmlspecialchars($employee['username'] ?? '') ?></td>
             <td>
               <?php
+              $displayRole = ($employee['role'] ?? '') === 'owner' ? 'homeowner' : ($employee['role'] ?? '');
               $badges = [
                 'admin' => 'info',
                 'guard' => 'success',
                 'super_admin' => 'purple',
-                'owner' => 'success'
+                'homeowner' => 'success'
               ];
-              $badge = $badges[$employee['role']] ?? 'neutral';
+              $badge = $badges[$displayRole] ?? 'neutral';
               ?>
               <span class="ta-badge <?= $badge ?>">
-                <?= ucfirst(str_replace('_', ' ', htmlspecialchars($employee['role'] ?? ''))) ?>
+                <?= ucfirst(str_replace('_', ' ', htmlspecialchars($displayRole))) ?>
+              </span>
+            </td>
+            <td>
+              <?php
+              // Role hierarchy: super_admin > admin > guard > homeowner
+              // Show account_status badge — highlights pending/suspended accounts
+              $acctStatus = strtolower(trim($employee['account_status'] ?? 'active'));
+              $statusBadges = [
+                'active'    => 'success',
+                'approved'  => 'success',
+                'pending'   => 'warning',
+                'suspended' => 'danger',
+                'rejected'  => 'danger',
+              ];
+              $statusBadge = $statusBadges[$acctStatus] ?? 'neutral';
+              ?>
+              <span class="ta-badge <?= $statusBadge ?>">
+                <?= ucfirst(htmlspecialchars($acctStatus)) ?>
               </span>
             </td>
             <td class="muted"><?= date('M d, Y', strtotime($employee['created_at'])) ?></td>
             <td>
               <div class="flex items-center justify-center">
                 <div class="ta-action-dropdown">
-                  <button class="ta-action-btn">
+                  <button type="button" class="ta-action-btn" aria-haspopup="menu" aria-expanded="false">
                     Actions
                     <svg class="ta-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
-                  <div class="ta-action-menu">
-                    <button class="ta-action-menu-item blue editEmployeeBtn" data-id="<?= $employee['id'] ?>">
+                  <div class="ta-action-menu" role="menu" aria-hidden="true">
+                    <button type="button" role="menuitem" class="ta-action-menu-item blue editEmployeeBtn" data-id="<?= $employee['id'] ?>">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                       Edit
-                    </button>
-                    <div class="ta-action-divider"></div>
-                    <button class="ta-action-menu-item red deleteEmployeeBtn" data-id="<?= $employee['id'] ?>" data-username="<?= htmlspecialchars($employee['username'] ?? '', ENT_QUOTES) ?>">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                      Delete
                     </button>
                   </div>
                 </div>
@@ -144,6 +229,27 @@ $roleCount = array_count_values(array_column($employees, 'role'));
       <?php endif; ?>
     </tbody>
   </table>
+</div>
+
+<div class="flex flex-col gap-2 mt-4 md:flex-row md:items-center md:justify-between">
+  <p class="text-sm text-slate-600 dark:text-slate-400">
+    Showing <?php echo $totalEmployees > 0 ? ($offset + 1) : 0; ?>-<?php echo min($offset + $perPage, $totalEmployees); ?> of <?php echo $totalEmployees; ?> employees
+  </p>
+  <div class="flex items-center gap-1">
+    <?php if ($page > 1): ?>
+      <button type="button" class="employees-page-btn ta-btn ta-btn-outline-secondary ta-btn-sm" data-page="<?php echo $page - 1; ?>">Previous</button>
+    <?php endif; ?>
+    <?php
+      $startPage = max(1, $page - 2);
+      $endPage = min($totalPages, $page + 2);
+      for ($i = $startPage; $i <= $endPage; $i++):
+    ?>
+      <button type="button" class="employees-page-btn ta-btn ta-btn-sm <?php echo $i === $page ? 'ta-btn-primary' : 'ta-btn-outline-secondary'; ?>" data-page="<?php echo $i; ?>"><?php echo $i; ?></button>
+    <?php endfor; ?>
+    <?php if ($page < $totalPages): ?>
+      <button type="button" class="employees-page-btn ta-btn ta-btn-outline-secondary ta-btn-sm" data-page="<?php echo $page + 1; ?>">Next</button>
+    <?php endif; ?>
+  </div>
 </div>
 
 <!-- Stats Cards (TailAdmin Pattern) -->

@@ -2,7 +2,11 @@
 /**
  * Add new vehicle for homeowner
  */
+require_once __DIR__ . '/../../includes/security_headers.php';
 require_once __DIR__ . '/../../includes/session_homeowner.php';
+require_once __DIR__ . '/../../includes/input_sanitizer.php';
+require_once __DIR__ . '/../../includes/input_validator.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
 require_once __DIR__ . '/../../db.php';
 
 header('Content-Type: application/json');
@@ -13,72 +17,121 @@ if (!isset($_SESSION['homeowner_id'])) {
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
-    exit();
-}
+requireRequestMethod('POST');
 
-// Validate CSRF token
-$csrfToken = $_POST['csrf_token'] ?? '';
-if (empty($csrfToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
+// Validate CSRF token using InputSanitizer
+$csrfToken = InputSanitizer::post('csrf_token', 'string');
+if (!InputSanitizer::validateCsrf($csrfToken)) {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
     exit();
 }
 
 try {
-    $vehicleType = trim($_POST['vehicle_type'] ?? '');
-    $color = trim($_POST['color'] ?? '');
-    $plateNumber = strtoupper(trim($_POST['plate_number'] ?? ''));
-    $isPrimary = isset($_POST['is_primary']) && $_POST['is_primary'] === 'true';
+    $vehicleType = InputSanitizer::post('vehicle_type', 'string');
+    $vehicleTypeOther = InputSanitizer::post('vehicle_type_other', 'string');
+    $color = InputSanitizer::post('color', 'string');
+    $colorOther = InputSanitizer::post('color_other', 'string');
+    $plateNumber = strtoupper(InputSanitizer::post('plate_number', 'string'));
+    $isPrimary = InputSanitizer::post('is_primary', 'bool', false);
     
     // Validate required fields
     if (empty($vehicleType) || empty($color) || empty($plateNumber)) {
+        http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'All fields are required']);
         exit();
     }
+
+    $vehicleType = trim($vehicleType);
+    if (strcasecmp($vehicleType, 'Car') === 0) {
+        $vehicleType = 'Sedan';
+    }
+
+    $allowedVehicleTypes = ['Sedan', 'SUV', 'Hatchback', 'Pickup', 'Van', 'Motorcycle', 'E-bike', 'Truck', 'Other'];
+    if ($vehicleType === 'Other') {
+        $vehicleType = trim($vehicleTypeOther);
+        if ($vehicleType === '' || strlen($vehicleType) > 40) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Please provide a valid custom vehicle type (max 40 characters)']);
+            exit();
+        }
+    } elseif (!in_array($vehicleType, $allowedVehicleTypes, true)) {
+        // Backward compatibility: accept legacy/custom values from older clients.
+        if ($vehicleType === '' || strlen($vehicleType) > 40) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid vehicle type']);
+            exit();
+        }
+    }
+
+    $color = trim($color);
+    $allowedColors = ['Black', 'White', 'Silver', 'Gray', 'Red', 'Blue', 'Green', 'Brown', 'Yellow', 'Orange', 'Other'];
+    if ($color === 'Other') {
+        $color = trim($colorOther);
+        if ($color === '' || strlen($color) > 30) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Please provide a valid custom vehicle color (max 30 characters)']);
+            exit();
+        }
+    } elseif (!in_array($color, $allowedColors, true)) {
+        // Backward compatibility: accept legacy/custom values from older clients.
+        if ($color === '' || strlen($color) > 30) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid vehicle color']);
+            exit();
+        }
+    }
+
+    $plateValidation = InputValidator::validatePlateNumber($plateNumber);
+    if (!$plateValidation['valid']) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => $plateValidation['message']]);
+        exit();
+    }
+    $plateNumber = $plateValidation['formatted'];
     
     // Check for duplicate plate number
-    $stmt = $pdo->prepare("SELECT id FROM vehicles WHERE plate_number = ?");
+    $stmt = $pdo->prepare("SELECT 1 FROM vehicles WHERE plate_number = ? LIMIT 1");
     $stmt->execute([$plateNumber]);
     if ($stmt->fetch()) {
+        http_response_code(409);
         echo json_encode(['success' => false, 'error' => 'This plate number is already registered']);
         exit();
     }
+
+    // Keep primary state deterministic: first active vehicle becomes primary by default.
+    if (!$isPrimary) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM vehicles WHERE homeowner_id = ? AND is_active = TRUE");
+        $stmt->execute([$_SESSION['homeowner_id']]);
+        $activeVehicleCount = (int)$stmt->fetchColumn();
+        if ($activeVehicleCount === 0) {
+            $isPrimary = true;
+        }
+    }
     
-    // Handle vehicle image upload
+    // Handle vehicle image upload using InputSanitizer
     $vehicleImg = null;
-    if (isset($_FILES['vehicle_img']) && $_FILES['vehicle_img']['error'] === UPLOAD_ERR_OK) {
+    if (isset($_FILES['vehicle_img']) && $_FILES['vehicle_img']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $uploadRes = InputSanitizer::validateFileUpload($_FILES['vehicle_img'], ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
+        
+        if (!$uploadRes['valid']) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => $uploadRes['error']]);
+            exit();
+        }
+        
         $uploadDir = __DIR__ . '/../../uploads/vehicles/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
-        
-        // Validate file extension
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-        $ext = strtolower(pathinfo($_FILES['vehicle_img']['name'], PATHINFO_EXTENSION));
-        if (!in_array($ext, $allowedExtensions)) {
-            echo json_encode(['success' => false, 'error' => 'Invalid file type. Allowed: ' . implode(', ', $allowedExtensions)]);
-            exit();
+
+        $originalName = $_FILES['vehicle_img']['name'] ?? '';
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+            $ext = 'jpg';
         }
-        
-        // Validate MIME type
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($_FILES['vehicle_img']['tmp_name']);
-        if (!in_array($mimeType, $allowedMimes)) {
-            echo json_encode(['success' => false, 'error' => 'Invalid file content. Only image files are allowed.']);
-            exit();
-        }
-        
-        // Validate file size (max 5MB)
-        if ($_FILES['vehicle_img']['size'] > 5 * 1024 * 1024) {
-            echo json_encode(['success' => false, 'error' => 'File too large. Maximum size is 5MB.']);
-            exit();
-        }
-        
-        $filename = 'vehicle_' . uniqid() . '.' . $ext;
+
+        $filename = 'vehicle_' . uniqid('', true) . '.' . $ext;
         $destination = $uploadDir . $filename;
         
         if (move_uploaded_file($_FILES['vehicle_img']['tmp_name'], $destination)) {
@@ -93,18 +146,61 @@ try {
     }
     
     // Insert new vehicle
-    $stmt = $pdo->prepare("
-        INSERT INTO vehicles (homeowner_id, vehicle_type, color, plate_number, is_primary, is_active, registered_at)
-        VALUES (?, ?, ?, ?, ?, TRUE, NOW())
-    ");
-    
-    $stmt->execute([
-        $_SESSION['homeowner_id'],
-        $vehicleType,
-        $color,
-        $plateNumber,
-        $isPrimary
-    ]);
+        $vehicleColumns = [];
+        try {
+            $vehicleColumns = $pdo->query("SHOW COLUMNS FROM vehicles")->fetchAll(PDO::FETCH_COLUMN);
+        } catch (Exception $e) {
+            $vehicleColumns = [];
+        }
+        $hasVehicleImageColumn = in_array('vehicle_img', $vehicleColumns, true);
+        
+        $homeownerColumns = [];
+        try {
+            $homeownerColumns = $pdo->query("SHOW COLUMNS FROM homeowners")->fetchAll(PDO::FETCH_COLUMN);
+        } catch (Exception $e) {
+            $homeownerColumns = [];
+        }
+        $hasHomeownerCarImageColumn = in_array('car_img', $homeownerColumns, true);
+
+        // Insert new vehicle
+        if ($hasVehicleImageColumn) {
+            $stmt = $pdo->prepare("
+                INSERT INTO vehicles (homeowner_id, vehicle_type, color, plate_number, vehicle_img, is_primary, is_active, registered_at)
+                VALUES (?, ?, ?, ?, ?, ?, TRUE, NOW())
+            ");
+
+            $stmt->execute([
+                $_SESSION['homeowner_id'],
+                $vehicleType,
+                $color,
+                $plateNumber,
+                $vehicleImg,
+                $isPrimary
+            ]);
+        } else {
+            $stmt = $pdo->prepare("
+                INSERT INTO vehicles (homeowner_id, vehicle_type, color, plate_number, is_primary, is_active, registered_at)
+                VALUES (?, ?, ?, ?, ?, TRUE, NOW())
+            ");
+
+            $stmt->execute([
+                $_SESSION['homeowner_id'],
+                $vehicleType,
+                $color,
+                $plateNumber,
+                $isPrimary
+            ]);
+        }
+        
+        if ($vehicleImg !== null && $hasHomeownerCarImageColumn) {
+            if ($isPrimary) {
+                $stmt = $pdo->prepare("UPDATE homeowners SET car_img = ? WHERE id = ?");
+                $stmt->execute([$vehicleImg, $_SESSION['homeowner_id']]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE homeowners SET car_img = ? WHERE id = ? AND (car_img IS NULL OR car_img = '')");
+                $stmt->execute([$vehicleImg, $_SESSION['homeowner_id']]);
+            }
+        }
     
     echo json_encode([
         'success' => true,

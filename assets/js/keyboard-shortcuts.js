@@ -8,7 +8,15 @@
 (function () {
     'use strict';
 
-    // Registered shortcuts
+    const DEBUG = !!(window.vehiscanConfig && window.vehiscanConfig.debug);
+    const debugLog = (...args) => { if (DEBUG) console.log(...args); };
+
+    if (window.keyboardShortcuts && window.keyboardShortcuts.__initialized) {
+        debugLog('[Keyboard] Keyboard shortcuts already initialized; skipping duplicate init');
+        return;
+    }
+
+    // Registered shortcuts (multiple handlers per combo)
     const shortcuts = new Map();
     let enabled = true;
 
@@ -35,25 +43,34 @@
         const combo = parts.join('+');
 
         // Check if shortcut is registered
-        const shortcut = shortcuts.get(combo);
-        if (!shortcut) return;
+        const handlers = shortcuts.get(combo);
+        if (!handlers || handlers.length === 0) return;
 
-        // Check if typing (unless shortcut allows it)
-        if (isTyping() && !shortcut.allowWhileTyping) return;
+        // Newer registrations run first so page-specific handlers can override globals.
+        for (let i = handlers.length - 1; i >= 0; i -= 1) {
+            const shortcut = handlers[i];
 
-        // Prevent default if specified
-        if (shortcut.preventDefault) {
-            e.preventDefault();
+            // Check if typing (unless shortcut allows it)
+            if (isTyping() && !shortcut.allowWhileTyping) continue;
+
+            // Prevent default if specified
+            if (shortcut.preventDefault) {
+                e.preventDefault();
+            }
+
+            // Returning true marks the shortcut as handled and stops further handlers.
+            const handled = shortcut.callback(e);
+            if (handled === true) {
+                break;
+            }
         }
-
-        // Execute callback
-        shortcut.callback(e);
     };
 
     // Show help modal
     const showHelp = () => {
         const shortcutList = Array.from(shortcuts.entries())
-            .map(([combo, data]) => {
+            .flatMap(([combo, handlers]) => handlers.map((data) => ({ combo, data })))
+            .map(({ combo, data }) => {
                 const keys = combo.split('+').map(k => {
                     const keyMap = {
                         'ctrl': 'Ctrl',
@@ -87,25 +104,57 @@
 
     // Public API
     window.keyboardShortcuts = {
+        __initialized: true,
+
         // Register a shortcut
         register: function (key, callback, options = {}) {
             const {
+                id = null,
                 description = 'No description',
                 preventDefault = true,
                 allowWhileTyping = false
             } = options;
 
-            shortcuts.set(key.toLowerCase(), {
+            const combo = key.toLowerCase();
+            const shortcut = {
+                id,
                 callback,
                 description,
                 preventDefault,
                 allowWhileTyping
-            });
+            };
+
+            if (!shortcuts.has(combo)) {
+                shortcuts.set(combo, []);
+            }
+
+            const handlers = shortcuts.get(combo);
+            if (id) {
+                const existingIndex = handlers.findIndex((h) => h.id === id);
+                if (existingIndex !== -1) {
+                    handlers.splice(existingIndex, 1);
+                }
+            }
+
+            handlers.push(shortcut);
         },
 
         // Unregister a shortcut
-        unregister: function (key) {
-            shortcuts.delete(key.toLowerCase());
+        unregister: function (key, id = null) {
+            const combo = key.toLowerCase();
+            if (!shortcuts.has(combo)) return;
+
+            if (!id) {
+                shortcuts.delete(combo);
+                return;
+            }
+
+            const handlers = shortcuts.get(combo).filter((handler) => handler.id !== id);
+            if (handlers.length === 0) {
+                shortcuts.delete(combo);
+            } else {
+                shortcuts.set(combo, handlers);
+            }
         },
 
         // Show help modal
@@ -130,6 +179,7 @@
     const registerGlobalShortcuts = () => {
         // Help modal
         window.keyboardShortcuts.register('?', showHelp, {
+            id: 'global.help',
             description: 'Show keyboard shortcuts',
             preventDefault: true,
             allowWhileTyping: false
@@ -150,6 +200,7 @@
                 searchInput.select();
             }
         }, {
+            id: 'global.search.focus.ctrlk',
             description: 'Focus search',
             preventDefault: true
         });
@@ -159,6 +210,13 @@
             // Close SweetAlert
             if (typeof Swal !== 'undefined' && Swal.isVisible()) {
                 Swal.close();
+                return;
+            }
+
+            // Use centralized modal close logic when available so body/UI state is restored.
+            if (typeof window.closeModal === 'function') {
+                window.closeModal();
+                return;
             }
 
             // Close custom modals
@@ -166,9 +224,14 @@
             modals.forEach(modal => {
                 if (modal.classList.contains('hidden') === false) {
                     modal.classList.add('hidden');
+                    modal.setAttribute('aria-hidden', 'true');
                 }
             });
+
+            // Restore page scroll and modal state classes for fallback modal closures.
+            document.body.classList.remove('modal-open');
         }, {
+            id: 'global.modal.close.escape',
             description: 'Close modals/dialogs',
             preventDefault: false,
             allowWhileTyping: true
@@ -186,6 +249,7 @@
                 window.location.href = '/Vehiscan-RFID/homeowners/portal.php';
             }
         }, {
+            id: 'global.nav.home.ctrlh',
             description: 'Go to Dashboard/Home',
             preventDefault: true
         });
@@ -195,15 +259,17 @@
                 loadPage('logs');
             }
         }, {
+            id: 'global.nav.logs.ctrll',
             description: 'View Access Logs',
             preventDefault: true
         });
 
         window.keyboardShortcuts.register('ctrl+v', () => {
             if (typeof loadPage === 'function') {
-                loadPage('visitor-passes');
+                loadPage('visitors');
             }
         }, {
+            id: 'global.nav.visitors.ctrlv',
             description: 'View Visitor Passes',
             preventDefault: true
         });
@@ -213,6 +279,7 @@
                 loadPage('manage');
             }
         }, {
+            id: 'global.nav.manage.ctrlm',
             description: 'Manage Records',
             preventDefault: true
         });
@@ -232,6 +299,7 @@
                 addButton.click();
             }
         }, {
+            id: 'global.action.addnew.ctrln',
             description: 'Add New Record',
             preventDefault: true
         });
@@ -251,6 +319,7 @@
                 searchInput.select();
             }
         }, {
+            id: 'global.search.focus.slash',
             description: 'Focus Search',
             preventDefault: true,
             allowWhileTyping: false
@@ -261,7 +330,7 @@
     document.addEventListener('keydown', handleKeydown);
     registerGlobalShortcuts();
 
-    console.log('[Keyboard] Keyboard shortcuts system initialized (Phase 3.3)');
-    console.log('[Keyboard] Press ? to see all available shortcuts');
+    debugLog('[Keyboard] Keyboard shortcuts system initialized (Phase 3.3)');
+    debugLog('[Keyboard] Press ? to see all available shortcuts');
 
 })();

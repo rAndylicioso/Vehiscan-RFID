@@ -97,6 +97,25 @@ try {
     error_log('[CRON_CLEANUP] rfid_scan_log error: ' . $e->getMessage());
 }
 
+// 6. Clean up old enhanced audit logs (older than 365 days)
+try {
+    $tableExistsStmt = $pdo->query("SHOW TABLES LIKE 'audit_logs_enhanced'");
+    if ($tableExistsStmt->fetchColumn()) {
+        $stmt = $pdo->prepare("\
+            DELETE FROM audit_logs_enhanced
+            WHERE created_at < DATE_SUB(NOW(), INTERVAL 365 DAY)
+            LIMIT 50000
+        ");
+        $stmt->execute();
+        $results['audit_logs_enhanced_cleaned'] = $stmt->rowCount();
+    } else {
+        $results['audit_logs_enhanced_cleaned'] = 'SKIPPED: table not found';
+    }
+} catch (PDOException $e) {
+    $results['audit_logs_enhanced_cleaned'] = 'ERROR: ' . $e->getMessage();
+    error_log('[CRON_CLEANUP] audit_logs_enhanced error: ' . $e->getMessage());
+}
+
 $elapsed = round(microtime(true) - $startTime, 3);
 
 // Output summary

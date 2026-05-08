@@ -80,7 +80,7 @@
     <!-- User Section -->
     <div class="mt-auto border-t border-gray-200 dark:border-slate-700 p-4">
         <div class="relative">
-            <button id="user-trigger"
+            <button id="user-trigger" type="button" aria-haspopup="menu" aria-controls="user-dropdown" aria-expanded="false"
                 class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 flex-shrink-0">
                     <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

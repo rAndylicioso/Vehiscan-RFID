@@ -1,6 +1,11 @@
 <?php
 // Security: Role-based access control
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+require_once __DIR__ . '/../../includes/common_utilities.php';
+
+requireRequestMethod('GET');
+
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     http_response_code(403);
     header('Content-Type: application/json');
@@ -19,7 +24,12 @@ try {
 
 // Pagination
 $page = max(1, intval($_GET['p'] ?? 1));
-$perPage = 15;
+$page = min($page, 10000);
+$allowedPerPage = [10, 15, 25, 50];
+$perPage = (int)($_GET['per_page'] ?? 15);
+if (!in_array($perPage, $allowedPerPage, true)) {
+    $perPage = 15;
+}
 $offset = ($page - 1) * $perPage;
 
 // Search
@@ -96,6 +106,15 @@ if ($tableExists) {
 }
 
 $totalPages = max(1, ceil($totalRequests / $perPage));
+$grandTotal = $pendingCount + $acknowledgedCount + $completedCount + $rejectedCount;
+$hasActiveFilters = ($search !== '' || $statusFilter !== '');
+$statusLabels = [
+    'pending' => 'Pending',
+    'acknowledged' => 'Acknowledged',
+    'completed' => 'Completed',
+    'rejected' => 'Rejected'
+];
+$activeStatusLabel = $statusLabels[$statusFilter] ?? 'All';
 
 // Helper: generate initials from name
 function getInitials($name) {
@@ -153,39 +172,93 @@ function getStatusBadge($status) {
 <?php else: ?>
 
     <!-- Stat Cards Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
         <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === '' ? 'ring-2 ring-blue-500' : ''; ?>"
             data-status="">
+            <div class="ta-stat-icon indigo">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </div>
             <div class="ta-stat-content">
                 <p class="ta-stat-label">Total</p>
-                <p class="ta-stat-value"><?php echo $pendingCount + $acknowledgedCount + $completedCount + $rejectedCount; ?></p>
+                <p class="ta-stat-value"><?php echo $grandTotal; ?></p>
             </div>
         </button>
-        <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''; ?>"
+        <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'pending' ? 'ring-2 ring-amber-500' : ''; ?>"
             data-status="pending">
+            <div class="ta-stat-icon amber">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
             <div class="ta-stat-content">
-                <p class="ta-stat-label" style="color: #d97706;">Pending</p>
-                <p class="ta-stat-value" style="color: #b45309;"><?php echo $pendingCount; ?></p>
+                <p class="ta-stat-label">Pending</p>
+                <p class="ta-stat-value"><?php echo $pendingCount; ?></p>
             </div>
         </button>
         <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'acknowledged' ? 'ring-2 ring-blue-500' : ''; ?>"
             data-status="acknowledged">
+            <div class="ta-stat-icon blue">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
             <div class="ta-stat-content">
-                <p class="ta-stat-label" style="color: #2563eb;">Acknowledged</p>
-                <p class="ta-stat-value" style="color: #1d4ed8;"><?php echo $acknowledgedCount; ?></p>
+                <p class="ta-stat-label">Acknowledged</p>
+                <p class="ta-stat-value"><?php echo $acknowledgedCount; ?></p>
             </div>
         </button>
         <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'completed' ? 'ring-2 ring-green-500' : ''; ?>"
             data-status="completed">
+            <div class="ta-stat-icon green">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
             <div class="ta-stat-content">
-                <p class="ta-stat-label" style="color: #059669;">Completed</p>
-                <p class="ta-stat-value" style="color: #047857;"><?php echo $completedCount; ?></p>
+                <p class="ta-stat-label">Completed</p>
+                <p class="ta-stat-value"><?php echo $completedCount; ?></p>
+            </div>
+        </button>
+        <button type="button" class="ta-stat-card stat-filter-btn cursor-pointer text-left <?php echo $statusFilter === 'rejected' ? 'ring-2 ring-red-500' : ''; ?>"
+            data-status="rejected">
+            <div class="ta-stat-icon red">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <div class="ta-stat-content">
+                <p class="ta-stat-label">Rejected</p>
+                <p class="ta-stat-value"><?php echo $rejectedCount; ?></p>
             </div>
         </button>
     </div>
 
+
+    <div class="mb-4 rounded-xl border border-blue-100 bg-blue-50/70 dark:bg-slate-800 dark:border-slate-700 px-4 py-3">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+                <p class="text-sm font-semibold text-blue-900 dark:text-slate-100">Workflow Guide</p>
+                <p class="text-xs text-blue-700 dark:text-slate-300 mt-1">Use this quick map to process requests consistently.</p>
+            </div>
+            <div class="text-xs text-blue-700 dark:text-slate-300">
+                Tip: Click any status card to filter quickly.
+            </div>
+        </div>
+        <div class="mt-3 flex items-center gap-2 flex-wrap text-xs">
+            <span class="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 px-2.5 py-1">Pending</span>
+            <span class="text-gray-500 dark:text-slate-400">-></span>
+            <span class="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2.5 py-1">Acknowledge</span>
+            <span class="text-gray-500 dark:text-slate-400">or</span>
+            <span class="inline-flex items-center rounded-full bg-red-100 text-red-800 px-2.5 py-1">Reject</span>
+            <span class="text-gray-500 dark:text-slate-400">-></span>
+            <span class="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2.5 py-1">Mark Complete</span>
+        </div>
+    </div>
+
     <!-- Action Bar -->
-    <div class="flex items-center gap-2 mb-4 flex-wrap">
+    <div class="flex items-center gap-2 mb-2 flex-wrap">
         <button id="refreshProfileReqs" class="ta-btn ta-btn-secondary">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -193,29 +266,58 @@ function getStatusBadge($status) {
             </svg>
             Refresh
         </button>
+        <?php if ($hasActiveFilters): ?>
+            <button id="profileReqClearFilters" class="ta-btn ta-btn-secondary" title="Clear search and status filters">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Clear Filters
+            </button>
+        <?php endif; ?>
         <div class="flex items-center gap-2 ml-auto">
-            <div class="relative flex items-center">
+            <div class="relative flex items-center flex-1 min-w-0 sm:max-w-md">
                 <svg class="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 <input type="text" id="profileReqSearch"
-                    class="h-10 px-4 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg min-w-[280px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
+                    class="h-10 px-4 pl-10 w-full border border-gray-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-slate-700 dark:text-gray-200"
                     placeholder="Search requests..." value="<?php echo htmlspecialchars($search); ?>">
             </div>
+            <select id="profileReqPerPage" class="ta-select" title="Rows per page">
+                <?php foreach ($allowedPerPage as $opt): ?>
+                    <option value="<?php echo $opt; ?>" <?php echo $perPage === $opt ? 'selected' : ''; ?>><?php echo $opt; ?> / page</option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </div>
+
+    <div class="mb-4 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="text-gray-600 dark:text-gray-300">
+            Showing <?php echo $totalRequests; ?> of <?php echo $grandTotal; ?> requests
+        </div>
+        <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+            <span class="inline-flex items-center rounded-full border border-gray-300 dark:border-slate-600 px-2.5 py-1">
+                Status: <?php echo htmlspecialchars($activeStatusLabel); ?>
+            </span>
+            <?php if ($search !== ''): ?>
+                <span class="inline-flex items-center rounded-full border border-gray-300 dark:border-slate-600 px-2.5 py-1">
+                    Search: <?php echo htmlspecialchars($search); ?>
+                </span>
+            <?php endif; ?>
         </div>
     </div>
 
     <!-- Requests Table -->
-    <div class="ta-table-wrapper" style="overflow-x: auto;">
-        <table class="ta-table">
+    <div class="ta-table-wrapper overflow-x-auto">
+        <table class="ta-table w-full">
             <thead>
                 <tr>
-                    <th>Homeowner</th>
-                    <th>Request</th>
-                    <th class="text-center">Status</th>
-                    <th>Date</th>
-                    <th class="text-center">Actions</th>
+                    <th class="text-left">Homeowner</th>
+                    <th class="text-left">Request</th>
+                    <th class="text-center whitespace-nowrap">Status</th>
+                    <th class="text-left whitespace-nowrap">Date</th>
+                    <th class="text-center whitespace-nowrap">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -241,7 +343,7 @@ function getStatusBadge($status) {
                     ?>
                         <tr class="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                             <!-- Homeowner -->
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
                                     <?php if (!empty($r['owner_img'])): ?>
                                         <img src="../uploads/<?php echo htmlspecialchars($r['owner_img']); ?>"
@@ -261,7 +363,7 @@ function getStatusBadge($status) {
                             </td>
                             <!-- Request Text -->
                             <td class="px-4 py-3">
-                                <p class="text-slate-700 dark:text-slate-300 max-w-xs truncate" title="<?php echo htmlspecialchars($r['request_text']); ?>">
+                                <p class="text-slate-700 dark:text-slate-300 max-w-md whitespace-normal break-words leading-5" title="<?php echo htmlspecialchars($r['request_text']); ?>">
                                     <?php echo htmlspecialchars($r['request_text']); ?>
                                 </p>
                                 <?php if (!empty($r['admin_notes'])): ?>
@@ -279,25 +381,25 @@ function getStatusBadge($status) {
                             </td>
                             <!-- Date -->
                             <td class="px-4 py-3 text-slate-600 dark:text-slate-400 text-xs whitespace-nowrap">
-                                <?php echo date('M j, Y g:i A', strtotime($r['created_at'])); ?>
+                                <?php echo formatDisplayDateTime($r['created_at']); ?>
                             </td>
                             <!-- Actions -->
                             <td class="px-4 py-3 text-center">
                                 <?php if ($r['status'] === 'pending'): ?>
                                         <div class="ta-action-dropdown">
-                                            <button type="button" class="ta-action-btn">
+                                            <button type="button" class="ta-action-btn" aria-haspopup="menu" aria-expanded="false">
                                                 Actions
                                                 <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                                             </button>
-                                            <div class="ta-action-menu">
-                                                <button type="button" class="ta-action-menu-item blue action-btn"
-                                                    data-id="<?php echo $r['id']; ?>" data-action="acknowledged" title="Acknowledge">
+                                            <div class="ta-action-menu" role="menu" aria-hidden="true">
+                                                <button type="button" role="menuitem" class="ta-action-menu-item blue action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="acknowledged" data-homeowner="<?php echo htmlspecialchars($displayName, ENT_QUOTES); ?>" title="Acknowledge">
                                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                     Acknowledge
                                                 </button>
                                                 <div class="ta-action-divider"></div>
-                                                <button type="button" class="ta-action-menu-item red action-btn"
-                                                    data-id="<?php echo $r['id']; ?>" data-action="rejected" title="Reject">
+                                                <button type="button" role="menuitem" class="ta-action-menu-item red action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="rejected" data-homeowner="<?php echo htmlspecialchars($displayName, ENT_QUOTES); ?>" title="Reject">
                                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                     Reject
                                                 </button>
@@ -305,19 +407,19 @@ function getStatusBadge($status) {
                                         </div>
                                     <?php elseif ($r['status'] === 'acknowledged'): ?>
                                         <div class="ta-action-dropdown">
-                                            <button type="button" class="ta-action-btn">
+                                            <button type="button" class="ta-action-btn" aria-haspopup="menu" aria-expanded="false">
                                                 Actions
                                                 <svg class="ta-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
                                             </button>
-                                            <div class="ta-action-menu">
-                                                <button type="button" class="ta-action-menu-item green action-btn"
-                                                    data-id="<?php echo $r['id']; ?>" data-action="completed" title="Mark Complete">
+                                            <div class="ta-action-menu" role="menu" aria-hidden="true">
+                                                <button type="button" role="menuitem" class="ta-action-menu-item green action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="completed" data-homeowner="<?php echo htmlspecialchars($displayName, ENT_QUOTES); ?>" title="Mark Complete">
                                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                     Mark Complete
                                                 </button>
                                                 <div class="ta-action-divider"></div>
-                                                <button type="button" class="ta-action-menu-item red action-btn"
-                                                    data-id="<?php echo $r['id']; ?>" data-action="rejected" title="Reject">
+                                                <button type="button" role="menuitem" class="ta-action-menu-item red action-btn"
+                                                    data-id="<?php echo $r['id']; ?>" data-action="rejected" data-homeowner="<?php echo htmlspecialchars($displayName, ENT_QUOTES); ?>" title="Reject">
                                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                     Reject
                                                 </button>
@@ -371,211 +473,27 @@ function getStatusBadge($status) {
 <?php endif; ?>
 
 <!-- Action Modal -->
-<div id="profileReqModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-        <h3 id="modalTitle" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Process Request</h3>
-        <div class="mb-4">
+<div id="profileReqModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 p-3" style="z-index: 10050;">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg w-full p-4 max-h-[85vh] overflow-y-auto" style="max-width: 520px;">
+        <h3 id="modalTitle" class="text-base font-semibold text-gray-900 dark:text-white mb-3">Process Request</h3>
+        <p id="modalContext" class="text-sm text-gray-600 dark:text-gray-300 mb-3"></p>
+        <div class="mb-3">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Admin Notes (optional)</label>
-            <textarea id="modalNotes" rows="3"
-                class="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-gray-200"
+            <textarea id="modalNotes" rows="2"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-gray-200"
                 placeholder="Add any notes about this action..."></textarea>
         </div>
         <div class="flex items-center justify-end gap-2">
             <button id="modalCancel"
-                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
+                class="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
                 Cancel
             </button>
             <button id="modalConfirm"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
                 Confirm
             </button>
         </div>
     </div>
 </div>
 
-<script>
-(function() {
-    'use strict';
 
-    const CSRF = window.__ADMIN_CSRF__ || document.querySelector('meta[name="csrf-token"]')?.content || '';
-    let currentRequestId = null;
-    let currentAction = null;
-    let debounceTimer = null;
-
-    // Action button modal titles & confirm button colors
-    const actionConfig = {
-        acknowledged: { title: 'Acknowledge Request', color: 'bg-blue-600 hover:bg-blue-700' },
-        completed:    { title: 'Mark as Completed', color: 'bg-green-600 hover:bg-green-700' },
-        rejected:     { title: 'Reject Request', color: 'bg-red-600 hover:bg-red-700' }
-    };
-
-    // Modal
-    const modal = document.getElementById('profileReqModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalNotes = document.getElementById('modalNotes');
-    const modalConfirm = document.getElementById('modalConfirm');
-    const modalCancel = document.getElementById('modalCancel');
-
-    function openModal(requestId, action) {
-        currentRequestId = requestId;
-        currentAction = action;
-        const config = actionConfig[action] || actionConfig.acknowledged;
-        modalTitle.textContent = config.title;
-        modalConfirm.className = `px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${config.color}`;
-        modalNotes.value = '';
-        modal.classList.remove('hidden');
-    }
-
-    function closeModal() {
-        modal.classList.add('hidden');
-        currentRequestId = null;
-        currentAction = null;
-    }
-
-    // Event: action buttons
-    document.querySelectorAll('.action-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.dataset.id;
-            const action = this.dataset.action;
-            openModal(id, action);
-        });
-    });
-
-    // Event: modal cancel
-    modalCancel.addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) closeModal();
-    });
-
-    // Event: modal confirm
-    modalConfirm.addEventListener('click', async function() {
-        if (!currentRequestId || !currentAction) return;
-
-        modalConfirm.disabled = true;
-        modalConfirm.textContent = 'Processing...';
-
-        try {
-            const formData = new FormData();
-            formData.append('request_id', currentRequestId);
-            formData.append('action', currentAction);
-            formData.append('admin_notes', modalNotes.value.trim());
-            formData.append('csrf_token', CSRF);
-
-            const res = await fetch('api/handle_profile_request.php', {
-                method: 'POST',
-                body: formData,
-                credentials: 'same-origin'
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-                closeModal();
-                // Show success toast
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Done',
-                        text: data.message,
-                        timer: 2000,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end'
-                    });
-                }
-                // Reload the page content
-                reloadPage();
-            } else {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'An error occurred' });
-                } else {
-                    alert(data.message || 'An error occurred');
-                }
-            }
-        } catch (err) {
-            console.error('Profile request action error:', err);
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Network error occurred' });
-            }
-        } finally {
-            modalConfirm.disabled = false;
-            modalConfirm.textContent = 'Confirm';
-        }
-    });
-
-    // Reload page content via SPA loadPage
-    function reloadPage(params) {
-        const search = document.getElementById('profileReqSearch')?.value || '';
-        const status = document.querySelector('.stat-filter-btn.ring-2[data-status]')?.dataset.status || '';
-        let url = `fetch/fetch_profile_requests.php?_=${Date.now()}`;
-        if (search) url += `&search=${encodeURIComponent(search)}`;
-        if (status) url += `&status=${encodeURIComponent(status)}`;
-        if (params?.page) url += `&p=${params.page}`;
-
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
-            .then(r => r.text())
-            .then(html => {
-                const contentArea = document.getElementById('content-area');
-                if (contentArea) {
-                    contentArea.innerHTML = html;
-                    // Re-run inline scripts
-                    contentArea.querySelectorAll('script').forEach(old => {
-                        const s = document.createElement('script');
-                        s.textContent = old.textContent;
-                        old.parentNode.replaceChild(s, old);
-                    });
-                }
-            })
-            .catch(err => console.error('Reload error:', err));
-    }
-
-    // Stat filter buttons
-    document.querySelectorAll('.stat-filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            reloadPage();
-            // Will reload with the new status filter via the button's data-status
-            const status = this.dataset.status;
-            let url = `fetch/fetch_profile_requests.php?_=${Date.now()}`;
-            const search = document.getElementById('profileReqSearch')?.value || '';
-            if (search) url += `&search=${encodeURIComponent(search)}`;
-            if (status) url += `&status=${encodeURIComponent(status)}`;
-
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
-                .then(r => r.text())
-                .then(html => {
-                    const contentArea = document.getElementById('content-area');
-                    if (contentArea) {
-                        contentArea.innerHTML = html;
-                        contentArea.querySelectorAll('script').forEach(old => {
-                            const s = document.createElement('script');
-                            s.textContent = old.textContent;
-                            old.parentNode.replaceChild(s, old);
-                        });
-                    }
-                });
-        });
-    });
-
-    // Debounced search
-    const searchInput = document.getElementById('profileReqSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => reloadPage(), 400);
-        });
-    }
-
-    // Refresh button
-    const refreshBtn = document.getElementById('refreshProfileReqs');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => reloadPage());
-    }
-
-    // Pagination buttons
-    document.querySelectorAll('.page-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            reloadPage({ page: this.dataset.page });
-        });
-    });
-})();
-</script>

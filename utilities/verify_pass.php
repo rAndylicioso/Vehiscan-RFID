@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../includes/common_utilities.php';
 
 $token = $_GET['token'] ?? '';
 
@@ -191,13 +192,13 @@ try {
             <div class="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <p class="text-blue-600 font-semibold">From</p>
-                <p class="text-blue-900 font-bold"><?php echo date('M d, Y', strtotime($pass['valid_from'])); ?></p>
-                <p class="text-blue-700"><?php echo date('h:i A', strtotime($pass['valid_from'])); ?></p>
+                <p class="text-blue-900 font-bold"><?php echo formatDisplayDateTime($pass['valid_from'], false); ?></p>
+                <p class="text-blue-700"><?php echo date('g:i A', strtotime($pass['valid_from'])); ?></p>
               </div>
               <div>
                 <p class="text-blue-600 font-semibold">Until</p>
-                <p class="text-blue-900 font-bold"><?php echo date('M d, Y', strtotime($pass['valid_until'])); ?></p>
-                <p class="text-blue-700"><?php echo date('h:i A', strtotime($pass['valid_until'])); ?></p>
+                <p class="text-blue-900 font-bold"><?php echo formatDisplayDateTime($pass['valid_until'], false); ?></p>
+                <p class="text-blue-700"><?php echo date('g:i A', strtotime($pass['valid_until'])); ?></p>
               </div>
             </div>
           </div>

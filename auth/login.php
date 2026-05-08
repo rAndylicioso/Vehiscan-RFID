@@ -5,8 +5,8 @@ ob_start();
 
 // Database connection - use centralized config
 require_once __DIR__ . '/../db.php';
-require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/security_headers.php';
+require_once __DIR__ . '/../includes/input_sanitizer.php';
 
 // Start session with default name first
 if (session_status() === PHP_SESSION_NONE) {
@@ -30,29 +30,26 @@ $success = '';
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Validate CSRF token
     $submittedToken = $_POST['csrf_token'] ?? '';
-    if (!hash_equals($_SESSION['csrf_token'] ?? '', $submittedToken)) {
+    if (!InputSanitizer::validateCsrf((string)$submittedToken)) {
         $error = "Invalid form submission. Please try again.";
     } else {
-    $username = trim($_POST['username'] ?? '');
+    $identifier = trim((string)($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
-    
-    // Rate limiting: 5 attempts per 15 minutes per IP
-    $rateLimiter = new RateLimiter($pdo);
-    $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateCheck = $rateLimiter->check($clientIp, 'login', 5, 15);
-    
-    if (!$rateCheck['allowed']) {
-        $error = "Too many login attempts. Please try again in 15 minutes.";
-    } else {
     
     $authenticated = false;
     $redirectUrl = '';
     $userRole = '';
     $userId = 0;
+    $sessionUsername = '';
+    
+    // Validate identifier
+    if ($identifier === '') {
+        $error = "Email or username is required.";
+    } else {
     
     // Try super_admin
-    $stmt = $pdo->prepare("SELECT id, username, password_hash FROM super_admin WHERE username = ? OR email = ?");
-    $stmt->execute([$username, $username]);
+    $stmt = $pdo->prepare("SELECT id, username, password_hash FROM super_admin WHERE email = ? OR username = ? LIMIT 1");
+    $stmt->execute([$identifier, $identifier]);
     $result = $stmt->fetch();
     
     if ($result) {
@@ -62,14 +59,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $authenticated = true;
             $userRole = 'super_admin';
             $userId = $result['id'];
+            $sessionUsername = (string)($result['username'] ?? $identifier);
             $redirectUrl = '../admin/admin_panel.php';
         }
     }
     
     // Try users table if not authenticated yet
     if (!$authenticated) {
-        $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$username, $username]);
+        $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE email = ? OR username = ? LIMIT 1");
+        $stmt->execute([$identifier, $identifier]);
         $result = $stmt->fetch();
         
         if ($result) {
@@ -77,16 +75,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             
             if ($passwordMatch) {
                 $authenticated = true;
-                $userRole = $result['role'];
+                $rawRole = (string)($result['role'] ?? '');
+                $userRole = $rawRole === 'owner' ? 'homeowner' : $rawRole;
                 $userId = $result['id'];
+                $sessionUsername = (string)($result['username'] ?? $identifier);
                 
-                if ($result['role'] === 'admin') {
+                if ($userRole === 'admin') {
                     $redirectUrl = '../admin/admin_panel.php';
-                } elseif ($result['role'] === 'guard') {
+                } elseif ($userRole === 'guard') {
                     $redirectUrl = '../guard/pages/guard_side.php';
-                } elseif ($result['role'] === 'owner' || $result['role'] === 'homeowner') {
+                } elseif ($userRole === 'homeowner') {
                     $redirectUrl = '../homeowners/portal.php';
-                    $userRole = 'homeowner'; // Normalize to homeowner for session name
                 }
             }
         }
@@ -99,10 +98,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                    h.account_status
             FROM homeowner_auth ha
             JOIN homeowners h ON ha.homeowner_id = h.id
-            WHERE ha.username = ? OR ha.email = ?
+            WHERE ha.email = ? OR ha.username = ?
             LIMIT 1
         ");
-        $stmt->execute([$username, $username]);
+        $stmt->execute([$identifier, $identifier]);
         $result = $stmt->fetch();
         
         if ($result && $result['is_active'] && $result['account_status'] === 'approved') {
@@ -112,6 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $authenticated = true;
                 $userRole = 'homeowner';
                 $userId = $result['homeowner_id']; // Use homeowner_id, not auth ID
+                $sessionUsername = (string)($result['username'] ?? $identifier);
                 $redirectUrl = '../homeowners/portal.php';
                 
                 // Update last_login
@@ -127,6 +127,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($authenticated && $redirectUrl) {
         // Destroy current session
         session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         
         // Clear ALL role-specific session cookies to prevent session collision
         // This is critical: stale cookies from a previous role login will cause
@@ -134,12 +137,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $allSessionNames = ['vehiscan_superadmin', 'vehiscan_admin', 'vehiscan_guard', 'vehiscan_homeowner', 'vehiscan_session'];
         foreach ($allSessionNames as $sName) {
             if (isset($_COOKIE[$sName])) {
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    session_write_close();
+                }
                 // Destroy the session data on disk
                 session_name($sName);
                 session_id($_COOKIE[$sName]);
                 session_start();
                 $_SESSION = [];
                 session_destroy();
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    session_write_close();
+                }
                 // Expire the cookie
                 setcookie($sName, '', time() - 3600, '/');
                 unset($_COOKIE[$sName]);
@@ -159,6 +168,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         
         // Start new session with correct name and secure cookie params
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         session_name($sessionName);
         ini_set('session.cookie_httponly', 1);
         ini_set('session.cookie_samesite', 'Lax');
@@ -171,7 +183,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         
         // Set session variables
         $_SESSION['user_id'] = $userId;
-        $_SESSION['username'] = $username;
+        $_SESSION['username'] = $sessionUsername !== '' ? $sessionUsername : $identifier;
         $_SESSION['role'] = $userRole;
         $_SESSION['last_activity'] = time();
         $_SESSION['created'] = time();
@@ -194,12 +206,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         header("Location: $redirectUrl");
         exit();
     } else {
-        // Record failed login attempt for rate limiting
-        $rateLimiter->recordAttempt($clientIp, 'login', ['username' => $username]);
-        $error = "Invalid credentials. Please check your username and password.";
+        $error = "Invalid credentials. Please check your email/username and password.";
     }
-    } // end rate-limit else
-    } // end CSRF else
+    }
+    } // end CSRF else and identifier validation else
 }
 
 // Check for URL parameters
@@ -222,7 +232,7 @@ ob_end_flush();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in to VehiScan</title>
-    <link rel="stylesheet" href="../assets/css/login.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../assets/css/login.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/login.css'); ?>">
     <script src="../assets/js/libs/sweetalert2.all.min.js"></script>
 </head>
 <body>
@@ -244,11 +254,11 @@ ob_end_flush();
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
             <div class="form-group">
-                <label for="username" class="form-label">Username<span class="required">*</span></label>
+                <label for="email" class="form-label">Email or Username<span class="required">*</span></label>
                 <div class="input-icon-wrapper">
-                    <input id="username" name="username" type="text" placeholder="Enter your username" required
-                        aria-label="Username" autofocus autocomplete="username">
-                    <span class="input-icon"><svg style="width:1em;height:1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    <input id="email" name="email" type="text" placeholder="Enter your email or username" required
+                        aria-label="Email or Username" autofocus autocomplete="username">
+                    <span class="input-icon"><svg style="width:1em;height:1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
                 </div>
             </div>
 
@@ -266,10 +276,7 @@ ob_end_flush();
             </div>
 
             <div class="remember-forgot">
-                <label class="remember-me">
-                    <input type="checkbox" name="remember">
-                    <span>Remember Me</span>
-                </label>
+                <div></div>
                 <a href="forgot-password.php" class="forgot-link">Forgot Password?</a>
             </div>
 
@@ -292,7 +299,7 @@ ob_end_flush();
     </div>
 
     <!-- External JavaScript -->
-    <script src="../assets/js/login.js?v=<?php echo time(); ?>"></script>
+    <script src="../assets/js/login.js?v=<?php echo filemtime(__DIR__ . '/../assets/js/login.js'); ?>"></script>
 
     <!-- PHP-generated alerts -->
     <script>

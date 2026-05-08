@@ -149,4 +149,100 @@ class EmailTemplates
 
         return self::wrap('Account Status — VehiScan', $content);
     }
+
+    /**
+     * Visitor pass approved notification email.
+     *
+     * @param string $homeownerName
+     * @param string $visitorName
+     * @param string $validFrom
+     * @param string $validUntil
+     * @param string $passUrl
+     * @return string HTML email body
+     */
+    public static function visitorPassApprovedEmail($homeownerName, $visitorName, $validFrom, $validUntil, $passUrl)
+    {
+        $content = '
+            <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#111827;">Visitor Pass Approved</h2>
+            <p style="margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.6;">
+                Hi ' . htmlspecialchars($homeownerName) . ',
+            </p>
+            <p style="margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.6;">
+                Your visitor pass request for <strong>' . htmlspecialchars($visitorName) . '</strong> has been approved.
+            </p>
+            <div style="margin:16px 0;padding:12px;background-color:#eff6ff;border-left:3px solid #2563eb;border-radius:4px;">
+                <p style="margin:0 0 4px;font-size:13px;color:#1e3a8a;"><strong>Valid from:</strong> ' . htmlspecialchars($validFrom) . '</p>
+                <p style="margin:0;font-size:13px;color:#1e3a8a;"><strong>Valid until:</strong> ' . htmlspecialchars($validUntil) . '</p>
+            </div>
+            <div style="text-align:center;margin:24px 0;">
+                <a href="' . htmlspecialchars($passUrl) . '"
+                   style="display:inline-block;padding:12px 32px;background-color:#2563eb;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:8px;">
+                    View Visitor Pass
+                </a>
+            </div>';
+
+        return self::wrap('Visitor Pass Approved — VehiScan', $content);
+    }
+
+    /**
+     * Visitor pass rejected notification email.
+     *
+     * @param string $homeownerName
+     * @param string $visitorName
+     * @param string $reason
+     * @return string HTML email body
+     */
+    public static function visitorPassRejectedEmail($homeownerName, $visitorName, $reason = '')
+    {
+        $reasonBlock = '';
+        if ($reason !== '') {
+            $reasonBlock = '
+            <div style="margin:16px 0;padding:12px;background-color:#fef2f2;border-left:3px solid #ef4444;border-radius:4px;">
+                <p style="margin:0;font-size:13px;color:#991b1b;"><strong>Reason:</strong> ' . htmlspecialchars($reason) . '</p>
+            </div>';
+        }
+
+        $content = '
+            <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#111827;">Visitor Pass Rejected</h2>
+            <p style="margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.6;">
+                Hi ' . htmlspecialchars($homeownerName) . ',
+            </p>
+            <p style="margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.6;">
+                Your visitor pass request for <strong>' . htmlspecialchars($visitorName) . '</strong> was not approved.
+            </p>
+            ' . $reasonBlock . '
+            <p style="margin:16px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
+                If you believe this was an error, please contact your subdivision administration.
+            </p>';
+
+        return self::wrap('Visitor Pass Rejected — VehiScan', $content);
+    }
+
+    /**
+     * Visitor pass used notification email.
+     *
+     * @param string $homeownerName
+     * @param string $visitorName
+     * @param string $usedAt
+     * @return string HTML email body
+     */
+    public static function visitorPassUsedEmail($homeownerName, $visitorName, $usedAt)
+    {
+        $content = '
+            <h2 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#111827;">Visitor Pass Used</h2>
+            <p style="margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.6;">
+                Hi ' . htmlspecialchars($homeownerName) . ',
+            </p>
+            <p style="margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.6;">
+                The visitor pass for <strong>' . htmlspecialchars($visitorName) . '</strong> was scanned at the gate.
+            </p>
+            <div style="margin:16px 0;padding:12px;background-color:#f0fdf4;border-left:3px solid #16a34a;border-radius:4px;">
+                <p style="margin:0;font-size:13px;color:#166534;"><strong>Scanned at:</strong> ' . htmlspecialchars($usedAt) . '</p>
+            </div>
+            <p style="margin:16px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
+                If this was not expected, please contact your subdivision administration immediately.
+            </p>';
+
+        return self::wrap('Visitor Pass Used — VehiScan', $content);
+    }
 }

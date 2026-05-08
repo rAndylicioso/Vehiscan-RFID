@@ -9,6 +9,9 @@
  * @created 2025-11-20
  */
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+
+requireRequestMethod('GET');
 
 // Check authentication
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
@@ -34,8 +37,60 @@ try {
     $severity = $_GET['severity'] ?? null;
     $status = $_GET['status'] ?? null;
     $username = $_GET['username'] ?? null;
+    $dateFromRaw = trim((string)($_GET['date_from'] ?? ''));
+    $dateToRaw = trim((string)($_GET['date_to'] ?? ''));
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
     $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+    $dateFrom = null;
+    $dateTo = null;
+
+    if ($dateFromRaw !== '') {
+        $parsed = DateTimeImmutable::createFromFormat('Y-m-d', $dateFromRaw);
+        if (!$parsed || $parsed->format('Y-m-d') !== $dateFromRaw) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid date_from format. Expected YYYY-MM-DD.'
+            ]);
+            exit;
+        }
+        $dateFrom = $parsed->setTime(0, 0, 0);
+    }
+
+    if ($dateToRaw !== '') {
+        $parsed = DateTimeImmutable::createFromFormat('Y-m-d', $dateToRaw);
+        if (!$parsed || $parsed->format('Y-m-d') !== $dateToRaw) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid date_to format. Expected YYYY-MM-DD.'
+            ]);
+            exit;
+        }
+        $dateTo = $parsed->setTime(23, 59, 59);
+    }
+
+    if ($dateFrom && $dateTo) {
+        if ($dateFrom > $dateTo) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'date_from must be earlier than or equal to date_to.'
+            ]);
+            exit;
+        }
+
+        $daysDiff = (int)$dateFrom->diff($dateTo)->days;
+        if ($daysDiff > 366) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Date range cannot exceed 366 days.'
+            ]);
+            exit;
+        }
+    }
     
     // Build query
     $sql = "SELECT * FROM audit_logs_enhanced WHERE 1=1";
@@ -59,6 +114,16 @@ try {
     if ($username) {
         $sql .= " AND username = ?";
         $params[] = $username;
+    }
+
+    if ($dateFrom) {
+        $sql .= " AND created_at >= ?";
+        $params[] = $dateFrom->format('Y-m-d H:i:s');
+    }
+
+    if ($dateTo) {
+        $sql .= " AND created_at <= ?";
+        $params[] = $dateTo->format('Y-m-d H:i:s');
     }
     
     // Get total count

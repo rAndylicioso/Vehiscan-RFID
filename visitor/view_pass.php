@@ -6,6 +6,11 @@ ini_set('display_errors', 0); // Don't show errors to user, log them instead
 // Use centralized database connection
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../includes/common_utilities.php';
+require_once __DIR__ . '/../includes/visitor_pass_tracking.php';
+require_once __DIR__ . '/../includes/email.php';
+require_once __DIR__ . '/../includes/email_templates.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 if (!isset($pdo)) {
     error_log("[VISITOR_PASS] Database connection not available");
@@ -13,35 +18,57 @@ if (!isset($pdo)) {
 }
 
 $token = $_GET['token'] ?? '';
+$ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $error = $error ?? null;
 $pass = null;
 $statusDisplay = '';
 $statusClass = '';
 $statusIcon = '';
+$httpStatus = 200;
+$wasUsed = false;
+$firstUsedAt = null;
 
 if (!$pdo) {
     $error = 'Database Connection Failed';
+    $httpStatus = 500;
 } elseif (!$token) {
     $error = 'Invalid Request';
+    $httpStatus = 400;
+} elseif (!preg_match('/^[a-fA-F0-9]{32,64}$/', $token)) {
+    $error = 'Invalid Request';
+    $httpStatus = 400;
 } else {
     try {
+        $rateLimiter = new RateLimiter($pdo);
+        $rate = $rateLimiter->check($ipAddress, 'visitor_pass_lookup', 10, 5);
+        if (!$rate['allowed']) {
+            $error = 'Too many requests. Please try again in a few minutes.';
+            $httpStatus = 429;
+        }
+
+        if ($error) {
+            throw new RuntimeException($error);
+        }
         
         // First get the visitor pass
-        $stmt = $pdo->prepare("SELECT * FROM visitor_passes WHERE qr_token = ?");
+        $stmt = $pdo->prepare("SELECT * FROM visitor_passes WHERE qr_token = ? LIMIT 1");
         $stmt->execute([$token]);
         $pass = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$pass) {
+            $rateLimiter->recordAttempt($ipAddress, 'visitor_pass_lookup', ['error' => 'token_not_found']);
             $error = 'Invalid or Expired Visitor Pass';
+            $httpStatus = 404;
         } else {
             
             // Try to get homeowner info (optional)
             $homeowner_name = 'Guest';
             $homeowner_address = '';
             $contact_number = '';
+            $homeowner_email = '';
             
             if (!empty($pass['homeowner_id'])) {
-                $stmt2 = $pdo->prepare("SELECT name, address, contact_number FROM homeowners WHERE id = ?");
+                $stmt2 = $pdo->prepare("SELECT name, address, contact_number, email FROM homeowners WHERE id = ?");
                 $stmt2->execute([$pass['homeowner_id']]);
                 $homeowner = $stmt2->fetch(PDO::FETCH_ASSOC);
                 
@@ -49,6 +76,7 @@ if (!$pdo) {
                     $homeowner_name = $homeowner['name'];
                     $homeowner_address = $homeowner['address'] ?? '';
                     $contact_number = $homeowner['contact_number'] ?? '';
+                    $homeowner_email = (string)($homeowner['email'] ?? '');
                 } else {
                     error_log("[VISITOR_PASS] Warning: Homeowner ID {$pass['homeowner_id']} not found");
                 }
@@ -58,14 +86,63 @@ if (!$pdo) {
             $pass['homeowner_name'] = $homeowner_name;
             $pass['homeowner_address'] = $homeowner_address;
             $pass['contact'] = $contact_number;
+            $pass['homeowner_email'] = $homeowner_email;
             
             // Determine pass status based on database status and time validity
             $now = new DateTime();
             $validFrom = new DateTime($pass['valid_from']);
             $validUntil = new DateTime($pass['valid_until']);
+            $nowSql = $now->format('Y-m-d H:i:s');
             
             // Check actual status from database
             $dbStatus = strtolower($pass['status'] ?? 'pending');
+
+            $scanStats = getVisitorPassScanStats($pdo, (int)$pass['id']);
+            $wasUsed = ((int)($scanStats['scan_count'] ?? 0) > 0);
+            $firstUsedAt = $scanStats['first_scanned_at'] ?? null;
+
+            // Record scan attempts for active/approved passes in valid time window.
+            if (($dbStatus === 'active' || $dbStatus === 'approved') && $now >= $validFrom && $now <= $validUntil) {
+                if (!$wasUsed) {
+                    recordVisitorPassScan(
+                        $pdo,
+                        $pass,
+                        'used_first_time',
+                        (string)($_SERVER['REMOTE_ADDR'] ?? ''),
+                        (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                        'Recorded from visitor pass view.'
+                    );
+
+                    $wasUsed = true;
+                    $firstUsedAt = $nowSql;
+
+                    $homeownerEmail = trim((string)($pass['homeowner_email'] ?? ''));
+                    if ($homeownerEmail !== '') {
+                        try {
+                            EmailService::send(
+                                $homeownerEmail,
+                                'Visitor Pass Used - VehiScan RFID',
+                                EmailTemplates::visitorPassUsedEmail(
+                                    (string)($pass['homeowner_name'] ?? 'Homeowner'),
+                                    (string)($pass['visitor_name'] ?? 'Visitor'),
+                                    $nowSql
+                                )
+                            );
+                        } catch (Throwable $emailError) {
+                            error_log('[VISITOR_PASS] First-use email send failed: ' . $emailError->getMessage());
+                        }
+                    }
+                } else {
+                    recordVisitorPassScan(
+                        $pdo,
+                        $pass,
+                        'repeat_scan',
+                        (string)($_SERVER['REMOTE_ADDR'] ?? ''),
+                        (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                        'Repeated scan after initial usage.'
+                    );
+                }
+            }
             
             // Priority order: cancelled/rejected > pending > time-based validation
             if ($dbStatus === 'rejected' || $dbStatus === 'cancelled') {
@@ -76,6 +153,10 @@ if (!$pdo) {
                 $statusDisplay = 'Pending Approval';
                 $statusClass = 'status-pending';
                 $statusIcon = '<svg class="w-4 h-4 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16.5 12"/></svg>';
+            } elseif ($wasUsed) {
+                $statusDisplay = 'Used';
+                $statusClass = 'status-used';
+                $statusIcon = '<svg class="w-4 h-4 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-6"/></svg>';
             } elseif ($now > $validUntil) {
                 // Pass has expired (current time is after valid_until)
                 $statusDisplay = 'Expired';
@@ -102,10 +183,21 @@ if (!$pdo) {
         error_log("[VISITOR_PASS] Database error: " . $e->getMessage() . " | Token: $token");
         error_log("[VISITOR_PASS] Stack trace: " . $e->getTraceAsString());
         $error = 'Database Query Error';
+        $httpStatus = 500;
+    } catch (RuntimeException $e) {
+        $error = $e->getMessage();
+        if ($httpStatus < 400) {
+            $httpStatus = 500;
+        }
     } catch (Exception $e) {
         error_log("[VISITOR_PASS] General error: " . $e->getMessage() . " | Token: $token");
         $error = 'System Error';
+        $httpStatus = 500;
     }
+}
+
+if ($error && $httpStatus >= 400) {
+    http_response_code($httpStatus);
 }
 ?>
 <!DOCTYPE html>
@@ -116,7 +208,7 @@ if (!$pdo) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Visitor Pass — VehiScan</title>
     <link rel="stylesheet" href="../assets/css/tailwind.css">
-    <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo @filemtime(__DIR__ . '/../assets/css/tailadmin-components.css') ?: time(); ?>">
+    <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailadmin-components.css'); ?>">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -175,6 +267,7 @@ if (!$pdo) {
                     <div class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wider
                         <?php echo match($statusClass) {
                             'status-valid' => 'bg-emerald-500 text-white',
+                            'status-used' => 'bg-sky-600 text-white',
                             'status-expired' => 'bg-red-500 text-white',
                             'status-cancelled' => 'bg-gray-500 text-white',
                             'status-pending' => 'bg-amber-500 text-white',
@@ -205,7 +298,7 @@ if (!$pdo) {
                     <?php endif; ?>
 
                     <div class="flex justify-between items-center py-3 info-row-border border-b gap-4">
-                        <span class="info-label-color text-xs font-medium uppercase tracking-wider flex-shrink-0">Host</span>
+                        <span class="info-label-color text-xs font-medium uppercase tracking-wider flex-shrink-0">Homeowner</span>
                         <span class="info-value-color text-sm font-semibold text-right"><?= htmlspecialchars($pass['homeowner_name'] ?? '') ?></span>
                     </div>
 
@@ -216,13 +309,20 @@ if (!$pdo) {
 
                     <div class="flex justify-between items-center py-3 info-row-border border-b gap-4">
                         <span class="info-label-color text-xs font-medium uppercase tracking-wider flex-shrink-0">Valid From</span>
-                        <span class="info-value-color text-sm font-semibold text-right"><?= date('M d, Y h:i A', strtotime($pass['valid_from'])) ?></span>
+                        <span class="info-value-color text-sm font-semibold text-right"><?= formatDisplayDateTime($pass['valid_from']) ?></span>
                     </div>
 
                     <div class="flex justify-between items-center py-3 gap-4">
                         <span class="info-label-color text-xs font-medium uppercase tracking-wider flex-shrink-0">Valid Until</span>
-                        <span class="info-value-color text-sm font-semibold text-right"><?= date('M d, Y h:i A', strtotime($pass['valid_until'])) ?></span>
+                        <span class="info-value-color text-sm font-semibold text-right"><?php echo !empty($pass['valid_until']) ? formatDisplayDateTime($pass['valid_until']) : 'Not available'; ?></span>
                     </div>
+
+                    <?php if ($wasUsed && !empty($firstUsedAt)): ?>
+                    <div class="flex justify-between items-center py-3 info-row-border border-t gap-4">
+                        <span class="info-label-color text-xs font-medium uppercase tracking-wider flex-shrink-0">First Used At</span>
+                        <span class="info-value-color text-sm font-semibold text-right"><?php echo formatDisplayDateTime($firstUsedAt); ?></span>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- QR Code -->

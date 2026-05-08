@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Manila');
 /**
  * RFID Scan Endpoint
  * 
@@ -10,37 +11,22 @@
  * Body: { "rfid_uid": "ABC123DEF456" }
  * 
  * OR for simulator/internal: POST with session auth
- * Body: rfid_uid=<uid>&csrf=<token>
+ * Body: rfid_uid=<uid>&csrf_token=<token>
  */
 
 header('Content-Type: application/json');
 
-// CORS: only allow same-origin and configured trusted origins
-$allowedOrigins = ['http://localhost', 'https://localhost', 'http://127.0.0.1'];
-$wifiIp = getenv('WIFI_IP');
-if ($wifiIp) {
-    $allowedOrigins[] = 'http://' . $wifiIp;
-    $allowedOrigins[] = 'https://' . $wifiIp;
-}
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowedOrigins, true)) {
-    header('Access-Control-Allow-Origin: ' . $origin);
-}
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-API-Key, X-Reader-ID');
-
-// Handle CORS preflight
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
+require_once __DIR__ . '/../../includes/cors_helper.php';
+applyTrustedCors(['POST', 'OPTIONS'], ['Content-Type', 'X-API-Key', 'X-Reader-ID']);
+if (handleCorsPreflight()) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    exit(json_encode(['success' => false, 'message' => 'Method not allowed']));
-}
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+requireRequestMethod('POST');
 
 require_once __DIR__ . '/../../db.php';
+require_once __DIR__ . '/../../includes/input_sanitizer.php';
 
 // Determine authentication method
 $apiKey = $_SERVER['HTTP_X_API_KEY'] ?? '';
@@ -79,31 +65,40 @@ if (!empty($apiKey)) {
     }
 } else {
     // Session-based authentication (simulator or admin)
-    // Use guard session ONLY when no admin/superadmin cookie exists
+    // Priority: 1. Explicit session_type request, 2. Guard cookie (no admin), 3. Admin Unified
+    $requestedType = InputSanitizer::post('session_type', 'string') ?: InputSanitizer::get('session_type', 'string');
     $hasAdminCookie = isset($_COOKIE['vehiscan_admin']) || isset($_COOKIE['vehiscan_superadmin']);
-    if (isset($_COOKIE['vehiscan_guard']) && !$hasAdminCookie) {
+    
+    if ($requestedType === 'guard' || (isset($_COOKIE['vehiscan_guard']) && !$hasAdminCookie)) {
         require_once __DIR__ . '/../../includes/session_guard.php';
     } else {
         require_once __DIR__ . '/../../includes/session_admin_unified.php';
     }
+    
     if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin', 'guard'])) {
         http_response_code(403);
         exit(json_encode(['success' => false, 'message' => 'Unauthorized']));
     }
 
-    // CSRF validation for session-based requests
-    $csrf = $_SESSION['csrf_token'] ?? '';
-    $posted = $_POST['csrf_token'] ?? '';
-    if (!hash_equals($csrf, (string)$posted)) {
-        error_log('[RFID_SCAN] CSRF mismatch — session_name=' . session_name()
+    // CSRF validation for session-based requests (never accept token from query string)
+    $postedToken = InputSanitizer::post('csrf_token', 'string');
+    
+    // Fallback for JSON body if shared via AJAX with different content type
+    if (empty($postedToken)) {
+        $jsonBody = json_decode(file_get_contents('php://input'), true);
+        $postedToken = $jsonBody['csrf_token'] ?? '';
+    }
+
+    if (!InputSanitizer::validateCsrf($postedToken)) {
+        error_log('[RFID_SCAN] CSRF failure — session_name=' . session_name()
             . ', role=' . ($_SESSION['role'] ?? 'none')
-            . ', has_session_token=' . (!empty($csrf) ? 'yes' : 'no')
-            . ', has_posted_token=' . (!empty($posted) ? 'yes' : 'no'));
+            . ', has_session_token=' . (isset($_SESSION['csrf_token']) ? 'yes' : 'no')
+            . ', has_provided_token=' . (!empty($postedToken) ? 'yes' : 'no'));
         http_response_code(403);
         exit(json_encode(['success' => false, 'message' => 'Invalid security token']));
     }
 
-    $inputSource = 'simulator';
+    $inputSource = 'session';
 }
 
 // Get RFID UID from request body
@@ -123,7 +118,7 @@ if (empty($rfidUid)) {
 }
 
 // Sanitize RFID UID (alphanumeric only, max 32 chars)
-$rfidUid = strtoupper(preg_replace('/[^A-Fa-f0-9]/', '', $rfidUid));
+$rfidUid = strtoupper(preg_replace('/[^A-Z0-9]/', '', $rfidUid));
 if (strlen($rfidUid) > 32 || strlen($rfidUid) < 4) {
     http_response_code(400);
     exit(json_encode(['success' => false, 'message' => 'Invalid RFID UID format']));
@@ -133,22 +128,36 @@ try {
     $pdo->beginTransaction();
 
     // Check 1: Is there an active binding session waiting for this scan?
-    $bindStmt = $pdo->prepare("
-        SELECT id, target_type, target_id, initiated_by 
-        FROM rfid_binding_sessions 
-        WHERE status = 'pending' AND expires_at > NOW()
-        ORDER BY created_at DESC 
-        LIMIT 1
-    ");
-    $bindStmt->execute();
-    $bindingSession = $bindStmt->fetch();
+    $currentUserId = $_SESSION['user_id'] ?? $_SESSION['id'] ?? 0;
+    $bindingSession = null;
+
+    // Prioritize session initiated by THIS user if we are in an admin session
+    if ($inputSource === 'session' && $currentUserId > 0) {
+        $bindStmt = $pdo->prepare("
+            SELECT id, target_type, target_id, initiated_by 
+            FROM rfid_binding_sessions 
+            WHERE status = 'pending' AND expires_at > NOW() AND initiated_by = ?
+            ORDER BY created_at DESC 
+            LIMIT 1 FOR UPDATE
+        ");
+        $bindStmt->execute([$currentUserId]);
+        $bindingSession = $bindStmt->fetch();
+    }
+
+    // Fallback: Check for ANY active pending session
+    if (!$bindingSession) {
+        $bindStmt = $pdo->prepare("\n            SELECT id, target_type, target_id, initiated_by \n            FROM rfid_binding_sessions \n            WHERE status = 'pending' AND expires_at > NOW()\n            ORDER BY created_at DESC \n            LIMIT 1 FOR UPDATE\n        ");
+        $bindStmt->execute();
+        $bindingSession = $bindStmt->fetch();
+    }
 
     if ($bindingSession) {
         // Complete the binding session
         $targetId = $bindingSession['target_id'];
 
-        // Check if this UID is already bound to another vehicle
-        $dupCheck = $pdo->prepare("SELECT id, plate_number FROM vehicles WHERE rfid_uid = ? AND id != ?");
+        // Check if this UID is already bound to another ACTIVE vehicle
+        // Lock this check as well to prevent concurrent identical binds
+        $dupCheck = $pdo->prepare("SELECT id, plate_number FROM vehicles WHERE rfid_uid = ? AND id != ? AND is_active = 1 FOR UPDATE");
         $dupCheck->execute([$rfidUid, $targetId]);
         $duplicate = $dupCheck->fetch();
 
@@ -162,6 +171,7 @@ try {
                 "UID already bound to vehicle {$duplicate['plate_number']}");
 
             $pdo->commit();
+            http_response_code(409);
             exit(json_encode([
                 'success' => false,
                 'scan_result' => 'binding_failed',
@@ -201,23 +211,47 @@ try {
     }
 
     // Check 2: Is this UID bound to a vehicle? (Normal access scan)
+    // Use FOR UPDATE to prevent rapid double scans toggling IN/OUT concurrently
     $vehicleStmt = $pdo->prepare("
-        SELECT v.id, v.plate_number, v.vehicle_type, v.color, v.homeowner_id,
+        SELECT v.id, v.plate_number, v.vehicle_type, v.color, v.homeowner_id, v.rfid_bound_at,
                h.name, h.address, h.contact_number, h.owner_img, h.car_img, h.account_status
         FROM vehicles v
         LEFT JOIN homeowners h ON v.homeowner_id = h.id
-        WHERE v.rfid_uid = ? AND v.is_active = 1
+        WHERE v.rfid_uid = ? AND v.is_active = 1 FOR UPDATE
     ");
     $vehicleStmt->execute([$rfidUid]);
     $vehicle = $vehicleStmt->fetch();
 
     if ($vehicle) {
+        $authorizedOwnerName = $vehicle['name'];
+        $hasAuthorizedAccess = (($vehicle['account_status'] ?? '') === 'approved');
+
+        // Fallback path is opt-in to avoid accidental approval bypass.
+        $allowSharedFallback = (getenv('ALLOW_SHARED_RFID_FALLBACK') === '1');
+        if (!$hasAuthorizedAccess && $allowSharedFallback && tableExists($pdo, 'vehicle_shared_access')) {
+            $sharedStmt = $pdo->prepare("\
+                SELECT h.id, h.name\
+                FROM vehicle_shared_access vsa\
+                INNER JOIN homeowners h ON h.id = vsa.homeowner_id\
+                WHERE vsa.vehicle_id = ? AND vsa.is_active = 1 AND h.account_status = 'approved'\
+                ORDER BY vsa.id ASC\
+                LIMIT 1\
+            ");
+            $sharedStmt->execute([$vehicle['id']]);
+            $sharedAccess = $sharedStmt->fetch();
+            if ($sharedAccess) {
+                $hasAuthorizedAccess = true;
+                $authorizedOwnerName = $sharedAccess['name'] ?? $authorizedOwnerName;
+            }
+        }
+
         // Check if homeowner account is active
-        if ($vehicle['account_status'] !== 'approved') {
+        if (!$hasAuthorizedAccess) {
             logScan($pdo, $rfidUid, $readerId, $apiKeyId, 'access_denied', $inputSource, $vehicle['id'], null,
                 'Homeowner account not approved');
 
             $pdo->commit();
+            http_response_code(403);
             exit(json_encode([
                 'success' => false,
                 'scan_result' => 'access_denied',
@@ -229,10 +263,35 @@ try {
             ]));
         }
 
-        // Determine IN/OUT status by checking last log entry
-        $lastLog = $pdo->prepare("SELECT status FROM recent_logs WHERE plate_number = ? ORDER BY created_at DESC LIMIT 1");
+
+        // Anti-passback / Debounce check
+        $recentScan = $pdo->prepare("SELECT scanned_at FROM rfid_scan_log WHERE rfid_uid = ? AND scan_result = 'access_granted' ORDER BY id DESC LIMIT 1");
+        $recentScan->execute([$rfidUid]);
+        $lastScan = $recentScan->fetch();
+        
+        if ($lastScan) {
+            $secondsSinceLastScan = time() - strtotime($lastScan['scanned_at']);
+            if ($secondsSinceLastScan < 60) { // 60 seconds cooldown
+                logScan($pdo, $rfidUid, $readerId, $apiKeyId, 'access_denied', $inputSource, $vehicle['id'], null, 'Anti-passback cooldown active');
+                $pdo->commit();
+                http_response_code(429);
+                exit(json_encode([
+                    'success' => false,
+                    'scan_result' => 'cooldown',
+                    'message' => 'Anti-passback: Please wait a moment before scanning again.',
+                    'data' => [
+                        'plate_number' => $vehicle['plate_number'],
+                        'name' => $authorizedOwnerName
+                    ]
+                ]));
+            }
+        }
+
+        // Determine IN/OUT status by checking last log entry (also lock it)
+        $lastLog = $pdo->prepare("SELECT status, log_time FROM recent_logs WHERE plate_number = ? ORDER BY log_id DESC LIMIT 1 FOR UPDATE");
         $lastLog->execute([$vehicle['plate_number']]);
         $lastEntry = $lastLog->fetch();
+
         $newStatus = (!$lastEntry || $lastEntry['status'] === 'OUT') ? 'IN' : 'OUT';
 
         // Insert into recent_logs (this is what the guard panel reads)
@@ -253,7 +312,7 @@ try {
                 'plate_number' => $vehicle['plate_number'],
                 'vehicle_type' => $vehicle['vehicle_type'],
                 'color' => $vehicle['color'],
-                'name' => $vehicle['name'],
+                'name' => $authorizedOwnerName,
                 'address' => $vehicle['address'],
                 'contact' => $vehicle['contact_number'],
                 'owner_img' => $vehicle['owner_img'],
@@ -264,15 +323,31 @@ try {
         ]));
     }
 
-    // Check 3: Unknown RFID UID
+    // Check 3: Is this UID already in the system but INACTIVE?
+    $inactiveStmt = $pdo->prepare("SELECT v.*, h.name FROM vehicles v LEFT JOIN homeowners h ON v.homeowner_id = h.id WHERE v.rfid_uid = ? AND v.is_active = 0 LIMIT 1");
+    $inactiveStmt->execute([$rfidUid]);
+    $inactiveVehicle = $inactiveStmt->fetch();
+
+    if ($inactiveVehicle) {
+        logScan($pdo, $rfidUid, $readerId, $apiKeyId, 'unknown_uid', $inputSource, null, null, "UID bound to inactive record ({$inactiveVehicle['plate_number']})");
+        $pdo->commit();
+        exit(json_encode([
+            'success' => true,
+            'scan_result' => 'unknown_uid',
+            'inactive_uid' => true,
+            'message' => "This RFID tag belongs to an inactive account ({$inactiveVehicle['plate_number']}). Please re-bind it."
+        ]));
+    }
+
     logScan($pdo, $rfidUid, $readerId, $apiKeyId, 'unknown_uid', $inputSource, null, null, 'No vehicle bound to this UID');
 
     $pdo->commit();
 
     exit(json_encode([
-        'success' => false,
+        'success' => true,
         'scan_result' => 'unknown_uid',
-        'message' => 'Unknown RFID tag - not bound to any vehicle'
+        'unknown_uid' => true,
+        'message' => 'New RFID tag - not bound to any vehicle.'
     ]));
 
 } catch (PDOException $e) {
@@ -305,5 +380,21 @@ function logScan($pdo, $rfidUid, $readerId, $apiKeyId, $scanResult, $inputSource
         ]);
     } catch (PDOException $e) {
         error_log('[RFID_SCAN] Failed to log scan: ' . $e->getMessage());
+    }
+}
+
+function tableExists($pdo, $tableName) {
+    static $cache = [];
+    if (array_key_exists($tableName, $cache)) {
+        return $cache[$tableName];
+    }
+
+    try {
+        $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
+        $stmt->execute([$tableName]);
+        $cache[$tableName] = (bool)$stmt->fetchColumn();
+        return $cache[$tableName];
+    } catch (Throwable $e) {
+        return false;
     }
 }

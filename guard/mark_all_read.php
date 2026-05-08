@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/session_guard.php';
+require_once __DIR__ . '/../includes/request_method_helper.php';
+require_once __DIR__ . '/../includes/input_sanitizer.php';
 require_once __DIR__ . '/../db.php';
 
 // Security: Only guards can access
@@ -9,13 +11,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guard') {
 }
 
 // CSRF validation
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    exit(json_encode(['success' => false, 'error' => 'Method not allowed']));
-}
+requireRequestMethod('POST');
 
 $postedToken = $_POST['csrf_token'] ?? '';
-if (empty($postedToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $postedToken)) {
+if (!InputSanitizer::validateCsrf((string)$postedToken)) {
     http_response_code(403);
     exit(json_encode(['success' => false, 'error' => 'Invalid CSRF token']));
 }

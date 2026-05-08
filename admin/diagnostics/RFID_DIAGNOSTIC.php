@@ -5,6 +5,19 @@
  * Example: http://localhost/Vehiscan-RFID/admin/RFID_DIAGNOSTIC.php
  */
 
+require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../config.php';
+
+if (!defined('APP_DEBUG') || APP_DEBUG !== true) {
+    http_response_code(404);
+    exit('Not Found');
+}
+
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin'], true)) {
+    http_response_code(403);
+    exit('Unauthorized');
+}
+
 echo "<h1>RFID Simulator Diagnostic</h1>";
 echo "<pre>";
 
@@ -78,7 +91,7 @@ try {
             echo "   Insert ID: $insertId\n";
             
             // Verify it appears
-            $verifyStmt = $pdo->prepare("SELECT * FROM recent_logs WHERE id = ?");
+            $verifyStmt = $pdo->prepare("SELECT * FROM recent_logs WHERE log_id = ?");
             $verifyStmt->execute([$insertId]);
             $row = $verifyStmt->fetch(PDO::FETCH_ASSOC);
             
@@ -87,7 +100,7 @@ try {
                 echo "   " . print_r($row, true) . "\n";
                 
                 // Clean up test entry
-                $pdo->prepare("DELETE FROM recent_logs WHERE id = ?")->execute([$insertId]);
+                $pdo->prepare("DELETE FROM recent_logs WHERE log_id = ?")->execute([$insertId]);
                 echo "[OK] Test entry cleaned up\n";
             }
         } else {
@@ -106,7 +119,7 @@ echo "\n=== FETCH LOGS SIMULATION ===\n";
 try {
     $stmt = $pdo->query("
         SELECT 
-            DATE_FORMAT(r.log_time, '%H:%i:%s') AS time,
+            DATE_FORMAT(r.log_time, '%h:%i:%s %p') AS time,
             r.plate_number, 
             r.status,
             h.name
@@ -132,10 +145,10 @@ try {
 echo "\n=== FILE CHECKS ===\n";
 
 $files = [
-    'simulate_rfid_scan.php' => __DIR__ . '/simulate_rfid_scan.php',
-    'get_recent_simulations.php' => __DIR__ . '/get_recent_simulations.php',
-    'admin_panel.js' => __DIR__ . '/admin_panel.js',
-    'fetch_simulator.php' => __DIR__ . '/fetch/fetch_simulator.php'
+    'simulate_rfid_scan.php' => dirname(__DIR__) . '/simulation/simulate_rfid_scan.php',
+    'get_recent_simulations.php' => dirname(__DIR__) . '/simulation/get_recent_simulations.php',
+    'admin_panel.js' => dirname(__DIR__, 2) . '/assets/js/admin/admin_panel.js',
+    'fetch_simulator.php' => dirname(__DIR__) . '/fetch/fetch_simulator.php'
 ];
 
 foreach ($files as $name => $path) {
@@ -147,12 +160,16 @@ foreach ($files as $name => $path) {
 }
 
 echo "\n=== SESSION CHECK ===\n";
-session_start();
+if (PHP_SAPI === 'cli' || headers_sent()) {
+    echo "[INFO]  Session check skipped in CLI/output mode\n";
+} elseif (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 if (isset($_SESSION['role'])) {
     echo "[OK] Session active\n";
     echo "   Role: {$_SESSION['role']}\n";
     echo "   Username: " . ($_SESSION['username'] ?? 'N/A') . "\n";
-} else {
+} elseif (PHP_SAPI !== 'cli') {
     echo "[WARN]  No active session\n";
 }
 

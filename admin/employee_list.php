@@ -6,6 +6,11 @@
 require_once __DIR__ . '/../includes/security_headers.php';
 require_once __DIR__ . '/../includes/session_admin_unified.php';
 
+// TODO [DEPRECATION NOTICE]:
+// This standalone employee_list.php file appears to be superseded by the routing 
+// in admin_panel.php -> fetch_employees.php. It should be reviewed for removal 
+// to prevent maintainers from editing the wrong file.
+
 $isSuperAdmin = (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'super_admin'])) {
@@ -18,7 +23,8 @@ $csrf = $_SESSION['csrf_token'];
 require_once __DIR__ . '/../db.php';
 
 $search = $_GET['search'] ?? '';
-$role_filter = $_GET['role'] ?? '';
+$role_filter_raw = trim((string)($_GET['role'] ?? ''));
+$role_filter = $role_filter_raw === 'owner' ? 'homeowner' : $role_filter_raw;
 
 $sql = "SELECT id, username, role, created_at FROM users WHERE 1=1";
 $params = [];
@@ -30,8 +36,14 @@ if ($search) {
 }
 
 if ($role_filter) {
-    $sql .= " AND role = ?";
-    $params[] = $role_filter;
+    if ($role_filter === 'homeowner') {
+        $sql .= " AND role IN (?, ?)";
+        $params[] = 'homeowner';
+        $params[] = 'owner';
+    } else {
+        $sql .= " AND role = ?";
+        $params[] = $role_filter;
+    }
 }
 
 $sql .= " ORDER BY created_at DESC";
@@ -49,10 +61,10 @@ $roleCount = array_count_values(array_column($employees, 'role'));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Management — VehiScan</title>
-    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailwind.css'); ?>">
     <link rel="stylesheet" href="../assets/css/tailadmin-components.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/tailadmin-components.css'); ?>">
-    <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="../assets/css/admin/admin.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../assets/css/system.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/system.css'); ?>">
+    <link rel="stylesheet" href="../assets/css/admin/admin.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/admin/admin.css'); ?>">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="m-0 p-0 overflow-hidden bg-gray-100 dark:bg-slate-950">
@@ -67,7 +79,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
             </div>
             <div class="flex-1 overflow-y-auto hide-scrollbar py-2">
                 <div class="mb-4 px-3">
-                    <div class="sidebar-text mb-2 px-2 text-xs font-semibold text-sidebar-foreground opacity-70">MAIN MENU</div>
+                    <div class="sidebar-text mb-2 px-2 text-xs font-semibold text-sidebar-foreground opacity-70">Main menu</div>
                     <div class="space-y-1">
                         <a href="admin_panel.php" class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-sidebar-foreground hover:bg-sidebar-accent">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
@@ -86,8 +98,12 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                         <?php echo strtoupper(substr($_SESSION['username'] ?? 'A', 0, 1)); ?>
                     </div>
                     <div class="sidebar-text flex-1 min-w-0">
+                        <?php
+                            $sessionRole = (string)($_SESSION['role'] ?? 'admin');
+                            $roleDisplay = $sessionRole === 'owner' ? 'homeowner' : $sessionRole;
+                        ?>
                         <p class="text-sm font-semibold truncate"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Administrator'); ?></p>
-                        <p class="text-xs opacity-70"><?php echo ucfirst($_SESSION['role'] ?? 'admin'); ?></p>
+                        <p class="text-xs opacity-70"><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $roleDisplay))); ?></p>
                     </div>
                 </div>
             </div>
@@ -113,7 +129,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                                 <option value="">All Roles</option>
                                 <option value="admin" <?= $role_filter === 'admin' ? 'selected' : '' ?>>Admin</option>
                                 <option value="guard" <?= $role_filter === 'guard' ? 'selected' : '' ?>>Guard</option>
-                                <option value="owner" <?= $role_filter === 'owner' ? 'selected' : '' ?>>Owner</option>
+                                <option value="homeowner" <?= $role_filter === 'homeowner' ? 'selected' : '' ?>>Homeowner</option>
                             </select>
                             <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors">
                                 Search
@@ -155,15 +171,16 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-white"><?= htmlspecialchars($employee['username'] ?? '') ?></td>
                                             <td class="px-6 py-4 text-sm">
                                                 <?php
+                                                $displayRole = ($employee['role'] ?? '') === 'owner' ? 'homeowner' : ($employee['role'] ?? '');
                                                 $badges = [
                                                     'admin' => 'bg-gray-200 text-gray-800',
                                                     'guard' => 'bg-gray-200 text-gray-800',
-                                                    'owner' => 'bg-emerald-100 text-emerald-800'
+                                                    'homeowner' => 'bg-emerald-100 text-emerald-800'
                                                 ];
-                                                $badge = $badges[$employee['role']] ?? 'bg-gray-100 text-gray-800';
+                                                $badge = $badges[$displayRole] ?? 'bg-gray-100 text-gray-800';
                                                 ?>
                                                 <span class="px-3 py-1 rounded-full text-xs font-semibold <?= $badge ?>">
-                                                    <?= ucfirst(htmlspecialchars($employee['role'] ?? '')) ?>
+                                                    <?= ucfirst(htmlspecialchars($displayRole)) ?>
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-600"><?= date('M d, Y', strtotime($employee['created_at'])) ?></td>
@@ -174,19 +191,11 @@ $roleCount = array_count_values(array_column($employees, 'role'));
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                                         Edit
                                                     </a>
-                                                    <button onclick="deleteEmployee(<?= $employee['id'] ?>, '<?= htmlspecialchars($employee['username'] ?? '', ENT_QUOTES) ?>')"
-                                                            class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 transition-colors gap-1">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                        Delete
-                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
 
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-6">
@@ -209,36 +218,8 @@ $roleCount = array_count_values(array_column($employees, 'role'));
     </div>
 
     <script>
-        function deleteEmployee(id, username) {
-            Swal.fire({
-                title: 'Delete Employee?',
-                text: `Delete "${username}"? This cannot be undone.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, delete',
-                cancelButtonText: 'Cancel',
-                heightAuto: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('employee_delete.php', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({id: id})
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({icon: 'success', title: 'Deleted!', text: 'Employee deleted.', heightAuto: false}).then(() => location.reload());
-                        } else {
-                            Swal.fire({icon: 'error', title: 'Error', text: data.message || 'Failed to delete.', heightAuto: false});
-                        }
-                    })
-                    .catch(() => Swal.fire({icon: 'error', title: 'Error', text: 'An error occurred.', heightAuto: false}));
-                }
-            });
-        }
+        const csrfToken = <?= json_encode($csrf ?? '') ?>;
+        // Delete functionality removed - admins cannot delete employee records
     </script>
 
     <!-- TailAdmin Action Dropdown Handler -->
@@ -268,7 +249,7 @@ $roleCount = array_count_values(array_column($employees, 'role'));
         if (leftPos < 4) leftPos = 4;
         if (leftPos + menuWidth > window.innerWidth - 4) leftPos = window.innerWidth - menuWidth - 4;
         menu.style.cssText = [
-          'position:fixed', 'z-index:9999', 'width:' + menuWidth + 'px', 'right:auto', 'margin:0',
+          'position:fixed', 'z-index:9980', 'width:' + menuWidth + 'px', 'right:auto', 'margin:0',
           'left:' + leftPos + 'px',
           dropUp
             ? 'top:auto;bottom:' + (window.innerHeight - rect.top + 4) + 'px'

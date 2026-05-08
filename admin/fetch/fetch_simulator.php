@@ -1,6 +1,13 @@
 <?php
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
-if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) exit('Unauthorized');
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+
+requireRequestMethod('GET');
+
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
+  http_response_code(403);
+  exit('Unauthorized');
+}
 require_once __DIR__ . '/../../db.php';
 
 // Get all homeowners for dropdown
@@ -48,10 +55,10 @@ try {
     <div class="ta-card-body">
       <!-- Scan Mode Toggle -->
       <div class="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1 mb-4">
-        <button id="modePlate" class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm" onclick="setScanMode('plate')">
+        <button type="button" id="modePlate" class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm" onclick="setScanMode('plate')">
           By Plate Number
         </button>
-        <button id="modeRfid" class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all text-gray-500 dark:text-gray-400" onclick="setScanMode('rfid')">
+        <button type="button" id="modeRfid" class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all text-gray-500 dark:text-gray-400" onclick="setScanMode('rfid')">
           By RFID UID
         </button>
       </div>
@@ -136,7 +143,7 @@ try {
             <?php else: ?>
               <?php foreach ($recent as $r): ?>
                 <tr>
-                  <td class="muted"><?php echo date('H:i:s', strtotime($r['created_at'])); ?></td>
+                  <td class="muted"><?php echo date('h:i:s A', strtotime($r['created_at'])); ?></td>
                   <td><?php echo htmlspecialchars($r['plate_number'] ?? ''); ?></td>
                   <td class="muted"><?php echo htmlspecialchars($r['name'] ?? 'Unknown'); ?></td>
                   <td class="muted"><?php echo htmlspecialchars($r['vehicle_type'] ?? '-'); ?></td>
@@ -201,51 +208,3 @@ try {
 }
 </style>
 
-<script>
-// Scan mode toggle for simulator
-window._simScanMode = 'plate';
-
-function setScanMode(mode) {
-    window._simScanMode = mode;
-    const platePanel = document.getElementById('plateModePanel');
-    const rfidPanel = document.getElementById('rfidModePanel');
-    const modePlate = document.getElementById('modePlate');
-    const modeRfid = document.getElementById('modeRfid');
-    const scanBtn = document.getElementById('scanBtn');
-    const isDark = document.body.classList.contains('dark') || document.body.classList.contains('dark-mode');
-
-    if (mode === 'rfid') {
-        platePanel?.classList.add('hidden');
-        rfidPanel?.classList.remove('hidden');
-        modePlate?.classList.remove('bg-white', 'dark:bg-slate-600', 'text-gray-900', 'dark:text-white', 'shadow-sm');
-        modePlate?.classList.add('text-gray-500', 'dark:text-gray-400');
-        modeRfid?.classList.add('bg-white', 'dark:bg-slate-600', 'text-gray-900', 'dark:text-white', 'shadow-sm');
-        modeRfid?.classList.remove('text-gray-500', 'dark:text-gray-400');
-        const rfidInput = document.getElementById('rfidUidInput');
-        if (scanBtn) scanBtn.disabled = !rfidInput?.value?.trim();
-    } else {
-        platePanel?.classList.remove('hidden');
-        rfidPanel?.classList.add('hidden');
-        modePlate?.classList.add('bg-white', 'dark:bg-slate-600', 'text-gray-900', 'dark:text-white', 'shadow-sm');
-        modePlate?.classList.remove('text-gray-500', 'dark:text-gray-400');
-        modeRfid?.classList.remove('bg-white', 'dark:bg-slate-600', 'text-gray-900', 'dark:text-white', 'shadow-sm');
-        modeRfid?.classList.add('text-gray-500', 'dark:text-gray-400');
-        const vehicleSelect = document.getElementById('vehicleSelect');
-        if (scanBtn) scanBtn.disabled = !vehicleSelect?.value;
-    }
-}
-
-// RFID UID input - enable/disable scan button and filter to hex
-(function() {
-    const rfidInput = document.getElementById('rfidUidInput');
-    if (rfidInput) {
-        rfidInput.addEventListener('input', function() {
-            this.value = this.value.replace(/[^A-Fa-f0-9]/g, '').toUpperCase();
-            const scanBtn = document.getElementById('scanBtn');
-            if (scanBtn && window._simScanMode === 'rfid') {
-                scanBtn.disabled = !this.value.trim();
-            }
-        });
-    }
-})();
-</script>

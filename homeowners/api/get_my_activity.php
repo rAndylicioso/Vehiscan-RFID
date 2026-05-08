@@ -4,8 +4,11 @@
  * Returns access logs for vehicles registered to this homeowner
  */
 require_once __DIR__ . '/../../includes/security_headers.php';
-require_once __DIR__ . '/../../includes/session_homeowner.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
 
+requireRequestMethod('GET');
+
+require_once __DIR__ . '/../../includes/session_homeowner.php';
 require_once __DIR__ . '/../../db.php';
 
 $homeownerId = $_SESSION['homeowner_id'];
