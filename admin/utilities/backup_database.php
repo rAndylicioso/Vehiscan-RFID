@@ -6,13 +6,31 @@ while (ob_get_level()) {
 ob_start();
 
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+require_once __DIR__ . '/../../includes/input_sanitizer.php';
 require_once __DIR__ . '/../../db.php';
+
+requireRequestMethod('POST');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     ob_end_clean();
     header('Content-Type: application/json');
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit();
+}
+
+// CSRF validation (accept only JSON body or POST body, never query string)
+$inputData = json_decode(file_get_contents('php://input'), true);
+if (!is_array($inputData)) {
+    $inputData = [];
+}
+$csrf = $inputData['csrf_token'] ?? ($_POST['csrf_token'] ?? '');
+if (!InputSanitizer::validateCsrf((string)$csrf)) {
+    ob_end_clean();
+    header('Content-Type: application/json');
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
     exit();
 }
 
@@ -31,17 +49,38 @@ try {
         }
     }
 
+    // Ensure backup directory is protected from direct web access.
+    $htaccessPath = $backup_dir . '/.htaccess';
+    if (!file_exists($htaccessPath)) {
+        $denyAllRules = "# Deny direct web access to DB backups\n"
+            . "<IfModule mod_authz_core.c>\n"
+            . "    Require all denied\n"
+            . "</IfModule>\n"
+            . "<IfModule !mod_authz_core.c>\n"
+            . "    Order deny,allow\n"
+            . "    Deny from all\n"
+            . "</IfModule>\n";
+        @file_put_contents($htaccessPath, $denyAllRules);
+    }
+
     $filename = 'vehiscan_backup_' . date('Y-m-d_His') . '.sql';
     $filepath = $backup_dir . '/' . $filename;
 
-    // Get database config
-    $host = 'localhost';
-    $db = 'vehiscan_vdp';
-    $user = 'root';
-    $pass = '';
+    // Get database config from constants
+    $host = DB_HOST;
+    $db = DB_NAME;
+    $user = DB_USER;
+    $pass = DB_PASS;
 
-    // Create backup using mysqldump
-    $command = "mysqldump --host=$host --user=$user --password=$pass $db > $filepath 2>&1";
+    // Create backup using mysqldump (shell-escape all credentials to prevent injection)
+    $command = sprintf(
+        'mysqldump --host=%s --user=%s --password=%s %s > %s 2>&1',
+        escapeshellarg($host),
+        escapeshellarg($user),
+        escapeshellarg($pass),
+        escapeshellarg($db),
+        escapeshellarg($filepath)
+    );
     exec($command, $output, $return_var);
 
     if ($return_var === 0 && file_exists($filepath)) {
@@ -105,7 +144,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Backup failed: ' . $e->getMessage()
+        'message' => 'Backup failed. Please check server logs for details.'
     ]);
 }
 exit();

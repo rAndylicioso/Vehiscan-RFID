@@ -7,6 +7,9 @@
 
 (function() {
     'use strict';
+
+    const DEBUG = !!(window.vehiscanConfig && window.vehiscanConfig.debug);
+    const debugLog = (...args) => { if (DEBUG) console.log(...args); };
     
     // Configuration
     const CONFIG = {
@@ -33,7 +36,7 @@
         // Start monitoring
         setInterval(checkSession, CONFIG.checkInterval);
         
-        console.log('[Session Monitor] Initialized - Session timeout: ' + (CONFIG.sessionLifetime / 60) + ' minutes');
+        debugLog('[Session Monitor] Initialized - Session timeout: ' + (CONFIG.sessionLifetime / 60) + ' minutes');
     }
     
     /**
@@ -91,7 +94,7 @@
         // Check if SweetAlert2 is available
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: '⏰ Session Expiring Soon',
+                title: 'Session Expiring Soon',
                 html: `
                     <p style="margin-bottom: 15px;">Your session will expire in:</p>
                     <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; margin: 20px 0;" id="sessionCountdown">${timeText}</div>
@@ -99,7 +102,7 @@
                 `,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: '✓ Stay Logged In',
+                confirmButtonText: 'Stay Logged In',
                 cancelButtonText: 'Logout',
                 confirmButtonColor: '#10b981',
                 cancelButtonColor: '#6b7280',
@@ -158,7 +161,7 @@
         
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: '⏱️ Session Expired',
+                title: 'Session Expired',
                 text: 'Your session has expired due to inactivity. You will be redirected to the login page.',
                 icon: 'info',
                 confirmButtonText: 'Login Again',
@@ -188,10 +191,10 @@
         
         // Show success toast if available
         if (window.toast && typeof window.toast.success === 'function') {
-            window.toast.success('✓ Session extended');
+            window.toast.success('Session extended');
         }
         
-        console.log('[Session Monitor] Session extended');
+        debugLog('[Session Monitor] Session extended');
     }
     
     /**

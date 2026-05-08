@@ -1,25 +1,25 @@
 <aside id="sidebar"
-    class="sidebar-transition sidebar-open relative flex flex-col border-r border-gray-200 bg-white overflow-x-hidden"
+    class="sidebar-transition sidebar-open relative flex flex-col border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-x-hidden transition-colors duration-300"
     role="navigation" aria-label="Main navigation">
     <!-- Brand Header -->
-    <div class="flex h-14 items-center border-b border-gray-200 px-4">
+    <div class="flex h-14 items-center border-b border-gray-200 dark:border-slate-700 px-4">
         <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center">
             <img src="../assets/images/vehiscan-logo.png" alt="VehiScan Logo" class="h-full w-full object-contain"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <span style="display:none;" class="text-2xl text-blue-600 font-bold">V</span>
         </div>
-        <span class="ml-3 text-left font-bold text-lg text-gray-900">VehiScan</span>
+        <span class="ml-3 text-left font-bold text-lg text-gray-900 dark:text-white">VehiScan</span>
     </div>
 
     <!-- Navigation Menu -->
     <div class="flex-1 overflow-y-auto hide-scrollbar py-2">
         <div class="mb-4 px-3">
-            <div class="mb-2 px-2 text-xs font-semibold text-gray-600">
+            <div class="mb-2 px-2 text-xs font-semibold text-gray-600 dark:text-gray-400">
                 HOMEOWNER PORTAL
             </div>
             <div class="space-y-1">
                 <a href="#"
-                    class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100 active"
+                    class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 active"
                     data-page="dashboard">
                     <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,7 +52,7 @@
                 </a>
 
                 <a href="#"
-                    class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+                    class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                     data-page="activity">
                     <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -63,7 +63,7 @@
                 </a>
 
                 <a href="#"
-                    class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 hover:bg-gray-100"
+                    class="menu-item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                     data-page="profile">
                     <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -78,10 +78,10 @@
 
 
     <!-- User Section -->
-    <div class="mt-auto border-t border-gray-200 p-4">
+    <div class="mt-auto border-t border-gray-200 dark:border-slate-700 p-4">
         <div class="relative">
-            <button id="user-trigger"
-                class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-gray-100 transition-colors">
+            <button id="user-trigger" type="button" aria-haspopup="menu" aria-controls="user-dropdown" aria-expanded="false"
+                class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 flex-shrink-0">
                     <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -90,8 +90,8 @@
                 </div>
                 <div class="flex flex-col items-start flex-1">
                     <span
-                        class="text-sm font-medium text-gray-900 dark:text-gray-200"><?php echo htmlspecialchars($homeowner['name']); ?></span>
-                    <span class="text-xs text-gray-600">Homeowner</span>
+                        class="text-sm font-medium text-gray-900 dark:text-gray-200"><?php echo htmlspecialchars($homeowner['name'] ?? ''); ?></span>
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Homeowner</span>
                 </div>
                 <svg id="user-chevron" class="ml-auto h-4 w-4 transition-transform rotate-180" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">

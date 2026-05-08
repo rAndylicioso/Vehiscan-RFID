@@ -3,8 +3,12 @@
  * Check for new access logs
  * Returns latest log ID and count of new logs
  */
+require_once __DIR__ . '/../../includes/security_headers.php';
 header('Content-Type: application/json');
 require_once __DIR__ . '/../../includes/session_admin_unified.php';
+require_once __DIR__ . '/../../includes/request_method_helper.php';
+
+requireRequestMethod('GET');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['super_admin', 'admin'])) {
     http_response_code(403);
@@ -34,7 +38,6 @@ try {
         $newCount = 0;
     }
     
-    header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
         'latest_log_id' => $latestId,
@@ -44,9 +47,10 @@ try {
     ]);
     
 } catch (Exception $e) {
+    error_log('Check new logs error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to check logs: ' . $e->getMessage()
+        'error' => 'Failed to check logs'
     ]);
 }

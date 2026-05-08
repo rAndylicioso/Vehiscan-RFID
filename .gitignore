@@ -1,7 +1,7 @@
-# Environment and Configuration
+# Environment and Configuration — catch ALL .env variants
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
 # Sensitive Files
 config.php.backup
@@ -37,6 +37,13 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+tmpclaude-*
+
+# Archive (dead code / diagnostic scripts - not for public repo)
+_archive/
+
+# Scratch / local diagnostic scripts
+scratch/
 
 # Backup Files
 *.backup
@@ -48,6 +55,8 @@ temp/
 *.sql.gz
 *.sql.zip
 database_backups/
+admin/backups_db/
+backups/*.json
 
 # Node Modules (if any)
 node_modules/
@@ -66,3 +75,6 @@ system_diagnostic.php
 phpinfo.php
 test*.php
 debug*.php
+
+# Temporary PowerShell / shell scripts
+*.ps1
